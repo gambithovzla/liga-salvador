@@ -414,7 +414,7 @@ $('calBtn').addEventListener('click', () => {
 /* ---------- RSVP coupon ---------- */
 const counts = {adultos: 2, ninos: 1};
 document.querySelectorAll('[data-k]').forEach(b => b.addEventListener('click', () => {
-  const k = b.dataset.k; counts[k] = Math.max(0, Math.min(15, counts[k] + +b.dataset.d)); $(k).textContent = counts[k];
+  const k = b.dataset.k; counts[k] = Math.max(0, Math.min(2, counts[k] + +b.dataset.d)); $(k).textContent = counts[k];
 }));
 let disfraz = 'Tal vez 🤔';
 $('disfraz').addEventListener('click', e => {
@@ -446,6 +446,7 @@ const cv = $('card'), cx = cv.getContext('2d');
 const logo = new Image(); logo.src = 'img/logo-liga.png';
 const shield = new Image(); shield.src = 'img/escudo-s.png';
 const paper = new Image(); paper.src = 'img/paper.jpg';
+const salva = new Image(); salva.src = 'img/salva/salva-vuela.png';
 let photo = null;
 const memberNo = String(Math.floor(Math.random()*900)+100);
 const INK = '#16130f', RED = '#d62b1f', GOLD = '#ffd21f', CREAM = '#fff3d2', NAVY = '#1b2c5e';
@@ -464,78 +465,151 @@ function caption(text, x, y, size, rot = 0){
   cx.fillStyle = INK; cx.textBaseline = 'middle'; cx.fillText(text, size*.35, h/2 + size*.05);
   cx.restore();
 }
-function drawCard(){
-  const W = 1080, H = 680;
-  cx.textBaseline = 'alphabetic'; cx.textAlign = 'left';
-  cx.fillStyle = '#f5ead0'; cx.fillRect(0,0,W,H);
-  if (paper.naturalWidth){ cx.save(); cx.globalCompositeOperation = 'multiply'; cx.fillStyle = cx.createPattern(paper, 'repeat'); cx.fillRect(0,0,W,H); cx.restore(); }
-  cx.fillStyle = 'rgba(245,194,27,.28)';
-  for (let y = 0; y < H; y += 14) for (let x = (y/14)%2*7; x < W; x += 14){ const r = 3.2*Math.max(0, 1 - (x + y)/900); if (r > .4){ cx.beginPath(); cx.arc(x,y,r,0,7); cx.fill(); } }
-
-  /* hero panel */
-  const px = 38, py = 128, pw = 360, ph = 420;
-  cx.fillStyle = INK; cx.fillRect(px+10, py+10, pw, ph);
-  cx.save(); cx.beginPath(); cx.rect(px, py, pw, ph); cx.clip();
-  const g = cx.createRadialGradient(px+pw*.55, py+ph*.45, 10, px+pw*.5, py+ph*.5, ph*.8);
-  g.addColorStop(0,'#8cbcff'); g.addColorStop(.4,'#3a74e0'); g.addColorStop(1,'#173a8f');
-  cx.fillStyle = g; cx.fillRect(px, py, pw, ph);
-  cx.fillStyle = 'rgba(255,255,255,.22)';
-  for (let i = 0; i < 28; i++){ const a0 = i/28*Math.PI*2, a1 = a0 + .09, R = 700, ox = px+pw*.55, oy = py+ph*.45;
-    cx.beginPath(); cx.moveTo(ox, oy); cx.lineTo(ox+Math.cos(a0)*R, oy+Math.sin(a0)*R); cx.lineTo(ox+Math.cos(a1)*R, oy+Math.sin(a1)*R); cx.fill(); }
-  cx.fillStyle = 'rgba(10,25,80,.3)';
-  for (let y = py; y < py+ph; y += 12) for (let x = px + ((y-py)/12)%2*6; x < px+pw; x += 12){
-    const d = Math.hypot(x-(px+pw*.55), y-(py+ph*.45))/(ph*.7), r = 3.2*Math.max(0, d-.35); if (r > .3){ cx.beginPath(); cx.arc(x,y,r,0,7); cx.fill(); } }
-  if (photo){
-    const s = Math.max(pw/photo.width, ph/photo.height), w = photo.width*s, h = photo.height*s;
-    cx.drawImage(photo, px+(pw-w)/2, py+(ph-h)/2, w, h);
-  } else if (shield.naturalWidth){
-    const w = pw*.82, h = w*shield.height/shield.width; cx.drawImage(shield, px+(pw-w)/2, py+(ph-h)/2, w, h);
-  }
+function caption2(text, x, y, size, rot = 0, bg = INK, fg = GOLD){
+  cx.save(); cx.translate(x, y); cx.rotate(rot);
+  cx.font = `${size}px Bangers`; const w = cx.measureText(text).width + size*.8, h = size*1.2;
+  cx.fillStyle = 'rgba(0,0,0,.45)'; cx.fillRect(7, 7, w, h);
+  cx.fillStyle = bg; cx.fillRect(0, 0, w, h); cx.lineWidth = 5; cx.strokeStyle = INK; cx.strokeRect(0, 0, w, h);
+  cx.fillStyle = fg; cx.textBaseline = 'middle'; cx.fillText(text, size*.4, h/2 + size*.06);
   cx.restore();
-  cx.lineWidth = 8; cx.strokeStyle = INK; cx.strokeRect(px, py, pw, ph);
-  cx.lineWidth = 3;
-  [[px+pw-40, py+46, 24], [px+34, py+ph-38, 18]].forEach(([x, y, r]) => { star(x, y, r); cx.fillStyle = GOLD; cx.fill(); cx.strokeStyle = INK; cx.stroke(); });
+}
+function outlined(text, x, y, font, fill, stroke = INK, lw = 8){
+  cx.font = font; cx.lineJoin = 'round'; cx.lineWidth = lw; cx.strokeStyle = stroke; cx.strokeText(text, x, y); cx.fillStyle = fill; cx.fillText(text, x, y);
+}
+function seeded(str){
+  let h = 2166136261; for (const ch of str) h = Math.imul(h ^ ch.charCodeAt(0), 16777619);
+  return () => ((h = Math.imul(h ^ (h >>> 15), 2246822507) ^ Math.imul(h ^ (h >>> 13), 3266489909)) >>> 0) / 4294967296;
+}
+function bolt(x, y, s){
+  cx.beginPath();
+  [[.55,0],[.1,.55],[.45,.55],[.25,1],[.9,.38],[.52,.38],[.8,0]].forEach(([a, b], i) => i ? cx.lineTo(x + a*s, y + b*s) : cx.moveTo(x + a*s, y + b*s));
+  cx.closePath(); cx.fillStyle = GOLD; cx.fill(); cx.lineWidth = 4; cx.strokeStyle = INK; cx.stroke();
+}
+function drawCard(){
+  const W = 1080, H = 680, ox = 760, oy = 320;
+  cx.save(); cx.textBaseline = 'alphabetic'; cx.textAlign = 'left'; cx.shadowColor = 'transparent';
+
+  /* explosion background */
+  const g = cx.createRadialGradient(ox, oy, 20, ox, oy, 780);
+  g.addColorStop(0, '#fff4b8'); g.addColorStop(.12, '#ffd21f'); g.addColorStop(.34, '#f7931e'); g.addColorStop(.62, '#d62b1f'); g.addColorStop(1, '#4a0d18');
+  cx.fillStyle = g; cx.fillRect(0, 0, W, H);
+  cx.save(); cx.translate(ox, oy); cx.fillStyle = 'rgba(255,255,255,.17)';
+  for (let i = 0; i < 40; i++){ const a = i/40*Math.PI*2; cx.beginPath(); cx.moveTo(0,0); cx.lineTo(Math.cos(a)*1300, Math.sin(a)*1300); cx.lineTo(Math.cos(a+.05)*1300, Math.sin(a+.05)*1300); cx.fill(); }
+  cx.restore();
+  cx.fillStyle = 'rgba(74,13,24,.42)';
+  for (let y = 0; y < H; y += 12) for (let x = (y/12)%2*6; x < W; x += 12){
+    const r = 4.6*Math.min(1, Math.max(0, Math.hypot(x-ox, y-oy)/620 - .32)); if (r > .4){ cx.beginPath(); cx.arc(x, y, r, 0, 7); cx.fill(); } }
+  if (paper.naturalWidth){ cx.save(); cx.globalCompositeOperation = 'multiply'; cx.globalAlpha = .35; cx.fillStyle = cx.createPattern(paper, 'repeat'); cx.fillRect(0,0,W,H); cx.restore(); }
+
+  /* skyline */
+  const base = H - 58, rs = seeded('barranco');
+  let bx = 0;
+  while (bx < W){
+    const bw = 34 + rs()*60, bh = 50 + rs()*110;
+    cx.fillStyle = '#1a0a12'; cx.fillRect(bx, base - bh, bw, bh);
+    cx.fillStyle = '#ffb13a';
+    for (let wy = base - bh + 10; wy < base - 8; wy += 16) for (let wx = bx + 7; wx < bx + bw - 9; wx += 13) if (rs() > .45) cx.fillRect(wx, wy, 6, 8);
+    bx += bw + 2;
+  }
+
+  /* mission strip */
+  cx.fillStyle = INK; cx.fillRect(0, base, W, H - base);
+  cx.fillStyle = GOLD; cx.fillRect(0, base, W, 5);
+  cx.font = '32px Bangers'; cx.fillStyle = GOLD; cx.fillText('MISIÓN ★ DOMINGO 11 DE OCTUBRE ★ 3:00 PM ★ BARRANCO', 28, H - 18);
+  cx.fillStyle = '#fff'; cx.fillRect(W - 188, base + 12, 160, 36);
+  const rb = seeded('11102026'); let bb = W - 182;
+  cx.fillStyle = INK; while (bb < W - 34){ const w = 1 + Math.floor(rb()*4); cx.fillRect(bb, base + 15, w, 30); bb += w + 1 + Math.floor(rb()*3); }
 
   /* header */
-  caption('TARJETA DE MIEMBRO OFICIAL', 38, 28, 58, -.012);
-  if (logo.naturalWidth){ const w = 230, h = w*logo.height/logo.width; cx.drawImage(logo, W-w-26, 14, w, h); }
+  if (logo.naturalWidth){ const w = 250, h = w*logo.height/logo.width; cx.save(); cx.shadowColor = 'rgba(0,0,0,.45)'; cx.shadowOffsetX = 6; cx.shadowOffsetY = 6; cx.drawImage(logo, 22, 12, w, h); cx.restore(); }
+  caption2('TARJETA DE MIEMBRO OFICIAL', 300, 26, 44, -.025);
 
-  /* identity */
-  const tx = 438, maxW = W - tx - 44;
-  caption('AGENTE', tx, 146, 30);
-  const name = ($('heroName').value.trim() || 'Tu nombre').toUpperCase();
-  fit(name, maxW, 104, '"Luckiest Guy"');
-  const ny = 292;
-  cx.lineJoin = 'round';
-  for (let i = 8; i >= 1; i--){ cx.fillStyle = i > 6 ? INK : RED; cx.fillText(name, tx + i, ny + i); }
-  cx.lineWidth = 11; cx.strokeStyle = INK; cx.strokeText(name, tx, ny);
-  cx.fillStyle = CREAM; cx.fillText(name, tx, ny);
-
-  caption('SUPERPODER', tx, 322, 30);
-  const pw2 = $('power').value.toUpperCase();
-  fit(pw2, maxW, 58, 'Bangers'); cx.fillStyle = NAVY; cx.fillText(pw2, tx, 422);
-
-  [['MIEMBRO Nº', '#' + memberNo, tx], ['MISIÓN', '11 · 10 · 2026', tx + 226]].forEach(([k, v, x]) => {
-    const bw = k === 'MISIÓN' ? 330 : 200, by = 452, bh = 92;
-    cx.fillStyle = INK; cx.fillRect(x+6, by+6, bw, bh);
-    cx.fillStyle = '#fff'; cx.fillRect(x, by, bw, bh); cx.lineWidth = 5; cx.strokeStyle = INK; cx.strokeRect(x, by, bw, bh);
-    cx.font = '26px Bangers'; cx.fillStyle = RED; cx.fillText(k, x + 14, by + 32);
-    cx.font = '44px Bangers'; cx.fillStyle = INK; cx.fillText(v, x + 14, by + 78);
-  });
-
-  /* approved burst */
-  cx.save(); cx.translate(W-128, H-86); cx.rotate(-.2);
-  star(0, 0, 98, 14, .66); cx.save(); cx.translate(6,6); cx.fillStyle = INK; cx.fill(); cx.restore();
-  cx.fillStyle = RED; cx.fill(); cx.lineWidth = 5; cx.strokeStyle = INK; cx.stroke();
-  cx.textAlign = 'center'; cx.font = '34px "Luckiest Guy"'; cx.lineWidth = 6; cx.strokeText('¡OK!', 0, -2); cx.fillStyle = CREAM; cx.fillText('¡OK!', 0, -2);
-  cx.font = '22px Bangers'; cx.fillStyle = '#fff'; cx.fillText('APROBADO', 0, 28);
+  /* polaroid with the agent */
+  cx.save(); cx.translate(185, 360);
+  cx.save(); cx.rotate(.15); star(0, 0, 215, 16, .72); cx.fillStyle = GOLD; cx.fill(); cx.lineWidth = 5; cx.strokeStyle = INK; cx.stroke(); cx.restore();
+  cx.rotate(-.06);
+  cx.fillStyle = 'rgba(0,0,0,.5)'; cx.fillRect(-140, -170, 290, 350);
+  cx.fillStyle = '#fffdf4'; cx.fillRect(-150, -180, 290, 350); cx.lineWidth = 6; cx.strokeStyle = INK; cx.strokeRect(-150, -180, 290, 350);
+  const fx = -134, fy = -164, fw = 258, fh = 262;
+  cx.save(); cx.beginPath(); cx.rect(fx, fy, fw, fh); cx.clip();
+  const pg = cx.createRadialGradient(fx+fw*.5, fy+fh*.45, 8, fx+fw*.5, fy+fh*.5, fh*.8);
+  pg.addColorStop(0, '#8cbcff'); pg.addColorStop(.45, '#3a74e0'); pg.addColorStop(1, '#173a8f');
+  cx.fillStyle = pg; cx.fillRect(fx, fy, fw, fh);
+  cx.fillStyle = 'rgba(255,255,255,.2)';
+  for (let i = 0; i < 24; i++){ const a = i/24*Math.PI*2, px0 = fx+fw*.5, py0 = fy+fh*.45; cx.beginPath(); cx.moveTo(px0, py0); cx.lineTo(px0+Math.cos(a)*500, py0+Math.sin(a)*500); cx.lineTo(px0+Math.cos(a+.1)*500, py0+Math.sin(a+.1)*500); cx.fill(); }
+  if (photo){
+    const s = Math.max(fw/photo.width, fh/photo.height), w = photo.width*s, h = photo.height*s;
+    cx.drawImage(photo, fx+(fw-w)/2, fy+(fh-h)/2, w, h);
+  } else if (shield.naturalWidth){
+    const w = fw*.84, h = w*shield.height/shield.width; cx.drawImage(shield, fx+(fw-w)/2, fy+(fh-h)/2, w, h);
+  }
+  cx.restore();
+  cx.lineWidth = 4; cx.strokeStyle = INK; cx.strokeRect(fx, fy, fw, fh);
+  cx.fillStyle = 'rgba(255,240,190,.75)'; cx.save(); cx.rotate(-.5); cx.fillRect(-150, -150, 90, 30); cx.restore();
+  cx.save(); cx.rotate(.45); cx.fillRect(10, -225, 90, 30); cx.restore();
+  cx.textAlign = 'center'; cx.font = '40px "Patrick Hand"'; cx.fillStyle = INK; cx.fillText('Agente #' + memberNo, -5, 150);
   cx.restore(); cx.textAlign = 'left';
 
-  cx.font = '24px Bangers'; cx.fillStyle = INK; cx.fillText('LA LIGA DE SALVADOR · NÚM. 1 · BARRANCO', 40, H - 34);
+  /* rubber stamp */
+  cx.save(); cx.translate(298, 404); cx.rotate(-.22); cx.globalAlpha = .93;
+  cx.fillStyle = 'rgba(255,253,244,.55)'; cx.fillRect(-110, -34, 220, 68);
+  cx.lineWidth = 6; cx.strokeStyle = RED; cx.strokeRect(-110, -34, 220, 68); cx.lineWidth = 2.5; cx.strokeRect(-102, -26, 204, 52);
+  cx.fillStyle = RED; cx.textAlign = 'center'; cx.font = '46px Bangers'; cx.fillText('¡APROBADO!', 0, 17);
+  cx.restore(); cx.textAlign = 'left';
+
+  /* identity */
+  const tx = 372;
+  caption('AGENTE', tx, 118, 30, -.02);
+  const name = ($('heroName').value.trim() || 'Tu nombre').toUpperCase();
+  fit(name, 430, 112, '"Luckiest Guy"');
+  const nf = cx.font;
+  cx.save(); cx.translate(tx + 6, 262); cx.transform(1, 0, -.12, 1, 0, 0);
+  for (let i = 11; i >= 1; i--){ cx.fillStyle = i > 8 ? INK : RED; cx.fillText(name, i, i); }
+  cx.lineJoin = 'round'; cx.lineWidth = 12; cx.strokeStyle = INK; cx.strokeText(name, 0, 0);
+  const ng = cx.createLinearGradient(0, -90, 0, 0); ng.addColorStop(0, '#fff6c8'); ng.addColorStop(.55, '#ffd21f'); ng.addColorStop(1, '#f59a1b');
+  cx.fillStyle = ng; cx.fillText(name, 0, 0);
+  cx.restore();
+
+  caption('SUPERPODER', tx, 290, 28, -.02);
+  bolt(tx - 2, 340, 58);
+  const pw2 = $('power').value.toUpperCase();
+  fit(pw2, 370, 54, 'Bangers');
+  outlined(pw2, tx + 58, 390, cx.font, '#fff', INK, 9);
+
+  /* stats: stable per name */
+  const rnd = seeded(name + memberNo);
+  [['FUERZA'], ['VALENTÍA'], ['DIVERSIÓN']].forEach(([k], i) => {
+    const y = 416 + i*42, v = .72 + rnd()*.28, bx0 = tx + 150, bw0 = 250;
+    outlined(k, tx, y + 26, '28px Bangers', '#fff', INK, 6);
+    cx.fillStyle = INK; cx.fillRect(bx0 + 4, y + 6, bw0, 26);
+    cx.fillStyle = '#fff'; cx.fillRect(bx0, y + 2, bw0, 26);
+    const bgd = cx.createLinearGradient(bx0, 0, bx0 + bw0, 0); bgd.addColorStop(0, '#ffd21f'); bgd.addColorStop(1, RED);
+    cx.fillStyle = bgd; cx.fillRect(bx0, y + 2, bw0*v, 26);
+    cx.fillStyle = 'rgba(22,19,15,.5)'; for (let s = 1; s < 10; s++) cx.fillRect(bx0 + s*bw0/10 - 1, y + 2, 2, 26);
+    cx.lineWidth = 4; cx.strokeStyle = INK; cx.strokeRect(bx0, y + 2, bw0, 26);
+  });
+
+  /* captain Salvador signs off */
+  cx.save(); cx.strokeStyle = 'rgba(255,255,255,.75)'; cx.lineWidth = 5; cx.lineCap = 'round';
+  [[790, 420, 850, 380], [800, 470, 865, 430], [820, 515, 880, 470]].forEach(([a, b, c, d]) => { cx.beginPath(); cx.moveTo(a, b); cx.lineTo(c, d); cx.stroke(); });
+  cx.restore();
+  if (salva.naturalWidth){
+    const w = 230, h = w*salva.height/salva.width;
+    cx.save(); cx.shadowColor = 'rgba(0,0,0,.45)'; cx.shadowOffsetX = 8; cx.shadowOffsetY = 8; cx.drawImage(salva, 838, 262, w, h); cx.restore();
+  }
+  cx.save();
+  cx.beginPath(); cx.ellipse(918, 168, 142, 60, 0, 0, Math.PI*2);
+  cx.moveTo(900, 222); cx.lineTo(950, 290); cx.lineTo(940, 222);
+  cx.fillStyle = '#fff'; cx.fill(); cx.lineWidth = 5; cx.strokeStyle = INK; cx.stroke();
+  cx.beginPath(); cx.ellipse(918, 168, 139, 57, 0, 0, Math.PI*2); cx.fillStyle = '#fff'; cx.fill();
+  cx.textAlign = 'center'; cx.fillStyle = INK; cx.font = '34px Bangers'; cx.fillText('¡BIENVENIDO', 918, 160); cx.fillText('A MI LIGA!', 918, 196);
+  cx.restore(); cx.textAlign = 'left';
+
   cx.lineWidth = 12; cx.strokeStyle = INK; cx.strokeRect(6, 6, W-12, H-12);
+  cx.restore();
 }
-Promise.all([loaded(logo), loaded(shield), loaded(paper),
-  document.fonts.load('50px "Luckiest Guy"'), document.fonts.load('40px Bangers')]).then(drawCard);
+Promise.all([loaded(logo), loaded(shield), loaded(paper), loaded(salva),
+  document.fonts.load('50px "Luckiest Guy"'), document.fonts.load('40px Bangers'), document.fonts.load("40px 'Patrick Hand'")]).then(drawCard);
 ['input','change'].forEach(ev => { $('heroName').addEventListener(ev, drawCard); $('power').addEventListener(ev, drawCard); });
 $('photo').addEventListener('change', e => {
   const f = e.target.files[0]; if (!f) return;
