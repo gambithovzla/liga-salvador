@@ -142,9 +142,8 @@ body{font-family:'Patrick Hand',cursive;color:var(--ink);background:#070d27;over
 .pager{position:fixed;z-index:10;left:50%;top:calc(var(--top) + var(--bh) + 10px);transform:translateX(-50%);height:var(--nav);width:max(var(--bw),min(calc(100vw - 16px),400px));
   display:flex;align-items:center;justify-content:space-between;gap:8px}
 .pager button{font-family:'Bangers';letter-spacing:1px;font-size:20px;cursor:pointer;height:100%;
-  background:#ffd21f;color:var(--ink);border:3px solid var(--ink);box-shadow:3px 3px 0 #000;padding:0 14px;min-width:92px}
+  background:#ffd21f;color:var(--ink);border:3px solid var(--ink);box-shadow:3px 3px 0 #000;padding:0 14px;min-width:108px}
 .pager button:disabled{opacity:.35;cursor:default}
-.pager button.home{min-width:0;background:#fff;padding:0 12px}
 .pager .count{flex:1;text-align:center;font-family:'Bangers';color:#fff;letter-spacing:1.5px;font-size:19px;line-height:1.05;text-shadow:2px 2px 0 #000}
 .pager .count small{display:block;font-family:'Patrick Hand';letter-spacing:0;font-size:14px;color:#ffd97a;text-transform:uppercase}
 .next.pulse{animation:nudge 1.6s ease-in-out infinite}
@@ -330,7 +329,6 @@ body{font-family:'Patrick Hand',cursive;color:var(--ink);background:#070d27;over
 </div>
 
 <nav class="pager">
-  <button class="home" id="homeBtn" aria-label="Volver a la portada">⌂</button>
   <button class="prev" id="prevBtn">◂ Atrás</button>
   <div class="count"><span id="pageNo">Portada</span><small id="pageHint">Toca para abrir</small></div>
   <button class="next pulse" id="nextBtn">Abrir ▸</button>
@@ -423,7 +421,7 @@ function layout(){
   });
   $('pageNo').textContent = names[cur];
   $('pageHint').textContent = hints[cur];
-  $('prevBtn').disabled = $('homeBtn').disabled = cur === 0;
+  $('prevBtn').disabled = cur === 0;
   const nb = $('nextBtn');
   nb.disabled = cur === N - 1;
   nb.textContent = cur === 0 ? 'Abrir ▸' : 'Sigue ▸';
@@ -448,7 +446,6 @@ function go(to){
 layout();
 $('nextBtn').addEventListener('click', () => go(cur + 1));
 $('prevBtn').addEventListener('click', () => go(cur - 1));
-$('homeBtn').addEventListener('click', () => go(0));
 leaves[0].addEventListener('click', () => cur === 0 && go(1));
 addEventListener('keydown', e => {
   if (e.target.matches('input,select,textarea') || !$('game').hidden || !$('reg').hidden) return;
