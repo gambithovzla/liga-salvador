@@ -97,7 +97,7 @@ body{font-family:'Patrick Hand',cursive;color:var(--ink);background:#070d27;over
 .runhead{position:absolute;left:3.2cqw;right:3.2cqw;top:1.1cqw;display:flex;justify-content:space-between;font-family:'Anton';font-size:2.5cqw;letter-spacing:.15cqw;
   color:var(--ink);border-bottom:.3cqw solid var(--ink);padding-bottom:.5cqw}
 .pnl{position:absolute;left:3.4cqw;right:3.4cqw;border:.6cqw solid var(--ink);overflow:hidden}
-.pa{top:6.2cqw;height:19cqh;background:radial-gradient(circle at 62% 55%,#8cbcff 0%,#3a74e0 38%,#173a8f 100%)}
+.pa{top:6.2cqw;height:14cqh;background:radial-gradient(circle at 62% 55%,#8cbcff 0%,#3a74e0 38%,#173a8f 100%)}
 .pa:before{content:'';position:absolute;inset:-60%;background:repeating-conic-gradient(from 0deg at 50% 50%,rgba(255,255,255,.2) 0 4deg,transparent 4deg 11deg)}
 .pa:after{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(10,25,80,.35) 1.1cqw,transparent 1.25cqw);background-size:2.8cqw 2.8cqw;
   -webkit-mask:radial-gradient(circle at 62% 55%,transparent 30%,#000 80%);mask:radial-gradient(circle at 62% 55%,transparent 30%,#000 80%)}
@@ -105,16 +105,16 @@ body{font-family:'Patrick Hand',cursive;color:var(--ink);background:#070d27;over
 .pa .star{position:absolute;z-index:2;color:#ffd21f;-webkit-text-stroke:.35cqw var(--ink);font-size:7cqw;line-height:1}
 .capt{position:absolute;z-index:3;left:-.3cqw;top:-.3cqw;background:#ffd21f;border:.5cqw solid var(--ink);padding:.6cqw 1.8cqw .4cqw;
   font-family:'Bangers';font-size:4.2cqw;letter-spacing:.2cqw;line-height:1;color:var(--ink);box-shadow:.5cqw .5cqw 0 var(--ink)}
-.bub{position:absolute;z-index:3;left:4cqw;top:10cqw;width:46cqw;background:#fffdf4;border:.5cqw solid var(--ink);border-radius:50%/46%;padding:2.6cqw 3cqw;
-  text-align:center;font-family:'Bangers';font-size:4.4cqw;letter-spacing:.15cqw;line-height:1.05;color:var(--ink)}
+.bub{position:absolute;z-index:3;left:4cqw;top:7.6cqw;width:44cqw;background:#fffdf4;border:.5cqw solid var(--ink);border-radius:50%/46%;padding:2.6cqw 3cqw;
+  text-align:center;font-family:'Bangers';font-size:3.9cqw;letter-spacing:.15cqw;line-height:1.05;color:var(--ink);padding:1.6cqw 2.6cqw}
 .bub b{font-weight:400;color:var(--red)}
 .bub:after{content:'';position:absolute;right:6cqw;bottom:-2.6cqw;width:4.5cqw;height:4.5cqw;background:#fffdf4;border-right:.5cqw solid var(--ink);border-bottom:.5cqw solid var(--ink);
   transform:skewX(-35deg) rotate(35deg)}
-.pb{top:calc(6.2cqw + 19cqh + 2cqw);bottom:3cqw;background:#faf1da;display:flex;flex-direction:column;gap:2cqw;padding:3cqw 3cqw 2.6cqw}
+.pb{top:calc(6.2cqw + 14cqh + 2cqw);bottom:3cqw;background:#faf1da;display:flex;flex-direction:column;gap:2cqw;padding:3cqw 3cqw 2.6cqw}
 .pb:before{content:'';position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(rgba(245,194,27,.35) .6cqw,transparent .7cqw);background-size:2.4cqw 2.4cqw;
   -webkit-mask:linear-gradient(135deg,#000,transparent 45%);mask:linear-gradient(135deg,#000,transparent 45%)}
 .pb > *{position:relative}
-.title{font-family:'Luckiest Guy';font-weight:400;font-size:7.4cqw;line-height:1;text-align:center;color:var(--cream);letter-spacing:.2cqw;transform:rotate(-1.5deg);
+.title{font-family:'Luckiest Guy';font-weight:400;font-size:6.6cqw;line-height:1;text-align:center;color:var(--cream);letter-spacing:.2cqw;transform:rotate(-1.5deg);
   -webkit-text-stroke:.45cqw var(--ink);paint-order:stroke fill;text-shadow:.35cqw .35cqw 0 var(--red),.7cqw .7cqw 0 var(--red),1cqw 1cqw 0 var(--ink)}
 .title span{color:var(--gold)}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:2.4cqw}
@@ -132,6 +132,10 @@ body{font-family:'Patrick Hand',cursive;color:var(--ink);background:#070d27;over
 .cbtn.red{background:var(--red);color:#fff}
 .cbtn:active{box-shadow:.1cqw .1cqw 0 var(--ink);translate:.5cqw .5cqw}
 .cbtn[hidden]{display:none}
+.cbtn.play{font-family:'Luckiest Guy';font-size:5.2cqw;padding:2cqw 1cqw 1.5cqw;color:#fff;letter-spacing:.2cqw;
+  background:linear-gradient(180deg,#ff5a3c,#d62b1f 60%,#a81a12);-webkit-text-stroke:.3cqw var(--ink);paint-order:stroke fill;animation:glow 1.8s ease-in-out infinite}
+@keyframes glow{50%{box-shadow:.6cqw .6cqw 0 var(--ink),0 0 0 1cqw rgba(255,210,31,.55)}}
+.cbtn.play.done{background:linear-gradient(180deg,#ffe36a,#ffd21f 60%,#e8a912);color:var(--cream);animation:none}
 .note{text-align:center;font-family:'Bangers';font-size:3cqw;letter-spacing:.15cqw;color:#5a4a2e;margin-top:-.6cqw}
 
 /* ---------- pager ---------- */
@@ -154,6 +158,46 @@ body{font-family:'Patrick Hand',cursive;color:var(--ink);background:#070d27;over
 #pow b{position:relative;font-family:'Luckiest Guy';font-weight:400;font-size:40px;color:#ffd21f;-webkit-text-stroke:2px var(--ink);paint-order:stroke fill;text-shadow:4px 4px 0 var(--ink);transform:rotate(-8deg)}
 #pow svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
 @keyframes pow{0%{transform:translate(-50%,-50%) scale(0) rotate(-20deg)}40%{transform:translate(-50%,-50%) scale(1.1) rotate(4deg)}75%{opacity:1}100%{transform:translate(-50%,-50%) scale(1);opacity:0}}
+
+/* ---------- mini-game ---------- */
+.game{position:fixed;inset:0;z-index:80;display:grid;place-items:center;padding:12px;background:rgba(7,13,39,.9)}
+.game:before{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.1) 1.4px,transparent 1.8px);background-size:10px 10px;pointer-events:none}
+.game[hidden]{display:none}
+.gpanel{position:relative;width:min(100%,420px);background:#faf1da url(img/paper.jpg);background-size:320px;background-blend-mode:multiply;border:4px solid var(--ink);
+  box-shadow:8px 8px 0 #000;padding:18px 16px 16px;text-align:center}
+.gcap{display:inline-block;background:#ffd21f;border:3px solid var(--ink);box-shadow:3px 3px 0 var(--ink);padding:4px 12px 2px;font-family:'Bangers';font-size:18px;letter-spacing:1px;transform:rotate(-1.5deg)}
+.gtitle{margin-top:10px;font-family:'Luckiest Guy';font-weight:400;font-size:40px;line-height:1;color:var(--cream);letter-spacing:1px;
+  -webkit-text-stroke:2.5px var(--ink);paint-order:stroke fill;text-shadow:2px 2px 0 var(--red),4px 4px 0 var(--red),6px 6px 0 var(--ink)}
+.ghelp{margin:10px 4px 12px;font-family:'Patrick Hand';font-size:20px;line-height:1.15}
+.garena{position:relative;height:230px;border:4px solid var(--ink);overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none;
+  background:radial-gradient(circle at 50% 50%,#8cbcff 0%,#3a74e0 45%,#173a8f 100%)}
+.garena:before{content:'';position:absolute;inset:-60%;background:repeating-conic-gradient(from 0deg,rgba(255,255,255,.18) 0 5deg,transparent 5deg 13deg);pointer-events:none}
+.garena.hot-red{background:radial-gradient(circle at 50% 50%,#ffb347 0%,#e2482a 50%,#7d1016 100%)}
+.garena.hot-gold{background:radial-gradient(circle at 50% 50%,#fff4b8 0%,#ffd21f 40%,#e0880f 100%)}
+.gbig{position:absolute;inset:0;display:grid;place-items:center;font-family:'Luckiest Guy';font-size:64px;color:var(--cream);
+  -webkit-text-stroke:3px var(--ink);paint-order:stroke fill;text-shadow:5px 5px 0 var(--ink);pointer-events:none}
+.fist{position:absolute;left:50%;top:50%;width:132px;height:132px;margin:-66px 0 0 -66px;border-radius:50%;border:5px solid var(--ink);cursor:pointer;
+  background:radial-gradient(circle at 35% 30%,#ff7b5c,#d62b1f 60%,#8f150e);box-shadow:6px 6px 0 var(--ink);font-size:64px;line-height:1;display:grid;place-items:center}
+.fist.hit{transform:scale(.9)}
+.float{position:absolute;font-family:'Luckiest Guy';font-size:26px;color:#ffd21f;-webkit-text-stroke:2px var(--ink);paint-order:stroke fill;pointer-events:none;
+  animation:floatUp .7s ease-out forwards}
+@keyframes floatUp{to{transform:translateY(-50px) scale(1.3);opacity:0}}
+.track{position:absolute;left:8%;right:8%;top:50%;height:46px;margin-top:-23px;background:#fff;border:4px solid var(--ink);box-shadow:4px 4px 0 var(--ink)}
+.zone{position:absolute;left:39%;width:22%;top:0;bottom:0;background:repeating-linear-gradient(45deg,#ffd21f 0 8px,#f5b400 8px 16px)}
+.marker{position:absolute;top:-16px;bottom:-16px;width:12px;margin-left:-6px;background:var(--red);border:3px solid var(--ink)}
+.tries{position:absolute;left:0;right:0;bottom:14px;font-family:'Bangers';font-size:22px;color:#fff;-webkit-text-stroke:1px var(--ink);letter-spacing:1px}
+.star-t{position:absolute;width:62px;height:62px;margin:-31px 0 0 -31px;font-size:56px;line-height:62px;cursor:pointer;color:#ffd21f;-webkit-text-stroke:3px var(--ink);
+  animation:popIn .18s ease-out;text-align:center}
+@keyframes popIn{from{transform:scale(0)}}
+.gmeter{position:relative;height:26px;margin-top:14px;background:#fff;border:3px solid var(--ink);box-shadow:3px 3px 0 var(--ink)}
+.gmeter i{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,#ffd21f,#d62b1f);transition:width .15s}
+.gmeter b{position:absolute;inset:0;display:grid;place-items:center;font-family:'Bangers';font-weight:400;font-size:18px;letter-spacing:1px}
+.gtimer{position:absolute;right:10px;top:8px;z-index:2;font-family:'Luckiest Guy';font-size:34px;color:#fff;-webkit-text-stroke:2px var(--ink);paint-order:stroke fill}
+.gbtn{width:100%;margin-top:14px;font-family:'Luckiest Guy';font-size:24px;padding:12px 10px 9px}
+.gclose{position:absolute;right:-14px;top:-14px;width:40px;height:40px;border-radius:50%;background:#fff;border:3px solid var(--ink);box-shadow:3px 3px 0 var(--ink);
+  font:22px/1 'Bangers';cursor:pointer}
+.rank{font-family:'Luckiest Guy';font-size:34px;line-height:1.05;color:#ffd21f;-webkit-text-stroke:2px var(--ink);paint-order:stroke fill;text-shadow:3px 3px 0 var(--ink)}
+.rank small{display:block;font-family:'Bangers';font-size:20px;color:#fff;letter-spacing:2px;-webkit-text-stroke:1px var(--ink)}
 
 #printArea{display:none}
 @media print{
@@ -245,6 +289,7 @@ body{font-family:'Patrick Hand',cursive;color:var(--ink);background:#070d27;over
           </select>
         </label>
       </div>
+      <button class="cbtn play" id="playBtn">⚡ ¡CARGA TUS PODERES!</button>
       <div class="cardwrap"><canvas id="card" width="1080" height="680" aria-label="Tu tarjeta: esto es exactamente lo que se descarga e imprime"></canvas></div>
       <div class="acts">
         <label class="cbtn" for="photo">📷 Foto</label>
@@ -271,6 +316,17 @@ body{font-family:'Patrick Hand',cursive;color:var(--ink);background:#070d27;over
 
 <div id="pow" aria-hidden="true"><svg viewBox="-60 -45 120 90" data-burst="16" data-fill="#d62b1f"></svg><b>¡BOOM!</b></div>
 <div class="toast" id="toast"></div>
+<div class="game" id="game" hidden role="dialog" aria-modal="true" aria-labelledby="gTitle">
+  <div class="gpanel">
+    <button class="gclose" id="gClose" aria-label="Cerrar el juego">✕</button>
+    <div class="gcap" id="gStep">PRUEBA 1 DE 3</div>
+    <h3 class="gtitle" id="gTitle">¡FUERZA!</h3>
+    <p class="ghelp" id="gHelp"></p>
+    <div class="garena" id="gArena"></div>
+    <div class="gmeter"><i id="gFill"></i><b id="gPct"></b></div>
+    <button class="cbtn red gbtn" id="gBtn">¡EMPEZAR!</button>
+  </div>
+</div>
 <div id="printArea"><img id="printImg" alt=""><p>Recorta por la línea punteada · La Liga de Salvador · Núm. 1</p></div>
 
 <script>
@@ -358,7 +414,7 @@ $('prevBtn').addEventListener('click', () => go(cur - 1));
 $('homeBtn').addEventListener('click', () => go(0));
 leaves[0].addEventListener('click', () => cur === 0 && go(1));
 addEventListener('keydown', e => {
-  if (e.target.matches('input,select,textarea')) return;
+  if (e.target.matches('input,select,textarea') || !$('game').hidden) return;
   if (e.key === 'ArrowRight') go(cur + 1);
   if (e.key === 'ArrowLeft') go(cur - 1);
 });
@@ -419,7 +475,7 @@ document.querySelectorAll('[data-k]').forEach(b => b.addEventListener('click', (
 let disfraz = 'Tal vez 🤔';
 $('disfraz').addEventListener('click', e => {
   const b = e.target.closest('.row-hot'); if (!b) return;
-  document.querySelectorAll('#disfraz .row-hot').forEach(c => c.setAttribute('aria-pressed', c === b)); disfraz = b.dataset.v;
+  document.querySelectorAll('#disfraz .row-hot').forEach(c => c.setAttribute('aria-pressed', c === b)); disfraz = b.dataset.v; drawCard();
 });
 const sendWA = text => location.href = `https://wa.me/${WA}?text=${encodeURIComponent(text)}`;
 $('yesBtn').addEventListener('click', () => {
@@ -440,6 +496,40 @@ $('noBtn').addEventListener('click', () => {
   const fam = $('fam').value.trim(); if (!fam){ $('fam').focus(); toast('Escribe tu nombre primero'); return; }
   sendWA(`😢 ${fam} no podrá asistir a la misión de Salvador esta vez, ¡pero le mandamos un súper abrazo por su primer añito! 💙`);
 });
+
+/* ---------- hero stats: shaped by the chosen power, boosted by the mini-game ---------- */
+const PROFILES = {
+  'Súper fuerza': [96, 80, 76], 'Velocidad del rayo': [82, 84, 92], 'Vuelo': [76, 94, 86], 'Invisibilidad': [72, 86, 94],
+  'Súper abrazos': [86, 80, 98], 'Risa contagiosa': [72, 80, 100], 'Visión láser': [80, 98, 76], 'Escudo invencible': [90, 100, 72],
+};
+const STAT_KEYS = ['f', 'v', 'd'];
+let played = null, rank = null;
+const shown = {f: 0, v: 0, d: 0};
+function targetStats(){
+  const prof = PROFILES[$('power').value] || [85, 85, 85];
+  if (!played) return {f: prof[0], v: prof[1], d: prof[2]};
+  const best = STAT_KEYS[prof.indexOf(Math.max(...prof))];
+  const t = {};
+  STAT_KEYS.forEach(k => t[k] = Math.min(100, played[k] + (k === best ? 10 : 0)));
+  return t;
+}
+function rankFor(t){
+  const sum = t.f + t.v + t.d;
+  return sum >= 285 ? ['HÉROE', 'LEGENDARIO'] : sum >= 255 ? ['SÚPER', 'HÉROE'] : ['HÉROE', 'VALIENTE'];
+}
+let statAnim;
+function animateStats(){
+  const to = targetStats(), from = {...shown}, t0 = performance.now(), dur = reduced ? 0 : 700;
+  rank = played ? rankFor(to) : null;
+  cancelAnimationFrame(statAnim);
+  const step = now => {
+    const p = dur ? Math.min(1, (now - t0)/dur) : 1, e = 1 - Math.pow(1 - p, 3);
+    STAT_KEYS.forEach(k => shown[k] = from[k] + (to[k] - from[k])*e);
+    drawCard();
+    if (p < 1) statAnim = requestAnimationFrame(step);
+  };
+  statAnim = requestAnimationFrame(step);
+}
 
 /* ---------- member card: the canvas on screen IS the file that downloads / prints ---------- */
 const cv = $('card'), cx = cv.getContext('2d');
@@ -577,9 +667,8 @@ function drawCard(){
   outlined(pw2, tx + 58, 390, cx.font, '#fff', INK, 9);
 
   /* stats: stable per name */
-  const rnd = seeded(name + memberNo);
-  [['FUERZA'], ['VALENTÍA'], ['DIVERSIÓN']].forEach(([k], i) => {
-    const y = 416 + i*42, v = .72 + rnd()*.28, bx0 = tx + 150, bw0 = 250;
+  [['FUERZA', 'f'], ['VALENTÍA', 'v'], ['DIVERSIÓN', 'd']].forEach(([k, key], i) => {
+    const y = 416 + i*42, v = Math.max(0, Math.min(1, shown[key]/100)), bx0 = tx + 150, bw0 = 190;
     outlined(k, tx, y + 26, '28px Bangers', '#fff', INK, 6);
     cx.fillStyle = INK; cx.fillRect(bx0 + 4, y + 6, bw0, 26);
     cx.fillStyle = '#fff'; cx.fillRect(bx0, y + 2, bw0, 26);
@@ -587,11 +676,12 @@ function drawCard(){
     cx.fillStyle = bgd; cx.fillRect(bx0, y + 2, bw0*v, 26);
     cx.fillStyle = 'rgba(22,19,15,.5)'; for (let s = 1; s < 10; s++) cx.fillRect(bx0 + s*bw0/10 - 1, y + 2, 2, 26);
     cx.lineWidth = 4; cx.strokeStyle = INK; cx.strokeRect(bx0, y + 2, bw0, 26);
+    outlined(String(Math.round(shown[key])), bx0 + bw0 + 10, y + 27, '28px "Luckiest Guy"', GOLD, INK, 6);
   });
 
   /* captain Salvador signs off */
   cx.save(); cx.strokeStyle = 'rgba(255,255,255,.75)'; cx.lineWidth = 5; cx.lineCap = 'round';
-  [[790, 420, 850, 380], [800, 470, 865, 430], [820, 515, 880, 470]].forEach(([a, b, c, d]) => { cx.beginPath(); cx.moveTo(a, b); cx.lineTo(c, d); cx.stroke(); });
+  if (!rank) [[790, 420, 850, 380], [800, 470, 865, 430], [820, 515, 880, 470]].forEach(([a, b, c, d]) => { cx.beginPath(); cx.moveTo(a, b); cx.lineTo(c, d); cx.stroke(); });
   cx.restore();
   if (salva.naturalWidth){
     const w = 230, h = w*salva.height/salva.width;
@@ -605,11 +695,32 @@ function drawCard(){
   cx.textAlign = 'center'; cx.fillStyle = INK; cx.font = '34px Bangers'; cx.fillText('¡BIENVENIDO', 918, 160); cx.fillText('A MI LIGA!', 918, 196);
   cx.restore(); cx.textAlign = 'left';
 
+  if (rank){
+    cx.save(); cx.translate(826, 530); cx.rotate(-.08); cx.scale(.8, .8);
+    cx.fillStyle = RED; cx.strokeStyle = INK; cx.lineWidth = 4;
+    [[-38, 1], [38, -1]].forEach(([x, d]) => { cx.beginPath(); cx.moveTo(x - 16, 30); cx.lineTo(x + 16, 30); cx.lineTo(x + 16 + d*6, 104); cx.lineTo(x, 88); cx.lineTo(x - 16 + d*6, 104); cx.closePath(); cx.fill(); cx.stroke(); });
+    star(0, 0, 76, 20, .86); cx.fillStyle = INK; cx.save(); cx.translate(5, 5); cx.fill(); cx.restore();
+    const mg = cx.createRadialGradient(-20, -24, 8, 0, 0, 80); mg.addColorStop(0, '#fff6c8'); mg.addColorStop(.5, '#ffd21f'); mg.addColorStop(1, '#d58a0c');
+    cx.fillStyle = mg; cx.fill(); cx.lineWidth = 5; cx.stroke();
+    cx.beginPath(); cx.arc(0, 0, 54, 0, Math.PI*2); cx.lineWidth = 3; cx.stroke();
+    cx.textAlign = 'center'; cx.fillStyle = RED; cx.font = '18px Bangers'; cx.fillText('RANGO', 0, -24);
+    cx.fillStyle = INK; fit(rank[1], 96, 30, '"Luckiest Guy"'); const f2 = cx.font; cx.font = '26px "Luckiest Guy"'; cx.fillText(rank[0], 0, 6); cx.font = f2; cx.fillText(rank[1], 0, 34);
+    cx.restore(); cx.textAlign = 'left';
+  }
+  if (disfraz.startsWith('¡Con disfraz')){
+    cx.save(); cx.translate(84, 196); cx.rotate(-.22);
+    star(0, 0, 64, 14, .7); cx.fillStyle = INK; cx.save(); cx.translate(5, 5); cx.fill(); cx.restore();
+    cx.fillStyle = RED; cx.fill(); cx.lineWidth = 4; cx.strokeStyle = INK; cx.stroke();
+    cx.textAlign = 'center'; outlined('+ PUNTOS', 0, -2, '22px Bangers', '#fff', INK, 5); outlined('DISFRAZ', 0, 22, '22px Bangers', GOLD, INK, 5);
+    cx.restore(); cx.textAlign = 'left';
+  }
+
   cx.lineWidth = 12; cx.strokeStyle = INK; cx.strokeRect(6, 6, W-12, H-12);
   cx.restore();
 }
+$('power').addEventListener('change', animateStats);
 Promise.all([loaded(logo), loaded(shield), loaded(paper), loaded(salva),
-  document.fonts.load('50px "Luckiest Guy"'), document.fonts.load('40px Bangers'), document.fonts.load("40px 'Patrick Hand'")]).then(drawCard);
+  document.fonts.load('50px "Luckiest Guy"'), document.fonts.load('40px Bangers'), document.fonts.load("40px 'Patrick Hand'")]).then(animateStats);
 ['input','change'].forEach(ev => { $('heroName').addEventListener(ev, drawCard); $('power').addEventListener(ev, drawCard); });
 $('photo').addEventListener('change', e => {
   const f = e.target.files[0]; if (!f) return;
@@ -624,6 +735,107 @@ $('printBtn').addEventListener('click', () => {
   $('printImg').src = cv.toDataURL('image/png');
   $('printImg').decode().catch(() => {}).then(() => print());
 });
+/* ---------- mini-game: three quick trials, generous floor so every kid wins ---------- */
+(function powerGame(){
+  const box = $('game'), arena = $('gArena'), btn = $('gBtn'), fill = $('gFill'), pct = $('gPct');
+  const buzz = ms => { try { navigator.vibrate && navigator.vibrate(ms); } catch {} };
+  let round = 0, results = {}, cleanup = () => {};
+  const setMeter = v => { fill.style.width = v + '%'; pct.textContent = Math.round(v) + '%'; };
+  const floatText = (x, y, txt) => { const f = document.createElement('div'); f.className = 'float'; f.textContent = txt; f.style.left = x + 'px'; f.style.top = y + 'px'; arena.append(f); setTimeout(() => f.remove(), 700); };
+  const big = txt => { const b = document.createElement('div'); b.className = 'gbig'; b.innerHTML = txt; arena.append(b); return b; };
+  const timer = (secs, onTick, onEnd) => {
+    const t = document.createElement('div'); t.className = 'gtimer'; arena.append(t);
+    const end = performance.now() + secs*1000; let raf;
+    const tick = now => { const left = Math.max(0, end - now); t.textContent = Math.ceil(left/1000); onTick && onTick(left); if (left <= 0) return onEnd(); raf = requestAnimationFrame(tick); };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  };
+
+  const ROUNDS = [
+    {key: 'f', title: '¡FUERZA!', help: '¡Toca el puño lo más rápido que puedas durante 5 segundos!', skin: 'hot-red', play(done){
+      let taps = 0;
+      const fist = document.createElement('button'); fist.className = 'fist'; fist.textContent = '👊'; fist.setAttribute('aria-label', 'Puño'); arena.append(fist);
+      fist.addEventListener('pointerdown', e => {
+        e.preventDefault(); taps++; buzz(8);
+        fist.classList.add('hit'); setTimeout(() => fist.classList.remove('hit'), 70);
+        const r = arena.getBoundingClientRect(); floatText(20 + Math.random()*(r.width - 90), 20 + Math.random()*(r.height - 70), ['¡POW!', '¡PUM!', '¡BAM!'][taps % 3]);
+        setMeter(Math.min(100, 55 + taps*1.6));
+      });
+      const stop = timer(5, null, () => done(Math.min(100, 55 + taps*1.6)));
+      return () => stop();
+    }},
+    {key: 'v', title: '¡VALENTÍA!', help: '¡Toca cuando el rayo rojo esté en la zona dorada! Tienes 3 intentos.', skin: '', play(done){
+      const track = document.createElement('div'); track.className = 'track'; track.innerHTML = '<div class="zone"></div><div class="marker"></div>'; arena.append(track);
+      const marker = track.querySelector('.marker'), tries = document.createElement('div'); tries.className = 'tries'; arena.append(tries);
+      let pos = 0, scores = [], raf, t0 = performance.now(), period = 1500;
+      const loop = now => { const ph = ((now - t0) % period)/period; pos = ph < .5 ? ph*2 : 2 - ph*2; marker.style.left = (pos*100) + '%'; raf = requestAnimationFrame(loop); };
+      raf = requestAnimationFrame(loop);
+      const show = () => tries.textContent = 'INTENTO ' + Math.min(3, scores.length + 1) + ' DE 3';
+      show();
+      const onTap = e => {
+        e.preventDefault(); if (scores.length >= 3) return;
+        const d = Math.abs(pos - .5), inZone = d <= .11, acc = inZone ? 1 : Math.max(0, 1 - (d - .11)/.39);
+        scores.push(acc); buzz(inZone ? [20, 30, 20] : 15);
+        const r = arena.getBoundingClientRect(); floatText(r.width/2 - 60, r.height/2 - 80, inZone ? '¡PERFECTO!' : acc > .5 ? '¡BIEN!' : '¡CASI!');
+        const avg = scores.reduce((a, b) => a + b, 0)/scores.length; setMeter(60 + 40*avg);
+        period = Math.max(900, period - 220);
+        if (scores.length >= 3){ cancelAnimationFrame(raf); setTimeout(() => done(Math.round(60 + 40*avg)), 500); } else show();
+      };
+      arena.addEventListener('pointerdown', onTap);
+      return () => { cancelAnimationFrame(raf); arena.removeEventListener('pointerdown', onTap); };
+    }},
+    {key: 'd', title: '¡DIVERSIÓN!', help: '¡Atrapa todas las estrellas que puedas en 7 segundos!', skin: 'hot-gold', play(done){
+      let caught = 0, spawnT;
+      const spawn = () => {
+        const r = arena.getBoundingClientRect(), s = document.createElement('div');
+        s.className = 'star-t'; s.textContent = '★';
+        s.style.left = (40 + Math.random()*(r.width - 80)) + 'px'; s.style.top = (45 + Math.random()*(r.height - 80)) + 'px';
+        s.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); caught++; buzz(10); floatText(parseFloat(s.style.left) - 16, parseFloat(s.style.top) - 20, '+1'); s.remove(); setMeter(Math.min(100, 55 + caught*5.5)); });
+        arena.append(s); setTimeout(() => s.remove(), 1250);
+      };
+      spawn(); spawnT = setInterval(spawn, 520);
+      const stop = timer(7, null, () => { clearInterval(spawnT); arena.querySelectorAll('.star-t').forEach(s => s.remove()); done(Math.min(100, 55 + caught*5.5)); });
+      return () => { clearInterval(spawnT); stop(); };
+    }},
+  ];
+
+  function intro(i){
+    cleanup(); cleanup = () => {};
+    const r = ROUNDS[i]; round = i;
+    $('gStep').textContent = 'PRUEBA ' + (i + 1) + ' DE 3'; $('gTitle').textContent = r.title; $('gHelp').textContent = r.help;
+    arena.className = 'garena ' + r.skin; arena.replaceChildren(); big(['💪', '🛡️', '🎉'][i]);
+    setMeter(0); btn.hidden = false; btn.textContent = '¡EMPEZAR!';
+    btn.onclick = () => { btn.hidden = true; arena.replaceChildren(); cleanup = r.play(score => finish(i, score)); };
+  }
+  function finish(i, score){
+    cleanup(); cleanup = () => {};
+    results[ROUNDS[i].key] = Math.round(score); setMeter(score);
+    arena.replaceChildren(); big('¡' + Math.round(score) + '%!'); pow(score >= 95 ? '¡WOW!' : '¡POW!');
+    btn.hidden = false;
+    if (i < 2){ btn.textContent = 'SIGUIENTE PRUEBA ▸'; btn.onclick = () => intro(i + 1); }
+    else { btn.textContent = '¡VER RESULTADO!'; btn.onclick = summary; }
+  }
+  function summary(){
+    played = {...results};
+    const t = targetStats(), rk = rankFor(t);
+    $('gStep').textContent = '¡ENTRENAMIENTO COMPLETO!'; $('gTitle').textContent = '¡LISTO, AGENTE!';
+    $('gHelp').textContent = 'Tu superpoder te dio un bono extra. ¡Descarga o imprime tu tarjeta!';
+    arena.className = 'garena hot-gold'; arena.replaceChildren();
+    big(`<div class="rank"><small>TU RANGO</small>${rk.join(' ')}</div>`);
+    setMeter((t.f + t.v + t.d)/3);
+    btn.textContent = '¡VER MI TARJETA!'; btn.onclick = close;
+    buzz([30, 40, 30, 40, 60]);
+  }
+  function open(){ results = {}; box.hidden = false; intro(0); }
+  function close(){
+    cleanup(); cleanup = () => {}; box.hidden = true; arena.replaceChildren();
+    if (played){ $('playBtn').classList.add('done'); $('playBtn').textContent = '⚡ ¡JUGAR OTRA VEZ!'; animateStats(); }
+  }
+  $('playBtn').addEventListener('click', open);
+  $('gClose').addEventListener('click', close);
+  addEventListener('keydown', e => { if (e.key === 'Escape' && !box.hidden) close(); });
+})();
+
 if (navigator.canShare && navigator.canShare({files: [new File([''], 'x.png', {type:'image/png'})]})){
   $('shareBtn').hidden = false;
   $('shareBtn').addEventListener('click', async () => {
