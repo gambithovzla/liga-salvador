@@ -640,13 +640,6 @@ function drawCard(){
   cx.textAlign = 'center'; cx.font = '40px "Patrick Hand"'; cx.fillStyle = INK; cx.fillText('Agente #' + memberNo, -5, 150);
   cx.restore(); cx.textAlign = 'left';
 
-  /* rubber stamp */
-  cx.save(); cx.translate(298, 404); cx.rotate(-.22); cx.globalAlpha = .93;
-  cx.fillStyle = 'rgba(255,253,244,.55)'; cx.fillRect(-110, -34, 220, 68);
-  cx.lineWidth = 6; cx.strokeStyle = RED; cx.strokeRect(-110, -34, 220, 68); cx.lineWidth = 2.5; cx.strokeRect(-102, -26, 204, 52);
-  cx.fillStyle = RED; cx.textAlign = 'center'; cx.font = '46px Bangers'; cx.fillText('¡APROBADO!', 0, 17);
-  cx.restore(); cx.textAlign = 'left';
-
   /* identity */
   const tx = 372;
   caption('AGENTE', tx, 118, 30, -.02);
