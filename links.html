@@ -24,6 +24,7 @@ textarea{width:100%;min-height:170px;font:600 16px 'Rubik';padding:12px;border:3
 .item:last-child{border-bottom:0}
 .item b{flex:1 1 180px;font-size:17px}
 .item code{flex:1 1 100%;font-size:12px;word-break:break-all;color:#4a5578}
+.item small{flex:1 1 100%;margin-top:-6px;color:#4a5578;font-size:13px}
 .poster-row{display:flex;gap:14px;align-items:center}
 .poster-row img{width:72px;border:3px solid var(--ink);border-radius:8px;flex:none}
 .poster-row p{margin:0;color:var(--ink);font-size:14px}
@@ -34,7 +35,8 @@ textarea{width:100%;min-height:170px;font:600 16px 'Rubik';padding:12px;border:3
 <body>
 <main>
   <h1>Links personalizados</h1>
-  <p>Escribe un nombre por línea. Cada link abre el cómic con la banda <i>“Ejemplar de Familia Pérez”</i> en la portada y deja su nombre ya escrito en el cupón.</p>
+  <p>Escribe <b>una invitación por línea</b>. Cada link abre el cómic con la banda <i>“Ejemplar de José Gabriel”</i> en la portada y su nombre ya escrito en el cupón.</p>
+  <p>Si una pareja o familia recibe links por separado, escríbelos <b>en la misma línea con +</b> (por ejemplo <b>José Gabriel + Valeri</b>): cada uno tiene su propio cómic, pero comparten la misma invitación y no se registran dos veces.</p>
 
   <div class="box">
     <div class="poster-row">
@@ -45,7 +47,7 @@ textarea{width:100%;min-height:170px;font:600 16px 'Rubik';padding:12px;border:3
 
   <div class="box">
     <label for="names">Invitados (uno por línea)</label>
-    <textarea id="names" placeholder="Familia Pérez&#10;Tía Carmen&#10;Mateo y familia"></textarea>
+    <textarea id="names" placeholder="José Gabriel + Valeri&#10;Tía Carmen&#10;Familia Gómez"></textarea>
   </div>
 
   <div class="box" id="out" hidden></div>
@@ -56,7 +58,14 @@ const base = new URL('./', location.href).href;
 const ta = document.getElementById('names'), out = document.getElementById('out');
 try { ta.value = localStorage.getItem('liga-names') || ''; } catch {}
 const esc = t => t.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-function linkFor(n){ return `${base}?para=${encodeURIComponent(n)}`; }
+/* one line = one invitation; people joined with + share it, so the reception list never gets them twice */
+function invIdFor(line){
+  let h = 2166136261;
+  for (const ch of line.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ')) h = Math.imul(h ^ ch.charCodeAt(0), 16777619);
+  return (h >>> 0).toString(36).padStart(7, '0');
+}
+let INV = {};
+function linkFor(n){ return `${base}?para=${encodeURIComponent(n)}&inv=${INV[n]}`; }
 function message(n){
   return `🚨 ¡Alerta de la Liga! 🦸\n\n${n}, ¡llegó su ejemplar de La Liga de Salvador Núm. 1! 🦸 Salvador cumple 1 año 🎉\n\n📅 Domingo 11 de octubre · 3:00 pm\n📍 Av. El Sol Este 176, Barranco (terraza)\n\nAbran el cómic y confírmenos su asistencia aquí 👇\n${linkFor(n)}`;
 }
@@ -80,11 +89,18 @@ if (canShareFiles){
 
 function render(){
   try { localStorage.setItem('liga-names', ta.value); } catch {}
-  const names = [...new Set(ta.value.split('\n').map(s => s.trim()).filter(Boolean))];
+  const lines = [...new Set(ta.value.split('\n').map(s => s.trim()).filter(Boolean))];
+  const names = [], partners = {};
+  INV = {};
+  lines.forEach(line => {
+    const group = [...new Set(line.split('+').map(s => s.trim()).filter(Boolean))], id = invIdFor(group.join('+'));
+    group.forEach(n => { if (INV[n]) return; INV[n] = id; names.push(n); partners[n] = group.filter(o => o !== n); });
+  });
   out.hidden = !names.length;
   out.innerHTML = names.map((n, i) => `
     <div class="item">
       <b>${esc(n)}</b>
+      ${partners[n].length ? `<small>Misma invitación que ${partners[n].map(esc).join(', ')}</small>` : ''}
       ${canShareFiles ? `<button class="btn poster" data-poster="${i}" ${posterFile ? '' : 'disabled'}>📨 Enviar con póster</button>` : ''}
       <a class="btn wa" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(message(n))}">Enviar por WhatsApp</a>
       <button class="btn" data-copy="${i}">Copiar link</button>

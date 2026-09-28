@@ -199,6 +199,28 @@ body{font-family:'Patrick Hand',cursive;color:var(--ink);background:#070d27;over
 .rank{font-family:'Luckiest Guy';font-size:34px;line-height:1.05;color:#ffd21f;-webkit-text-stroke:2px var(--ink);paint-order:stroke fill;text-shadow:3px 3px 0 var(--ink)}
 .rank small{display:block;font-family:'Bangers';font-size:20px;color:#fff;letter-spacing:2px;-webkit-text-stroke:1px var(--ink)}
 
+/* ---------- guest registration ---------- */
+.rpanel{max-height:calc(100dvh - 24px);overflow-y:auto;text-align:center}
+.rpanel .ghelp{margin-bottom:4px}
+.agent{position:relative;background:#fff;border:3px solid var(--ink);box-shadow:4px 4px 0 var(--ink);padding:12px 12px 10px;margin-top:14px;text-align:left}
+.alabel{position:absolute;left:-3px;top:-14px;background:#ffd21f;border:2.5px solid var(--ink);padding:2px 10px 0;font-family:'Bangers';font-size:17px;letter-spacing:1px}
+.agent.kid .alabel{background:#8cbcff}
+.rin{width:100%;font:20px 'Patrick Hand',cursive;color:var(--ink);border:0;border-bottom:2.5px solid var(--ink);padding:6px 2px 2px;margin-top:6px;background:transparent;outline:none;border-radius:0}
+.rin:focus{background:rgba(255,210,31,.18)}
+.docrow{display:grid;grid-template-columns:1.15fr 1fr;gap:10px;align-items:end}
+.rsel{font:18px 'Patrick Hand',cursive;color:var(--ink);border:2.5px solid var(--ink);background:#fff;padding:5px 4px;margin-top:10px;border-radius:0}
+.rin.bad,.rsel.bad{border-color:var(--red);background:rgba(214,43,31,.08)}
+.err{display:block;color:var(--red);font:16px 'Patrick Hand',cursive;margin-top:4px}
+.err:empty{display:none}
+.known{margin-top:12px;background:#e9f7e4;border:3px solid var(--ink);padding:8px 10px;font:19px 'Patrick Hand',cursive;text-align:left}
+.known b{font-family:'Bangers';font-weight:400;letter-spacing:1px}
+.rlist{list-style:none;margin-top:12px;text-align:left;font:20px 'Patrick Hand',cursive}
+.rlist li{background:#fff;border:3px solid var(--ink);padding:6px 10px;margin-top:8px;box-shadow:3px 3px 0 var(--ink)}
+.rnote{font:15px 'Patrick Hand',cursive;color:#5a4a2e;margin-top:12px}
+.rnote[hidden]{display:none}
+.rbtn2{display:block;width:100%;margin-top:10px;background:none;border:0;font:18px 'Patrick Hand',cursive;text-decoration:underline;cursor:pointer;color:#5a4a2e}
+.rbtn2[hidden]{display:none}
+
 #printArea{display:none}
 @media print{
   @page{margin:12mm}
@@ -316,6 +338,18 @@ body{font-family:'Patrick Hand',cursive;color:var(--ink);background:#070d27;over
 
 <div id="pow" aria-hidden="true"><svg viewBox="-60 -45 120 90" data-burst="16" data-fill="#d62b1f"></svg><b>¡BOOM!</b></div>
 <div class="toast" id="toast"></div>
+<div class="game" id="reg" hidden role="dialog" aria-modal="true" aria-labelledby="rTitle">
+  <div class="gpanel rpanel">
+    <button class="gclose" id="rClose" aria-label="Cerrar">✕</button>
+    <div class="gcap" id="rStep">REGISTRO DE AGENTES</div>
+    <h3 class="gtitle" id="rTitle">¡CASI LISTO!</h3>
+    <p class="ghelp" id="rHelp"></p>
+    <div id="rBody"></div>
+    <p class="rnote" id="rNote">🔒 Tu documento solo se usa para la lista de ingreso del edificio.</p>
+    <button class="cbtn red gbtn" id="rBtn">¡CONFIRMAR!</button>
+    <button class="rbtn2" id="rAlt" hidden></button>
+  </div>
+</div>
 <div class="game" id="game" hidden role="dialog" aria-modal="true" aria-labelledby="gTitle">
   <div class="gpanel">
     <button class="gclose" id="gClose" aria-label="Cerrar el juego">✕</button>
@@ -331,10 +365,13 @@ body{font-family:'Patrick Hand',cursive;color:var(--ink);background:#070d27;over
 
 <script>
 const WA = '51925130858';
+/* Google Apps Script web-app URL (registro/Codigo.gs). Empty = confirmations go only by WhatsApp. */
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbystQPJvZtOQYXNojc3zOZaRFDgGrjqlqXz9lNmOPiQwLNgBTRUMTu7ybIMa30nAx0pCg/exec';
 const PARTY = new Date('2026-10-11T15:00:00-05:00');
 const IMG_W = 1024, IMG_H = 1536;
 const params = new URLSearchParams(location.search);
 const guest = (params.get('para') || '').trim().slice(0, 40);
+const invId = (params.get('inv') || '').replace(/[^a-z0-9]/gi, '').slice(0, 40);
 const $ = id => document.getElementById(id);
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -414,7 +451,7 @@ $('prevBtn').addEventListener('click', () => go(cur - 1));
 $('homeBtn').addEventListener('click', () => go(0));
 leaves[0].addEventListener('click', () => cur === 0 && go(1));
 addEventListener('keydown', e => {
-  if (e.target.matches('input,select,textarea') || !$('game').hidden) return;
+  if (e.target.matches('input,select,textarea') || !$('game').hidden || !$('reg').hidden) return;
   if (e.key === 'ArrowRight') go(cur + 1);
   if (e.key === 'ArrowLeft') go(cur - 1);
 });
@@ -478,24 +515,154 @@ $('disfraz').addEventListener('click', e => {
   document.querySelectorAll('#disfraz .row-hot').forEach(c => c.setAttribute('aria-pressed', c === b)); disfraz = b.dataset.v; drawCard();
 });
 const sendWA = text => location.href = `https://wa.me/${WA}?text=${encodeURIComponent(text)}`;
-$('yesBtn').addEventListener('click', () => {
-  const fam = $('fam').value.trim(); if (!fam){ $('fam').focus(); toast('¡Escribe tu nombre de agente!'); return; }
-  pow('¡KA-BOOM!');
-  setTimeout(() => sendWA(
-`✂️ CUPÓN DE CONFIRMACIÓN
+/* ---------- guest registration: every adult needs name + DNI/CE for the building's reception ---------- */
+(function registration(){
+  const box = $('reg'), body = $('rBody'), btn = $('rBtn'), alt = $('rAlt');
+  const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const withTimeout = (p, ms) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms))]);
+  const getJSON = url => withTimeout(fetch(url).then(r => r.json()), 20000);
+  const postJSON = data => withTimeout(fetch(SHEET_URL, {method: 'POST', body: JSON.stringify(data)}).then(r => r.json()), 35000);
+  let status = {adults: 0, kids: 0, names: []};
+  /* Apps Script can take ~15 s to wake up: ask while the guest is still reading the comic */
+  let cached = null, cachedAt = 0;
+  const fetchStatus = () => { cachedAt = Date.now(); return cached = getJSON(`${SHEET_URL}?inv=${encodeURIComponent(invId)}`).catch(() => null); };
+  if (SHEET_URL && invId) fetchStatus();
+
+  function show(step, title, help){ $('rStep').textContent = step; $('rTitle').textContent = title; $('rHelp').textContent = help; }
+  function open(){
+    box.hidden = false; alt.hidden = true; $('rNote').hidden = false;
+    show('REGISTRO DE AGENTES', '¡CASI LISTO!', 'Revisando tu invitación…');
+    body.innerHTML = ''; btn.hidden = true;
+    const load = SHEET_URL && invId ? (cached && Date.now() - cachedAt < 120000 ? cached : fetchStatus()) : Promise.resolve(null);
+    load.then(st => { status = st && st.ok ? st : {adults: 0, kids: 0, names: []}; form(); });
+  }
+  function close(){ box.hidden = true; body.innerHTML = ''; }
+
+  function form(){
+    const na = Math.max(0, Math.min(counts.adultos, 2 - status.adults));
+    const nk = Math.max(0, Math.min(counts.ninos, 2 - status.kids));
+    const known = status.names.length ? `<div class="known"><b>YA CONFIRMADOS EN TU INVITACIÓN:</b><br>${status.names.map(esc).join(', ')} ✅</div>` : '';
+    if ((2 - status.adults <= 0 && 2 - status.kids <= 0) || (!na && !nk && status.names.length)){
+      show('REGISTRO DE AGENTES', '¡YA ESTÁN LISTOS!', 'Tu invitación ya está confirmada. ¡Nos vemos en la misión!');
+      body.innerHTML = known; $('rNote').hidden = true;
+      btn.hidden = false; btn.textContent = 'CERRAR'; btn.onclick = close;
+      alt.hidden = false; alt.textContent = '¿Algo cambió? Escríbenos por WhatsApp'; alt.onclick = () => sendWA(`Hola 👋 Somos ${$('fam').value.trim() || guest || 'invitados'} y necesitamos cambiar nuestra confirmación para el cumple de Salvador.`);
+      return;
+    }
+    if (!na && !nk){
+      show('REGISTRO DE AGENTES', '¡UN MOMENTO!', 'Marca en el cupón cuántos adultos y niños vienen.');
+      body.innerHTML = known; btn.hidden = false; btn.textContent = 'VOLVER AL CUPÓN'; btn.onclick = close;
+      return;
+    }
+    show('REGISTRO DE AGENTES', '¡CASI LISTO!', 'La recepción del edificio pide la lista de invitados. Escribe los datos de quienes vienen:');
+    const first = $('fam').value.trim() || guest;
+    const knownKeys = status.names.map(n => n.toLowerCase());
+    const prefill = first && !knownKeys.includes(first.split(' ')[0].toLowerCase()) && !/^familia\b/i.test(first) ? first : '';
+    let html = known;
+    for (let i = 0; i < na; i++) html += `
+      <div class="agent" data-kind="adult"><span class="alabel">ADULTO ${status.adults + i + 1}</span>
+        <input class="rin" data-f="name" placeholder="Nombre y apellidos" autocomplete="${i ? 'off' : 'name'}" value="${i ? '' : esc(prefill)}">
+        <div class="docrow">
+          <select class="rsel" data-f="docType" aria-label="Tipo de documento"><option value="DNI">DNI</option><option value="CE">Carné de extranjería</option></select>
+          <input class="rin" data-f="doc" inputmode="numeric" maxlength="12" placeholder="Número" autocomplete="off">
+        </div>
+        <span class="err"></span>
+      </div>`;
+    for (let i = 0; i < nk; i++) html += `
+      <div class="agent kid" data-kind="kid"><span class="alabel">NIÑO ${status.kids + i + 1}</span>
+        <input class="rin" data-f="name" placeholder="Nombre y apellidos" autocomplete="off">
+        <span class="err"></span>
+      </div>`;
+    body.innerHTML = html;
+    body.querySelectorAll('select[data-f=docType]').forEach(sel => sel.addEventListener('change', () => {
+      sel.nextElementSibling.inputMode = sel.value === 'DNI' ? 'numeric' : 'text';
+    }));
+    btn.hidden = false; btn.textContent = '¡CONFIRMAR!'; btn.disabled = false; btn.onclick = submit;
+  }
+
+  function collect(){
+    let ok = true;
+    const adults = [], kids = [];
+    body.querySelectorAll('.agent').forEach(card => {
+      const f = k => card.querySelector(`[data-f=${k}]`);
+      const err = card.querySelector('.err'), msgs = [];
+      card.querySelectorAll('.bad').forEach(el => el.classList.remove('bad'));
+      const name = f('name').value.trim().replace(/\s+/g, ' ');
+      if (name.split(' ').length < 2 || name.length < 5){ f('name').classList.add('bad'); msgs.push('Escribe nombre y apellido.'); }
+      if (card.dataset.kind === 'adult'){
+        const type = f('docType').value, doc = f('doc').value.toUpperCase().replace(/[^0-9A-Z]/g, '');
+        const good = type === 'DNI' ? /^[0-9]{8}$/.test(doc) : /^[0-9A-Z]{8,12}$/.test(doc);
+        if (!good){ f('doc').classList.add('bad'); msgs.push(type === 'DNI' ? 'El DNI tiene 8 dígitos.' : 'Revisa el número del carné de extranjería.'); }
+        adults.push({name, docType: type, doc});
+      } else kids.push({name});
+      err.textContent = msgs.join(' ');
+      if (msgs.length) ok = false;
+    });
+    if (!ok){ const firstBad = body.querySelector('.bad'); firstBad && firstBad.focus(); }
+    return ok ? {adults, kids} : null;
+  }
+
+  function waSummary(people, withDocs){
+    const lines = people.adults.map(a => `🧑 ${a.name}${withDocs ? ` · ${a.docType === 'CE' ? 'CE' : 'DNI'} ${a.doc}` : ''}`)
+      .concat(people.kids.map(k => `🧒 ${k.name}`));
+    return `✂️ CUPÓN DE CONFIRMACIÓN
 La Liga de Salvador · Núm. 1 🦸
 
-👤 ${fam}
-🧑 Adultos: ${counts.adultos}
-🧒 Niños: ${counts.ninos}
+👤 ${$('fam').value.trim() || guest || 'Invitado'}
+${lines.join('\n')}
 🎭 Uniforme: ${disfraz}
 
-¡Misión aceptada! Nos vemos el domingo 11 a las 3pm 🎉`), reduced ? 0 : 900);
-});
-$('noBtn').addEventListener('click', () => {
-  const fam = $('fam').value.trim(); if (!fam){ $('fam').focus(); toast('Escribe tu nombre primero'); return; }
-  sendWA(`😢 ${fam} no podrá asistir a la misión de Salvador esta vez, ¡pero le mandamos un súper abrazo por su primer añito! 💙`);
-});
+¡Misión aceptada! Nos vemos el domingo 11 a las 3pm 🎉`;
+  }
+
+  async function submit(){
+    const people = collect(); if (!people) return;
+    if (!SHEET_URL){ pow('¡KA-BOOM!'); setTimeout(() => sendWA(waSummary(people, true)), reduced ? 0 : 900); return; }
+    btn.disabled = true; btn.textContent = 'GUARDANDO…';
+    $('rHelp').textContent = 'Guardando tu registro… puede tardar unos segundos.';
+    const payload = {inv: invId, para: guest, by: $('fam').value.trim() || guest, costume: disfraz, attending: true, ...people};
+    let res = null;
+    try { res = await postJSON(payload); } catch {}
+    if (!res || !res.ok){
+      // the sheet never stores the same person twice, so a retry is safe even if the first try did save
+      try { res = await postJSON(payload); } catch { res = null; }
+      if (res && res.ok){ res.added = res.added.concat(res.already); res.already = []; }
+    }
+    if (!res || !res.ok){
+      show('REGISTRO DE AGENTES', '¡UPS!', 'No pudimos guardar tu registro en línea. Envíanos tus datos por WhatsApp, ya están escritos:');
+      body.innerHTML = ''; $('rNote').hidden = false;
+      btn.disabled = false; btn.textContent = '📲 ENVIAR POR WHATSAPP'; btn.onclick = () => sendWA(waSummary(people, true));
+      return;
+    }
+    const li = (list, icon, note) => list.map(n => `<li>${icon} ${esc(n)}${note ? ` <small>· ${note}</small>` : ''}</li>`).join('');
+    cached = null;
+    const added = new Set(res.added);
+    body.innerHTML = `<ul class="rlist">${li(res.added, '✅', '')}${li(res.already, 'ℹ️', 'ya estaba registrado')}${li(res.full.concat(res.invalid), '⚠️', 'no se pudo agregar, escríbenos')}</ul>`;
+    $('rNote').hidden = true;
+    if (res.added.length){
+      show('¡REGISTRO COMPLETO!', '¡MISIÓN ACEPTADA!', '¡Gracias! Ya están en la lista de la Liga.');
+      pow('¡KA-BOOM!');
+    } else show('REGISTRO DE AGENTES', '¡YA ESTABAN!', 'Estas personas ya estaban en la lista. ¡Nos vemos en la misión!');
+    const confirmed = {adults: people.adults.filter(a => added.has(a.name)), kids: people.kids.filter(k => added.has(k.name))};
+    btn.disabled = false;
+    if (confirmed.adults.length || confirmed.kids.length){
+      btn.textContent = '📲 AVISAR POR WHATSAPP'; btn.onclick = () => sendWA(waSummary(confirmed, false));
+      alt.hidden = false; alt.textContent = 'Cerrar'; alt.onclick = close;
+    } else { btn.textContent = 'CERRAR'; btn.onclick = close; }
+  }
+
+  $('yesBtn').addEventListener('click', () => {
+    if (!$('fam').value.trim()){ $('fam').focus(); toast('¡Escribe tu nombre de agente!'); return; }
+    open();
+  });
+  $('noBtn').addEventListener('click', () => {
+    const fam = $('fam').value.trim(); if (!fam){ $('fam').focus(); toast('Escribe tu nombre primero'); return; }
+    if (SHEET_URL) fetch(SHEET_URL, {method: 'POST', body: JSON.stringify({inv: invId, para: guest, by: fam, attending: false}), keepalive: true}).catch(() => {});
+    sendWA(`😢 ${fam} no podrá asistir a la misión de Salvador esta vez, ¡pero le mandamos un súper abrazo por su primer añito! 💙`);
+  });
+  $('rClose').addEventListener('click', close);
+  addEventListener('keydown', e => { if (e.key === 'Escape' && !box.hidden) close(); });
+})();
 
 /* ---------- hero stats: shaped by the chosen power, boosted by the mini-game ---------- */
 const PROFILES = {
