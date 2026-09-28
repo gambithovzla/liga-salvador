@@ -18,17 +18,30 @@ label{display:block;font-weight:800;font-size:13px;letter-spacing:1.5px;text-tra
 textarea{width:100%;min-height:170px;font:600 16px 'Rubik';padding:12px;border:3px solid var(--ink);border-radius:12px;resize:vertical}
 .btn{font-family:'Bangers';letter-spacing:1px;font-size:19px;border:3px solid var(--ink);border-radius:12px;padding:8px 14px;background:var(--gold);color:var(--ink);cursor:pointer;box-shadow:3px 3px 0 var(--ink);text-decoration:none;display:inline-block;white-space:nowrap}
 .btn.wa{background:#25d366}
+.btn.poster{background:#e2482a;color:#fff}
+.btn:disabled{opacity:.5;cursor:wait}
 .item{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px 0;border-bottom:2px dashed #c9bfae}
 .item:last-child{border-bottom:0}
 .item b{flex:1 1 180px;font-size:17px}
 .item code{flex:1 1 100%;font-size:12px;word-break:break-all;color:#4a5578}
-.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--gold);color:var(--ink);font-weight:800;border:3px solid var(--ink);border-radius:12px;padding:10px 16px;display:none}
+.poster-row{display:flex;gap:14px;align-items:center}
+.poster-row img{width:72px;border:3px solid var(--ink);border-radius:8px;flex:none}
+.poster-row p{margin:0;color:var(--ink);font-size:14px}
+.poster-row a{color:var(--red);font-weight:800}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--gold);color:var(--ink);font-weight:800;border:3px solid var(--ink);border-radius:12px;padding:10px 16px;display:none;max-width:90vw;text-align:center}
 </style>
 </head>
 <body>
 <main>
   <h1>Links personalizados</h1>
   <p>Escribe un nombre por línea. Cada link abre el cómic con la banda <i>“Ejemplar de Familia Pérez”</i> en la portada y deja su nombre ya escrito en el cupón.</p>
+
+  <div class="box">
+    <div class="poster-row">
+      <img src="img/poster.jpg" alt="Póster de la invitación">
+      <p id="posterHint"><b>Enviar con póster</b> manda la imagen de la invitación con el mensaje y el link debajo, listo para tocar. <a href="img/poster.jpg" download="Invitacion La Liga de Salvador.jpg">Descargar póster</a></p>
+    </div>
+  </div>
 
   <div class="box">
     <label for="names">Invitados (uno por línea)</label>
@@ -47,6 +60,24 @@ function linkFor(n){ return `${base}?para=${encodeURIComponent(n)}`; }
 function message(n){
   return `🚨 ¡Alerta de la Liga! 🦸\n\n${n}, ¡llegó su ejemplar de La Liga de Salvador Núm. 1! 🦸 Salvador cumple 1 año 🎉\n\n📅 Domingo 11 de octubre · 3:00 pm\n📍 Av. El Sol Este 176, Barranco (terraza)\n\nAbran el cómic y confírmenos su asistencia aquí 👇\n${linkFor(n)}`;
 }
+function toast(text){
+  const t = document.getElementById('toast'); t.textContent = text; t.style.display = 'block';
+  clearTimeout(toast.timer); toast.timer = setTimeout(() => t.style.display = 'none', 2600);
+}
+
+/* The poster is fetched ahead of time: iPhone only lets a page open the share
+   sheet right after a tap, so there is no time to download it on click. */
+let posterFile = null;
+const canShareFiles = !!(navigator.canShare && navigator.canShare({files: [new File([''], 'x.jpg', {type: 'image/jpeg'})]}));
+if (canShareFiles){
+  fetch('img/poster.jpg').then(r => r.blob()).then(b => {
+    posterFile = new File([b], 'Invitacion La Liga de Salvador.jpg', {type: 'image/jpeg'});
+    out.querySelectorAll('[data-poster]').forEach(btn => btn.disabled = false);
+  }).catch(() => {});
+} else {
+  document.getElementById('posterHint').innerHTML = 'El botón <b>Enviar con póster</b> aparece al abrir esta página en el <b>celular</b>. Desde la computadora usa “Enviar por WhatsApp”. <a href="img/poster.jpg" download="Invitacion La Liga de Salvador.jpg">Descargar póster</a>';
+}
+
 function render(){
   try { localStorage.setItem('liga-names', ta.value); } catch {}
   const names = [...new Set(ta.value.split('\n').map(s => s.trim()).filter(Boolean))];
@@ -54,14 +85,23 @@ function render(){
   out.innerHTML = names.map((n, i) => `
     <div class="item">
       <b>${esc(n)}</b>
-      <button class="btn" data-copy="${i}">Copiar link</button>
+      ${canShareFiles ? `<button class="btn poster" data-poster="${i}" ${posterFile ? '' : 'disabled'}>📨 Enviar con póster</button>` : ''}
       <a class="btn wa" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(message(n))}">Enviar por WhatsApp</a>
+      <button class="btn" data-copy="${i}">Copiar link</button>
       <code>${esc(linkFor(n))}</code>
     </div>`).join('');
   out.querySelectorAll('[data-copy]').forEach(b => b.onclick = async () => {
     await navigator.clipboard.writeText(message(names[+b.dataset.copy]));
-    const t = document.getElementById('toast'); t.textContent = '¡Mensaje con link copiado!'; t.style.display = 'block';
-    setTimeout(() => t.style.display = 'none', 1800);
+    toast('¡Mensaje con link copiado!');
+  });
+  out.querySelectorAll('[data-poster]').forEach(b => b.onclick = async () => {
+    if (!posterFile) return toast('Cargando el póster, intenta de nuevo en un segundo');
+    const n = names[+b.dataset.poster];
+    try {
+      await navigator.share({files: [posterFile], text: message(n)});
+    } catch (e) {
+      if (e.name !== 'AbortError') toast('No se pudo compartir. Usa “Enviar por WhatsApp”.');
+    }
   });
 }
 ta.addEventListener('input', render); render();
