@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>La Liga de Salvador · Núm. 1</title>
+<meta name="description" content="Edición especial Núm. 1: ¡El origen de un héroe! Salvador cumple 1 año. Domingo 11 de octubre, 3:00 pm, Barranco.">
+<meta property="og:title" content="La Liga de Salvador · Núm. 1 · ¡El origen de un héroe!">
+<meta property="og:description" content="Salvador cumple 1 año · Domingo 11 de octubre · 3:00 pm · Barranco">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://salvador.gambitholabs.com/">
+<meta property="og:image" content="https://salvador.gambitholabs.com/img/og-comic.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#070d27">
+<meta name="robots" content="noindex">
+<link rel="icon" href="img/escudo-s.png">
+<link href="fonts/fonts.css" rel="stylesheet">
+<style>
+:root{
+  --ink:#16130f; --navy:#1b2c5e; --blue:#2a5fd0; --gold:#f5c21b; --red:#d62b1f; --cream:#fff3d2; --paper:#efe0c2;
+  --sky:linear-gradient(180deg,#070d27 0%,#14235c 34%,#2d3a86 55%,#6b3f86 74%,#d9683f 90%,#f2b51c 100%);
+  --nav:56px;
+  --bw:min(calc(100vw - 16px),560px,calc((100dvh - var(--nav) - 28px) / 1.5));
+  --bh:calc(var(--bw) * 1.5);
+  --top:max(8px,calc((100dvh - var(--bh) - var(--nav) - 10px) / 2));
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'Patrick Hand',cursive;color:var(--ink);background:#070d27;overflow:hidden;overscroll-behavior:none}
+
+.backdrop{position:fixed;inset:0;z-index:0;background:var(--sky);overflow:hidden}
+.backdrop:before{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.13) 1.3px,transparent 1.7px);background-size:9px 9px;
+  -webkit-mask:linear-gradient(#000,transparent 70%);mask:linear-gradient(#000,transparent 70%)}
+.backdrop .moon{position:absolute;right:12%;top:9%;width:110px;height:110px;border-radius:50%;background:radial-gradient(circle at 40% 40%,#fff8dc,#f6dd92 60%,#e6b85a);
+  box-shadow:0 0 60px 20px rgba(255,230,150,.25)}
+.backdrop svg{position:absolute;left:0;bottom:0;width:100%;height:46vh}
+.backdrop .back{height:52vh;opacity:.9}
+
+/* ---------- book ---------- */
+.book{position:fixed;z-index:1;left:50%;top:var(--top);transform:translateX(-50%);width:var(--bw);height:var(--bh);perspective:2400px;touch-action:pan-y}
+.leaf{position:absolute;inset:0;container-type:size;overflow:hidden;background:var(--paper);transform-origin:left center;
+  transition:transform .95s cubic-bezier(.55,.05,.3,1),box-shadow .95s;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  box-shadow:0 18px 40px rgba(0,0,0,.6),5px 0 0 -2px #d9c89f,9px 0 0 -3px #c9b88f}
+.leaf.turned{transform:rotateY(-178deg);pointer-events:none}
+.leaf.turning{box-shadow:-30px 0 60px rgba(0,0,0,.5)}
+.leaf:after{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(0,0,0,.2),transparent 4%,transparent 97%,rgba(255,255,255,.06))}
+.leaf > img.art{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:cover;user-select:none;-webkit-user-drag:none}
+.cover{cursor:pointer}
+
+[data-box]{position:absolute}
+.hot{background:transparent;border:0;cursor:pointer;border-radius:1.5cqw;color:inherit;font:inherit;-webkit-tap-highlight-color:transparent}
+.hot:active{background:rgba(255,255,255,.28)}
+.hot:focus-visible{outline:.5cqw dashed var(--red);outline-offset:.3cqw}
+.hot.round{border-radius:50%}
+/* make the painted buttons read as tappable */
+.cta{overflow:hidden}
+.cta:before{content:'';position:absolute;inset:0;background:linear-gradient(110deg,transparent 38%,rgba(255,255,255,.6) 50%,transparent 62%);
+  transform:translateX(-130%);animation:shine 3.4s ease-in-out infinite;pointer-events:none}
+.cta.late:before{animation-delay:1.1s}
+@keyframes shine{0%,50%{transform:translateX(-130%)}85%,100%{transform:translateX(130%)}}
+.tag{position:absolute;right:2%;top:4%;z-index:4;background:#ffd21f;border:.45cqw solid var(--ink);box-shadow:.5cqw .5cqw 0 var(--ink);padding:.5cqw 1.4cqw .3cqw;
+  font-family:'Bangers';font-size:3.4cqw;letter-spacing:.15cqw;line-height:1;color:var(--ink);transform:rotate(3deg);pointer-events:none;animation:wob 2.4s ease-in-out infinite}
+@keyframes wob{50%{transform:rotate(-2deg) scale(1.06)}}
+.sticker{display:grid;place-items:center;z-index:4;pointer-events:none}
+.sticker .tag{position:static;font-size:3.6cqw;padding:.7cqw 1.6cqw .5cqw}
+.sticker.late .tag{animation-delay:1.2s}
+
+.dedic{position:absolute;z-index:3;right:-9cqw;top:6.5cqw;width:44cqw;transform:rotate(38deg);background:var(--red);color:#fff;text-align:center;
+  border-top:.5cqw solid var(--ink);border-bottom:.5cqw solid var(--ink);box-shadow:0 .8cqw 1.4cqw rgba(0,0,0,.45);padding:.6cqw 7cqw .8cqw;
+  font-family:'Anton';text-transform:uppercase;line-height:1.05}
+.dedic small{display:block;font-size:2cqw;letter-spacing:.3cqw;color:#ffd97a}
+.dedic b{display:block;font-weight:400;font-size:3.4cqw;letter-spacing:.1cqw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dedic[hidden]{display:none}
+
+/* countdown digits sit on the repainted cards */
+.dg{display:grid;place-items:center;font-family:'Luckiest Guy';font-size:13cqw;line-height:1;padding-top:1.2cqw;color:var(--red);letter-spacing:-.2cqw;
+  -webkit-text-stroke:.6cqw var(--ink);paint-order:stroke fill;text-shadow:.8cqw .8cqw 0 var(--ink);pointer-events:none}
+.done-msg{display:none;place-items:center;text-align:center;font-family:'Luckiest Guy';font-size:6cqw;line-height:1.05;color:var(--cream);
+  -webkit-text-stroke:.45cqw var(--ink);paint-order:stroke fill;text-shadow:.6cqw .6cqw 0 var(--ink);background:rgba(20,35,92,.92);border:.5cqw solid var(--ink)}
+.over .dg{display:none}
+.over .done-msg{display:grid}
+
+/* coupon */
+.name-in{background:transparent;border:0;outline:none;font-family:'Patrick Hand';font-size:4.5cqw;color:var(--ink);padding:0 6.5cqw 0 1.6cqw;width:100%;height:100%}
+.name-in::placeholder{color:#8f8570}
+.name-in:focus{background:rgba(245,194,27,.18)}
+.val{display:grid;place-items:center;font-family:'Luckiest Guy';font-size:8cqw;line-height:1;padding-top:.8cqw;pointer-events:none}
+.row-hot{text-align:left}
+.tick{position:absolute;left:1.7%;top:12%;width:11.5%;height:80%;display:none;pointer-events:none}
+.row-hot[aria-pressed=true] .tick{display:block}
+.tick svg{width:130%;height:130%;margin:-20% 0 0 -5%;overflow:visible}
+
+/* ---------- page 6: member card (drawn in the same style as the illustrated pages) ---------- */
+.p6{background:#f1e2c3 url(img/paper.jpg);background-size:60cqw;background-blend-mode:multiply}
+.runhead{position:absolute;left:3.2cqw;right:3.2cqw;top:1.1cqw;display:flex;justify-content:space-between;font-family:'Anton';font-size:2.5cqw;letter-spacing:.15cqw;
+  color:var(--ink);border-bottom:.3cqw solid var(--ink);padding-bottom:.5cqw}
+.pnl{position:absolute;left:3.4cqw;right:3.4cqw;border:.6cqw solid var(--ink);overflow:hidden}
+.pa{top:6.2cqw;height:19cqh;background:radial-gradient(circle at 62% 55%,#8cbcff 0%,#3a74e0 38%,#173a8f 100%)}
+.pa:before{content:'';position:absolute;inset:-60%;background:repeating-conic-gradient(from 0deg at 50% 50%,rgba(255,255,255,.2) 0 4deg,transparent 4deg 11deg)}
+.pa:after{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(10,25,80,.35) 1.1cqw,transparent 1.25cqw);background-size:2.8cqw 2.8cqw;
+  -webkit-mask:radial-gradient(circle at 62% 55%,transparent 30%,#000 80%);mask:radial-gradient(circle at 62% 55%,transparent 30%,#000 80%)}
+.pa .kid{position:absolute;z-index:2;right:1%;bottom:-18%;height:128%}
+.pa .star{position:absolute;z-index:2;color:#ffd21f;-webkit-text-stroke:.35cqw var(--ink);font-size:7cqw;line-height:1}
+.capt{position:absolute;z-index:3;left:-.3cqw;top:-.3cqw;background:#ffd21f;border:.5cqw solid var(--ink);padding:.6cqw 1.8cqw .4cqw;
+  font-family:'Bangers';font-size:4.2cqw;letter-spacing:.2cqw;line-height:1;color:var(--ink);box-shadow:.5cqw .5cqw 0 var(--ink)}
+.bub{position:absolute;z-index:3;left:4cqw;top:10cqw;width:46cqw;background:#fffdf4;border:.5cqw solid var(--ink);border-radius:50%/46%;padding:2.6cqw 3cqw;
+  text-align:center;font-family:'Bangers';font-size:4.4cqw;letter-spacing:.15cqw;line-height:1.05;color:var(--ink)}
+.bub b{font-weight:400;color:var(--red)}
+.bub:after{content:'';position:absolute;right:6cqw;bottom:-2.6cqw;width:4.5cqw;height:4.5cqw;background:#fffdf4;border-right:.5cqw solid var(--ink);border-bottom:.5cqw solid var(--ink);
+  transform:skewX(-35deg) rotate(35deg)}
+.pb{top:calc(6.2cqw + 19cqh + 2cqw);bottom:3cqw;background:#faf1da;display:flex;flex-direction:column;gap:2cqw;padding:3cqw 3cqw 2.6cqw}
+.pb:before{content:'';position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(rgba(245,194,27,.35) .6cqw,transparent .7cqw);background-size:2.4cqw 2.4cqw;
+  -webkit-mask:linear-gradient(135deg,#000,transparent 45%);mask:linear-gradient(135deg,#000,transparent 45%)}
+.pb > *{position:relative}
+.title{font-family:'Luckiest Guy';font-weight:400;font-size:7.4cqw;line-height:1;text-align:center;color:var(--cream);letter-spacing:.2cqw;transform:rotate(-1.5deg);
+  -webkit-text-stroke:.45cqw var(--ink);paint-order:stroke fill;text-shadow:.35cqw .35cqw 0 var(--red),.7cqw .7cqw 0 var(--red),1cqw 1cqw 0 var(--ink)}
+.title span{color:var(--gold)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:2.4cqw}
+.fld{display:flex;flex-direction:column}
+.fld .lbl{align-self:flex-start;background:#ffd21f;border:.45cqw solid var(--ink);border-bottom:0;padding:.4cqw 1.4cqw .2cqw;font-family:'Bangers';font-size:3.2cqw;letter-spacing:.15cqw;line-height:1}
+.fld input,.fld select{width:100%;background:#fff;border:.45cqw solid var(--ink);box-shadow:.5cqw .5cqw 0 var(--ink);padding:.8cqw 1.6cqw;font-family:'Patrick Hand';font-size:4.4cqw;
+  color:var(--ink);outline:none;border-radius:0;-webkit-appearance:none;appearance:none}
+.fld select{background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%2316130f' stroke-width='2.5'/%3E%3C/svg%3E") no-repeat right 1.6cqw center;background-size:2.6cqw}
+.fld input:focus,.fld select:focus{background-color:#fff8e0}
+.cardwrap{flex:1;min-height:0;display:grid;place-items:center}
+#card{display:block;max-width:100%;max-height:100%;width:auto;height:auto;border:.5cqw solid var(--ink);box-shadow:.9cqw .9cqw 0 var(--ink)}
+.acts{display:grid;grid-template-columns:repeat(auto-fit,minmax(20cqw,1fr));gap:2cqw}
+.cbtn{font-family:'Bangers';font-size:4.2cqw;letter-spacing:.2cqw;line-height:1;cursor:pointer;text-align:center;padding:1.6cqw 1cqw 1.2cqw;
+  background:#ffd21f;color:var(--ink);border:.5cqw solid var(--ink);box-shadow:.6cqw .6cqw 0 var(--ink)}
+.cbtn.red{background:var(--red);color:#fff}
+.cbtn:active{box-shadow:.1cqw .1cqw 0 var(--ink);translate:.5cqw .5cqw}
+.cbtn[hidden]{display:none}
+.note{text-align:center;font-family:'Bangers';font-size:3cqw;letter-spacing:.15cqw;color:#5a4a2e;margin-top:-.6cqw}
+
+/* ---------- pager ---------- */
+.pager{position:fixed;z-index:10;left:50%;top:calc(var(--top) + var(--bh) + 10px);transform:translateX(-50%);height:var(--nav);width:max(var(--bw),min(calc(100vw - 16px),400px));
+  display:flex;align-items:center;justify-content:space-between;gap:8px}
+.pager button{font-family:'Bangers';letter-spacing:1px;font-size:20px;cursor:pointer;height:100%;
+  background:#ffd21f;color:var(--ink);border:3px solid var(--ink);box-shadow:3px 3px 0 #000;padding:0 14px;min-width:92px}
+.pager button:disabled{opacity:.35;cursor:default}
+.pager button.home{min-width:0;background:#fff;padding:0 12px}
+.pager .count{flex:1;text-align:center;font-family:'Bangers';color:#fff;letter-spacing:1.5px;font-size:19px;line-height:1.05;text-shadow:2px 2px 0 #000}
+.pager .count small{display:block;font-family:'Patrick Hand';letter-spacing:0;font-size:14px;color:#ffd97a;text-transform:uppercase}
+.next.pulse{animation:nudge 1.6s ease-in-out infinite}
+@keyframes nudge{50%{transform:scale(1.07)}}
+
+.toast{position:fixed;left:50%;bottom:90px;transform:translate(-50%,200%);visibility:hidden;background:#ffd21f;color:var(--ink);border:3px solid var(--ink);
+  padding:10px 16px;font-size:20px;box-shadow:4px 4px 0 var(--ink);z-index:60;transition:transform .3s;max-width:90vw;text-align:center}
+.toast.show{transform:translate(-50%,0);visibility:visible}
+#pow{position:fixed;z-index:70;pointer-events:none;left:50%;top:40%;width:230px;height:170px;transform:translate(-50%,-50%) scale(0);display:grid;place-items:center}
+#pow.go{animation:pow .9s cubic-bezier(.2,1.6,.4,1) forwards}
+#pow b{position:relative;font-family:'Luckiest Guy';font-weight:400;font-size:40px;color:#ffd21f;-webkit-text-stroke:2px var(--ink);paint-order:stroke fill;text-shadow:4px 4px 0 var(--ink);transform:rotate(-8deg)}
+#pow svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+@keyframes pow{0%{transform:translate(-50%,-50%) scale(0) rotate(-20deg)}40%{transform:translate(-50%,-50%) scale(1.1) rotate(4deg)}75%{opacity:1}100%{transform:translate(-50%,-50%) scale(1);opacity:0}}
+
+#printArea{display:none}
+@media print{
+  @page{margin:12mm}
+  body{background:#fff!important;overflow:visible}
+  body > *:not(#printArea){display:none!important}
+  #printArea{display:block}
+  #printArea img{width:86mm;height:54mm;display:block;border:.2mm dashed #999}
+  #printArea p{font:10pt sans-serif;margin-top:3mm;color:#555}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="backdrop" aria-hidden="true">
+  <div class="moon"></div>
+  <svg class="back" data-city="21" data-fill="#22306e" data-win="rgba(255,214,120,.35)" viewBox="0 0 600 300" preserveAspectRatio="none"></svg>
+  <svg data-city="8" data-fill="#070d24" data-win="#f2b51c" viewBox="0 0 600 260" preserveAspectRatio="none"></svg>
+</div>
+
+<div class="book" id="book">
+
+  <section class="leaf cover" aria-label="Portada: La Liga de Salvador, número 1. ¡El origen de un héroe!">
+    <img class="art" src="img/pages/portada.jpg" srcset="img/pages/portada-sm.jpg 768w, img/pages/portada.jpg 1024w" sizes="(max-width:600px) 100vw, 560px" alt="Portada: Salvador volando con su capa roja sobre Barranco.">
+    <div class="dedic" id="dedicBox" hidden><small>Ejemplar de</small><b id="dedic"></b></div>
+  </section>
+
+  <section class="leaf" aria-label="Página 1: el origen">
+    <img class="art" src="img/pages/p1.jpg" srcset="img/pages/p1-sm.jpg 768w, img/pages/p1.jpg 1024w" sizes="(max-width:600px) 100vw, 560px" alt="Lima, hace exactamente un año, llegó a la ciudad un héroe muy pequeñito. Su nombre: Salvador, alias Salva. Ficha del héroe: sonrisa desarmadora, abrazo de súper fuerza, ya se pone de pie.">
+  </section>
+
+  <section class="leaf" aria-label="Página 2: el poder">
+    <img class="art" src="img/pages/p2.jpg" srcset="img/pages/p2-sm.jpg 768w, img/pages/p2.jpg 1024w" sizes="(max-width:600px) 100vw, 560px" alt="Poder especial detectado: ¡la sonrisa que ilumina la ciudad! Pero hasta el héroe más fuerte necesita a su liga. ¡Se convoca a todos los héroes!">
+  </section>
+
+  <section class="leaf" aria-label="Página 3: la misión">
+    <img class="art" src="img/pages/p3.jpg" srcset="img/pages/p3-sm.jpg 768w, img/pages/p3.jpg 1024w" sizes="(max-width:600px) 100vw, 560px" alt="Domingo 11 de octubre, 3:00 pm. Base secreta: Av. El Sol Este 176, Barranco. Subir a la terraza.">
+    <a class="hot" data-box="35,850,990,1200" href="https://maps.app.goo.gl/CSnGSTLnidMWYhhT8" target="_blank" rel="noopener" aria-label="Abrir el mapa"><span class="tag">¡TOCA EL MAPA!</span></a>
+    <a class="hot cta" data-box="35,1220,498,1395" href="https://maps.app.goo.gl/CSnGSTLnidMWYhhT8" target="_blank" rel="noopener" aria-label="Cómo llegar"></a>
+    <button class="hot cta late" data-box="512,1220,990,1395" id="calBtn" aria-label="Guardar la fecha en el calendario"></button>
+    <div class="sticker" data-box="380,1196,512,1242" aria-hidden="true"><span class="tag">¡TOCA!</span></div>
+    <div class="sticker late" data-box="866,1196,998,1242" aria-hidden="true"><span class="tag">¡TOCA!</span></div>
+  </section>
+
+  <section class="leaf" aria-label="Página 4: cuenta regresiva" id="p4">
+    <img class="art" src="img/pages/p4.jpg" srcset="img/pages/p4-sm.jpg 768w, img/pages/p4.jpg 1024w" sizes="(max-width:600px) 100vw, 560px" alt="Tiempo restante para la misión. Uniforme opcional: ven con capa o con el traje de tu héroe favorito.">
+    <div class="dg" data-box="71,273,259,437" id="cd-d">--</div>
+    <div class="dg" data-box="293,276,446,437" id="cd-h">--</div>
+    <div class="dg" data-box="473,274,626,437" id="cd-m">--</div>
+    <div class="dg" data-box="652,277,802,437" id="cd-s">--</div>
+    <div class="done-msg" data-box="60,262,812,445" id="countMsg"></div>
+  </section>
+
+  <section class="leaf" aria-label="Página 5: cupón de confirmación">
+    <img class="art" src="img/pages/p5.jpg" srcset="img/pages/p5-sm.jpg 768w, img/pages/p5.jpg 1024w" sizes="(max-width:600px) 100vw, 560px" alt="Cupón de confirmación. Envíalo antes del miércoles 7 de octubre.">
+    <div data-box="500,556,884,628"><input class="name-in" id="fam" autocomplete="off" placeholder="Tu nombre aquí" aria-label="Nombre del agente o familia"></div>
+    <button class="hot round" data-box="472,834,540,902" data-k="adultos" data-d="-1" aria-label="Menos adultos"></button>
+    <div class="val" data-box="546,828,621,902" id="adultos">2</div>
+    <button class="hot round" data-box="626,834,694,902" data-k="adultos" data-d="1" aria-label="Más adultos"></button>
+    <button class="hot round" data-box="723,834,791,902" data-k="ninos" data-d="-1" aria-label="Menos niños"></button>
+    <div class="val" data-box="798,828,881,902" id="ninos">1</div>
+    <button class="hot round" data-box="888,834,956,902" data-k="ninos" data-d="1" aria-label="Más niños"></button>
+    <div id="disfraz">
+      <button class="hot row-hot" data-box="480,1072,962,1142" aria-pressed="false" data-v="¡Con disfraz! 🦸" aria-label="Vamos disfrazados"><span class="tick"></span></button>
+      <button class="hot row-hot" data-box="480,1148,962,1218" aria-pressed="true" data-v="Tal vez 🤔" aria-label="Tal vez, es secreto"><span class="tick"></span></button>
+      <button class="hot row-hot" data-box="480,1224,962,1294" aria-pressed="false" data-v="De civil 🙈" aria-label="Vamos de civil"><span class="tick"></span></button>
+    </div>
+    <button class="hot cta" data-box="185,1310,850,1440" id="yesBtn" aria-label="¡Acepto la misión!"></button>
+    <button class="hot" data-box="300,1448,720,1500" id="noBtn" aria-label="No podré ir esta vez"></button>
+  </section>
+
+  <section class="leaf p6" aria-label="Página 6: tarjeta de miembro">
+    <div class="runhead"><span>LA LIGA DE SALVADOR · NÚM. 1</span><span>PÁG. 6</span></div>
+    <div class="pnl pa">
+      <span class="star" style="left:52%;top:10%">★</span><span class="star" style="left:60%;bottom:8%;font-size:5cqw">★</span>
+      <img class="kid" src="img/salva/risa-comic.png" alt="Salvador riéndose">
+      <div class="capt">ARCHIVO SECRETO:</div>
+      <div class="bub">¡Todo héroe necesita su <b>credencial!</b></div>
+    </div>
+    <div class="pnl pb">
+      <h3 class="title">¡TU TARJETA DE <span>MIEMBRO!</span></h3>
+      <div class="row2">
+        <label class="fld"><span class="lbl">NOMBRE DE HÉROE</span><input id="heroName" maxlength="18" placeholder="Mateo" autocomplete="off"></label>
+        <label class="fld"><span class="lbl">SUPERPODER</span>
+          <select id="power">
+            <option>Súper fuerza</option><option>Velocidad del rayo</option><option>Vuelo</option><option>Invisibilidad</option>
+            <option>Súper abrazos</option><option>Risa contagiosa</option><option>Visión láser</option><option>Escudo invencible</option>
+          </select>
+        </label>
+      </div>
+      <div class="cardwrap"><canvas id="card" width="1080" height="680" aria-label="Tu tarjeta: esto es exactamente lo que se descarga e imprime"></canvas></div>
+      <div class="acts">
+        <label class="cbtn" for="photo">📷 Foto</label>
+        <button class="cbtn red" id="dlBtn">Descargar</button>
+        <button class="cbtn" id="printBtn">Imprimir</button>
+        <button class="cbtn" id="shareBtn" hidden>Enviar</button>
+      </div>
+      <input type="file" id="photo" accept="image/*" hidden>
+      <div class="note">Tamaño real de tarjeta: 8,6 × 5,4 cm</div>
+    </div>
+  </section>
+
+  <section class="leaf" aria-label="Contraportada">
+    <img class="art" src="img/pages/back.jpg" srcset="img/pages/back-sm.jpg 768w, img/pages/back.jpg 1024w" sizes="(max-width:600px) 100vw, 560px" alt="¿Fin? Continuará… el domingo 11 de octubre. Una producción de Papá y Mamá de Salvador, protagonizada por Salvador y toda su liga.">
+  </section>
+</div>
+
+<nav class="pager">
+  <button class="home" id="homeBtn" aria-label="Volver a la portada">⌂</button>
+  <button class="prev" id="prevBtn">◂ Atrás</button>
+  <div class="count"><span id="pageNo">Portada</span><small id="pageHint">Toca para abrir</small></div>
+  <button class="next pulse" id="nextBtn">Abrir ▸</button>
+</nav>
+
+<div id="pow" aria-hidden="true"><svg viewBox="-60 -45 120 90" data-burst="16" data-fill="#d62b1f"></svg><b>¡BOOM!</b></div>
+<div class="toast" id="toast"></div>
+<div id="printArea"><img id="printImg" alt=""><p>Recorta por la línea punteada · La Liga de Salvador · Núm. 1</p></div>
+
+<script>
+const WA = '51925130858';
+const PARTY = new Date('2026-10-11T15:00:00-05:00');
+const IMG_W = 1024, IMG_H = 1536;
+const params = new URLSearchParams(location.search);
+const guest = (params.get('para') || '').trim().slice(0, 40);
+const $ = id => document.getElementById(id);
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* overlays are placed in the illustration's own pixel coordinates */
+document.querySelectorAll('[data-box]').forEach(el => {
+  const [x1, y1, x2, y2] = el.dataset.box.split(',').map(Number);
+  Object.assign(el.style, {left: x1/IMG_W*100 + '%', top: y1/IMG_H*100 + '%', width: (x2-x1)/IMG_W*100 + '%', height: (y2-y1)/IMG_H*100 + '%'});
+});
+
+const TICK = '<svg viewBox="0 0 60 50"><path d="M6 26 L22 42 L56 4" fill="none" stroke="#16130f" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 26 L22 42 L56 4" fill="none" stroke="#d62b1f" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+document.querySelectorAll('.tick').forEach(t => t.innerHTML = TICK);
+
+document.querySelectorAll('svg[data-burst]').forEach(svg => {
+  const n = +svg.dataset.burst, vb = svg.viewBox.baseVal, rx = vb.width/2, ry = vb.height/2, pts = [];
+  for (let i = 0; i < n*2; i++){ const a = Math.PI*i/n, k = i%2 ? .62 + (i%4 === 1 ? .06 : -.04) : 1; pts.push(`${(Math.cos(a)*rx*k).toFixed(1)},${(Math.sin(a)*ry*k).toFixed(1)}`); }
+  svg.innerHTML = `<polygon points="${pts.join(' ')}" transform="translate(4 4)" fill="#16130f"/><polygon points="${pts.join(' ')}" fill="${svg.dataset.fill}" stroke="#16130f" stroke-width="3" stroke-linejoin="round"/>`;
+});
+
+document.querySelectorAll('svg[data-city]').forEach(svg => {
+  const vb = svg.viewBox.baseVal, W = vb.width, H = vb.height;
+  let s = +svg.dataset.city, x = 0, h = '';
+  const rnd = () => (s = (s*9301+49297)%233280)/233280;
+  while (x < W){
+    const w = W*(.05 + rnd()*.08), bh = H*(.3 + rnd()*.62);
+    h += `<rect x="${x}" y="${H-bh}" width="${w}" height="${bh}" fill="${svg.dataset.fill}"/>`;
+    if (rnd() < .22){ const cx = x + w/2; h += `<polygon points="${cx-w*.12},${H-bh} ${cx},${H-bh-H*.12} ${cx+w*.12},${H-bh}" fill="${svg.dataset.fill}"/>`; }
+    const ww = Math.max(2, w*.1), wh = ww*1.4;
+    for (let wy = H-bh+wh*1.2; wy < H-wh; wy += wh*2) for (let wx = x+ww; wx < x+w-ww*1.5; wx += ww*2)
+      if (Math.sin(wx*12.9+wy*78.2) > .15) h += `<rect x="${wx.toFixed(1)}" y="${wy.toFixed(1)}" width="${ww.toFixed(1)}" height="${wh.toFixed(1)}" fill="${svg.dataset.win}"/>`;
+    x += w + 1;
+  }
+  svg.innerHTML = h;
+});
+
+if (guest){ $('dedic').textContent = guest; $('dedicBox').hidden = false; $('fam').value = guest; }
+
+/* ---------- book ---------- */
+const leaves = [...document.querySelectorAll('.leaf')];
+const N = leaves.length;
+const names = ['Portada', 'Pág. 1', 'Pág. 2', 'Pág. 3', 'Pág. 4', 'Pág. 5', 'Pág. 6', 'Contraportada'];
+const hints = ['Toca para abrir', 'El origen', 'El poder', 'Toca los botones', 'Cuenta regresiva', 'Confirma aquí', 'Tu tarjeta', '¡Gracias!'];
+let cur = 0, busy = false;
+function layout(){
+  leaves.forEach((l, i) => {
+    l.classList.toggle('turned', i < cur);
+    l.style.zIndex = i < cur ? N + i : N - i;
+    l.setAttribute('aria-hidden', i !== cur);
+    l.inert = i !== cur;
+  });
+  $('pageNo').textContent = names[cur];
+  $('pageHint').textContent = hints[cur];
+  $('prevBtn').disabled = $('homeBtn').disabled = cur === 0;
+  const nb = $('nextBtn');
+  nb.disabled = cur === N - 1;
+  nb.textContent = cur === 0 ? 'Abrir ▸' : 'Sigue ▸';
+  nb.classList.toggle('pulse', cur === 0);
+}
+function go(to){
+  to = Math.max(0, Math.min(N - 1, to));
+  if (to === cur || busy) return;
+  busy = true;
+  const step = to > cur ? 1 : -1;
+  const moving = step > 0 ? leaves[cur] : leaves[cur - 1];
+  moving.classList.add('turning');
+  cur += step;
+  layout();
+  if (step < 0) moving.style.zIndex = 3*N;
+  if (navigator.vibrate) navigator.vibrate(15);
+  setTimeout(() => {
+    moving.classList.remove('turning'); layout(); busy = false;
+    if (cur !== to) go(to);
+  }, reduced ? 0 : (to !== cur ? 240 : 900));
+}
+layout();
+$('nextBtn').addEventListener('click', () => go(cur + 1));
+$('prevBtn').addEventListener('click', () => go(cur - 1));
+$('homeBtn').addEventListener('click', () => go(0));
+leaves[0].addEventListener('click', () => cur === 0 && go(1));
+addEventListener('keydown', e => {
+  if (e.target.matches('input,select,textarea')) return;
+  if (e.key === 'ArrowRight') go(cur + 1);
+  if (e.key === 'ArrowLeft') go(cur - 1);
+});
+(function swipe(){
+  let x0 = null, y0 = 0, t0 = 0;
+  const book = $('book');
+  book.addEventListener('pointerdown', e => { if (e.target.closest('input,select,button,a,canvas,label')) return; x0 = e.clientX; y0 = e.clientY; t0 = Date.now(); });
+  book.addEventListener('pointerup', e => {
+    if (x0 === null) return;
+    const dx = e.clientX - x0, dy = e.clientY - y0; x0 = null;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)*1.3 && Date.now() - t0 < 800) go(cur + (dx < 0 ? 1 : -1));
+  });
+  book.addEventListener('pointercancel', () => x0 = null);
+})();
+if (params.has('pag')){ cur = Math.min(N-1, Math.max(0, +params.get('pag') || 0)); layout(); }
+
+/* ---------- countdown ---------- */
+const pad = n => String(n).padStart(2,'0');
+function countdown(){
+  const diff = PARTY - Date.now();
+  if (diff <= 0){
+    $('p4').classList.add('over');
+    $('countMsg').textContent = Date.now() - PARTY < 5*3600e3 ? '¡La misión está en curso!' : '¡Misión cumplida! Gracias, liga.';
+    return;
+  }
+  $('cd-d').textContent = pad(Math.floor(diff/864e5)); $('cd-h').textContent = pad(Math.floor(diff/36e5)%24);
+  $('cd-m').textContent = pad(Math.floor(diff/6e4)%60); $('cd-s').textContent = pad(Math.floor(diff/1e3)%60);
+}
+countdown(); setInterval(countdown, 1000);
+
+function pow(word){
+  if (reduced) return;
+  const p = $('pow'); p.querySelector('b').textContent = word; p.classList.remove('go'); void p.offsetWidth; p.classList.add('go');
+}
+function toast(t){ const el = $('toast'); el.textContent = t; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 3000); }
+
+/* ---------- calendar ---------- */
+$('calBtn').addEventListener('click', () => {
+  const title = 'Cumpleaños de Salvador · La Liga de Salvador', loc = 'Av. El Sol Este 176, Barranco (terraza)';
+  const details = 'Misión: ¡Salvador cumple 1 año! ' + location.href.split('?')[0];
+  if (/iPhone|iPad|Macintosh/.test(navigator.userAgent)){
+    const ics = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//LigaSalvador//ES','BEGIN:VEVENT','UID:liga-salvador-20261011@invitacion','DTSTAMP:20260928T000000Z',
+      'DTSTART:20261011T200000Z','DTEND:20261012T000000Z',`SUMMARY:${title}`,`LOCATION:${loc.replace(/,/g,'\\,')}`,`DESCRIPTION:${details.replace(/,/g,'\\,')}`,
+      'BEGIN:VALARM','TRIGGER:-P1D','ACTION:DISPLAY','DESCRIPTION:Mañana es la misión de Salvador','END:VALARM','END:VEVENT','END:VCALENDAR'].join('\r\n');
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([ics],{type:'text/calendar'})); a.download = 'mision-salvador.ics'; a.click();
+  } else {
+    const u = new URL('https://calendar.google.com/calendar/render');
+    u.searchParams.set('action','TEMPLATE'); u.searchParams.set('text',title); u.searchParams.set('dates','20261011T200000Z/20261012T000000Z');
+    u.searchParams.set('location',loc); u.searchParams.set('details',details); open(u,'_blank','noopener');
+  }
+});
+
+/* ---------- RSVP coupon ---------- */
+const counts = {adultos: 2, ninos: 1};
+document.querySelectorAll('[data-k]').forEach(b => b.addEventListener('click', () => {
+  const k = b.dataset.k; counts[k] = Math.max(0, Math.min(15, counts[k] + +b.dataset.d)); $(k).textContent = counts[k];
+}));
+let disfraz = 'Tal vez 🤔';
+$('disfraz').addEventListener('click', e => {
+  const b = e.target.closest('.row-hot'); if (!b) return;
+  document.querySelectorAll('#disfraz .row-hot').forEach(c => c.setAttribute('aria-pressed', c === b)); disfraz = b.dataset.v;
+});
+const sendWA = text => location.href = `https://wa.me/${WA}?text=${encodeURIComponent(text)}`;
+$('yesBtn').addEventListener('click', () => {
+  const fam = $('fam').value.trim(); if (!fam){ $('fam').focus(); toast('¡Escribe tu nombre de agente!'); return; }
+  pow('¡KA-BOOM!');
+  setTimeout(() => sendWA(
+`✂️ CUPÓN DE CONFIRMACIÓN
+La Liga de Salvador · Núm. 1 🦸
+
+👤 ${fam}
+🧑 Adultos: ${counts.adultos}
+🧒 Niños: ${counts.ninos}
+🎭 Uniforme: ${disfraz}
+
+¡Misión aceptada! Nos vemos el domingo 11 a las 3pm 🎉`), reduced ? 0 : 900);
+});
+$('noBtn').addEventListener('click', () => {
+  const fam = $('fam').value.trim(); if (!fam){ $('fam').focus(); toast('Escribe tu nombre primero'); return; }
+  sendWA(`😢 ${fam} no podrá asistir a la misión de Salvador esta vez, ¡pero le mandamos un súper abrazo por su primer añito! 💙`);
+});
+
+/* ---------- member card: the canvas on screen IS the file that downloads / prints ---------- */
+const cv = $('card'), cx = cv.getContext('2d');
+const logo = new Image(); logo.src = 'img/logo-liga.png';
+const shield = new Image(); shield.src = 'img/escudo-s.png';
+const paper = new Image(); paper.src = 'img/paper.jpg';
+let photo = null;
+const memberNo = String(Math.floor(Math.random()*900)+100);
+const INK = '#16130f', RED = '#d62b1f', GOLD = '#ffd21f', CREAM = '#fff3d2', NAVY = '#1b2c5e';
+const loaded = img => img.complete && img.naturalWidth ? Promise.resolve() : new Promise(r => { img.onload = r; img.onerror = r; });
+function fit(text, maxW, size, font){ do { cx.font = `${size}px ${font}`; size -= 2; } while (cx.measureText(text).width > maxW && size > 18); }
+function star(x, y, r, n = 5, k = .45){
+  cx.beginPath();
+  for (let i = 0; i < n*2; i++){ const a = Math.PI*i/n - Math.PI/2, rr = i%2 ? r*k : r; cx.lineTo(x + Math.cos(a)*rr, y + Math.sin(a)*rr); }
+  cx.closePath();
+}
+function caption(text, x, y, size, rot = 0){
+  cx.save(); cx.translate(x, y); cx.rotate(rot);
+  cx.font = `${size}px Bangers`; const w = cx.measureText(text).width + size*.7, h = size*1.15;
+  cx.fillStyle = INK; cx.fillRect(6, 6, w, h);
+  cx.fillStyle = GOLD; cx.fillRect(0, 0, w, h); cx.lineWidth = 5; cx.strokeStyle = INK; cx.strokeRect(0, 0, w, h);
+  cx.fillStyle = INK; cx.textBaseline = 'middle'; cx.fillText(text, size*.35, h/2 + size*.05);
+  cx.restore();
+}
+function drawCard(){
+  const W = 1080, H = 680;
+  cx.textBaseline = 'alphabetic'; cx.textAlign = 'left';
+  cx.fillStyle = '#f5ead0'; cx.fillRect(0,0,W,H);
+  if (paper.naturalWidth){ cx.save(); cx.globalCompositeOperation = 'multiply'; cx.fillStyle = cx.createPattern(paper, 'repeat'); cx.fillRect(0,0,W,H); cx.restore(); }
+  cx.fillStyle = 'rgba(245,194,27,.28)';
+  for (let y = 0; y < H; y += 14) for (let x = (y/14)%2*7; x < W; x += 14){ const r = 3.2*Math.max(0, 1 - (x + y)/900); if (r > .4){ cx.beginPath(); cx.arc(x,y,r,0,7); cx.fill(); } }
+
+  /* hero panel */
+  const px = 38, py = 128, pw = 360, ph = 420;
+  cx.fillStyle = INK; cx.fillRect(px+10, py+10, pw, ph);
+  cx.save(); cx.beginPath(); cx.rect(px, py, pw, ph); cx.clip();
+  const g = cx.createRadialGradient(px+pw*.55, py+ph*.45, 10, px+pw*.5, py+ph*.5, ph*.8);
+  g.addColorStop(0,'#8cbcff'); g.addColorStop(.4,'#3a74e0'); g.addColorStop(1,'#173a8f');
+  cx.fillStyle = g; cx.fillRect(px, py, pw, ph);
+  cx.fillStyle = 'rgba(255,255,255,.22)';
+  for (let i = 0; i < 28; i++){ const a0 = i/28*Math.PI*2, a1 = a0 + .09, R = 700, ox = px+pw*.55, oy = py+ph*.45;
+    cx.beginPath(); cx.moveTo(ox, oy); cx.lineTo(ox+Math.cos(a0)*R, oy+Math.sin(a0)*R); cx.lineTo(ox+Math.cos(a1)*R, oy+Math.sin(a1)*R); cx.fill(); }
+  cx.fillStyle = 'rgba(10,25,80,.3)';
+  for (let y = py; y < py+ph; y += 12) for (let x = px + ((y-py)/12)%2*6; x < px+pw; x += 12){
+    const d = Math.hypot(x-(px+pw*.55), y-(py+ph*.45))/(ph*.7), r = 3.2*Math.max(0, d-.35); if (r > .3){ cx.beginPath(); cx.arc(x,y,r,0,7); cx.fill(); } }
+  if (photo){
+    const s = Math.max(pw/photo.width, ph/photo.height), w = photo.width*s, h = photo.height*s;
+    cx.drawImage(photo, px+(pw-w)/2, py+(ph-h)/2, w, h);
+  } else if (shield.naturalWidth){
+    const w = pw*.82, h = w*shield.height/shield.width; cx.drawImage(shield, px+(pw-w)/2, py+(ph-h)/2, w, h);
+  }
+  cx.restore();
+  cx.lineWidth = 8; cx.strokeStyle = INK; cx.strokeRect(px, py, pw, ph);
+  cx.lineWidth = 3;
+  [[px+pw-40, py+46, 24], [px+34, py+ph-38, 18]].forEach(([x, y, r]) => { star(x, y, r); cx.fillStyle = GOLD; cx.fill(); cx.strokeStyle = INK; cx.stroke(); });
+
+  /* header */
+  caption('TARJETA DE MIEMBRO OFICIAL', 38, 28, 58, -.012);
+  if (logo.naturalWidth){ const w = 230, h = w*logo.height/logo.width; cx.drawImage(logo, W-w-26, 14, w, h); }
+
+  /* identity */
+  const tx = 438, maxW = W - tx - 44;
+  caption('AGENTE', tx, 146, 30);
+  const name = ($('heroName').value.trim() || 'Tu nombre').toUpperCase();
+  fit(name, maxW, 104, '"Luckiest Guy"');
+  const ny = 292;
+  cx.lineJoin = 'round';
+  for (let i = 8; i >= 1; i--){ cx.fillStyle = i > 6 ? INK : RED; cx.fillText(name, tx + i, ny + i); }
+  cx.lineWidth = 11; cx.strokeStyle = INK; cx.strokeText(name, tx, ny);
+  cx.fillStyle = CREAM; cx.fillText(name, tx, ny);
+
+  caption('SUPERPODER', tx, 322, 30);
+  const pw2 = $('power').value.toUpperCase();
+  fit(pw2, maxW, 58, 'Bangers'); cx.fillStyle = NAVY; cx.fillText(pw2, tx, 422);
+
+  [['MIEMBRO Nº', '#' + memberNo, tx], ['MISIÓN', '11 · 10 · 2026', tx + 226]].forEach(([k, v, x]) => {
+    const bw = k === 'MISIÓN' ? 330 : 200, by = 452, bh = 92;
+    cx.fillStyle = INK; cx.fillRect(x+6, by+6, bw, bh);
+    cx.fillStyle = '#fff'; cx.fillRect(x, by, bw, bh); cx.lineWidth = 5; cx.strokeStyle = INK; cx.strokeRect(x, by, bw, bh);
+    cx.font = '26px Bangers'; cx.fillStyle = RED; cx.fillText(k, x + 14, by + 32);
+    cx.font = '44px Bangers'; cx.fillStyle = INK; cx.fillText(v, x + 14, by + 78);
+  });
+
+  /* approved burst */
+  cx.save(); cx.translate(W-128, H-86); cx.rotate(-.2);
+  star(0, 0, 98, 14, .66); cx.save(); cx.translate(6,6); cx.fillStyle = INK; cx.fill(); cx.restore();
+  cx.fillStyle = RED; cx.fill(); cx.lineWidth = 5; cx.strokeStyle = INK; cx.stroke();
+  cx.textAlign = 'center'; cx.font = '34px "Luckiest Guy"'; cx.lineWidth = 6; cx.strokeText('¡OK!', 0, -2); cx.fillStyle = CREAM; cx.fillText('¡OK!', 0, -2);
+  cx.font = '22px Bangers'; cx.fillStyle = '#fff'; cx.fillText('APROBADO', 0, 28);
+  cx.restore(); cx.textAlign = 'left';
+
+  cx.font = '24px Bangers'; cx.fillStyle = INK; cx.fillText('LA LIGA DE SALVADOR · NÚM. 1 · BARRANCO', 40, H - 34);
+  cx.lineWidth = 12; cx.strokeStyle = INK; cx.strokeRect(6, 6, W-12, H-12);
+}
+Promise.all([loaded(logo), loaded(shield), loaded(paper),
+  document.fonts.load('50px "Luckiest Guy"'), document.fonts.load('40px Bangers')]).then(drawCard);
+['input','change'].forEach(ev => { $('heroName').addEventListener(ev, drawCard); $('power').addEventListener(ev, drawCard); });
+$('photo').addEventListener('change', e => {
+  const f = e.target.files[0]; if (!f) return;
+  const img = new Image(); img.onload = () => { photo = img; drawCard(); }; img.src = URL.createObjectURL(f);
+});
+const cardBlob = () => new Promise(r => cv.toBlob(r, 'image/png'));
+const fileName = () => `tarjeta-liga-salvador-${($('heroName').value.trim() || 'heroe').toLowerCase().replace(/[^a-z0-9ñáéíóú]+/gi,'-')}.png`;
+$('dlBtn').addEventListener('click', async () => {
+  const a = document.createElement('a'); a.href = URL.createObjectURL(await cardBlob()); a.download = fileName(); a.click(); pow('¡LISTO!');
+});
+$('printBtn').addEventListener('click', () => {
+  $('printImg').src = cv.toDataURL('image/png');
+  $('printImg').decode().catch(() => {}).then(() => print());
+});
+if (navigator.canShare && navigator.canShare({files: [new File([''], 'x.png', {type:'image/png'})]})){
+  $('shareBtn').hidden = false;
+  $('shareBtn').addEventListener('click', async () => {
+    const file = new File([await cardBlob()], fileName(), {type:'image/png'});
+    try { await navigator.share({files: [file], title: 'Mi tarjeta de la Liga de Salvador'}); } catch {}
+  });
+}
+</script>
+</body>
+</html>

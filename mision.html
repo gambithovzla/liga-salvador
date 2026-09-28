@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>La Liga de Salvador · Misión Cumpleaños</title>
+<meta name="description" content="¡Has sido convocado! Salvador cumple 1 año. Domingo 11 de octubre, 3:00 pm.">
+<meta property="og:title" content="🚨 La Liga de Salvador te convoca">
+<meta property="og:description" content="Misión: ¡Salvador cumple 1 año! Domingo 11 de octubre · 3:00 pm · Barranco">
+<meta property="og:image" content="https://salvador.gambitholabs.com/img/og.png">
+<meta name="theme-color" content="#101c38">
+<meta name="robots" content="noindex">
+<link rel="icon" href="img/escudo-s.png">
+<link href="fonts/fonts.css" rel="stylesheet">
+<style>
+:root{
+  --navy:#101c38; --navy-2:#182a52; --navy-3:#22386b;
+  --gold:#f5b82e; --gold-2:#ffd766;
+  --red:#b3191c; --red-dark:#7f1012;
+  --cream:#f6eedf; --gray:#8a93a6;
+  --ink:#0c1530;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Rubik',system-ui,sans-serif; color:var(--cream);
+  background:var(--navy);
+  background-image:
+    radial-gradient(ellipse at 50% -10%, #2b4585 0%, transparent 60%),
+    radial-gradient(ellipse at 50% 110%, #3a1320 0%, transparent 55%);
+  min-height:100vh; overflow-x:hidden;
+}
+#stars{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+body:not(.ready){overflow:hidden}
+main{position:relative;z-index:1;max-width:560px;margin:0 auto;padding:24px 16px 0}
+
+/* ---------- INTRO ---------- */
+#intro{
+  position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:22px;padding:24px;text-align:center;
+  background:radial-gradient(circle at center,#1b2b55 0%,#070d1f 75%);
+  transition:opacity .7s ease, visibility .7s;
+}
+#intro.gone{opacity:0;visibility:hidden}
+.siren{width:92px;height:92px;border-radius:50%;
+  background:radial-gradient(circle at 40% 35%,#ff6b6b,var(--red) 55%,var(--red-dark));
+  box-shadow:0 0 0 0 rgba(255,40,40,.7);animation:siren 1.1s infinite;display:grid;place-items:center;font-size:44px}
+@keyframes siren{0%{box-shadow:0 0 0 0 rgba(255,40,40,.75)}70%{box-shadow:0 0 0 38px rgba(255,40,40,0)}100%{box-shadow:0 0 0 0 rgba(255,40,40,0)}}
+.alert-title{font-family:'Bangers',cursive;font-size:clamp(40px,11vw,64px);letter-spacing:2px;color:var(--gold);
+  text-shadow:3px 3px 0 var(--red),6px 6px 0 #000;animation:flick 2.2s infinite}
+@keyframes flick{0%,100%{opacity:1}46%{opacity:1}48%{opacity:.4}50%{opacity:1}}
+.typing{font-weight:600;font-size:18px;min-height:3.2em;color:#cfe0ff;max-width:340px;line-height:1.5}
+.typing .who{color:var(--gold-2);font-weight:800}
+.caret{display:inline-block;width:10px;background:var(--gold);animation:blink .8s steps(1) infinite;margin-left:2px}
+@keyframes blink{50%{opacity:0}}
+.btn{
+  font-family:'Bangers',cursive;letter-spacing:1.5px;font-size:24px;border:3px solid var(--ink);cursor:pointer;
+  padding:14px 26px;border-radius:14px;background:var(--gold);color:var(--ink);
+  box-shadow:5px 5px 0 var(--ink);transition:transform .12s, box-shadow .12s;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:10px;
+}
+.btn:active{transform:translate(4px,4px);box-shadow:1px 1px 0 var(--ink)}
+.btn.red{background:var(--red);color:#fff}
+.btn.ghost{background:var(--cream)}
+.btn.small{font-size:19px;padding:10px 16px}
+#intro .btn{font-size:28px;opacity:0;pointer-events:none;transition:opacity .4s}
+#intro .btn.show{opacity:1;pointer-events:auto;animation:pulse 1.6s infinite}
+@keyframes pulse{50%{transform:scale(1.06)}}
+
+/* ---------- HERO ---------- */
+.hero{text-align:center;padding-top:8px}
+.hero .logo{width:100%;max-width:470px;filter:drop-shadow(0 0 2px #fff) drop-shadow(0 0 18px rgba(245,184,46,.45)) drop-shadow(0 10px 18px rgba(0,0,0,.5))}
+.ready .hero .logo{animation:flyin 1.1s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes flyin{0%{transform:translateY(-120vh) rotate(-12deg) scale(.6)}100%{transform:none}}
+.callsign{margin-top:14px;font-weight:800;text-transform:uppercase;letter-spacing:3px;font-size:13px;color:var(--gold-2)}
+.hero h1{font-family:'Bangers',cursive;font-weight:400;letter-spacing:1.5px;font-size:clamp(29px,8.8vw,50px);line-height:1.05;margin-top:6px;
+  text-shadow:3px 3px 0 var(--red),5px 5px 0 #000}
+.hero h1 .n{color:var(--gold)}
+.hero p.lead{margin:14px auto 0;max-width:420px;font-size:17px;line-height:1.55;color:#dbe4f7}
+.ready .reveal{animation:up .8s both}
+@keyframes up{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+
+/* ---------- PANELS ---------- */
+.panel{
+  position:relative;margin-top:30px;background:var(--cream);color:var(--ink);border:4px solid var(--ink);border-radius:20px;
+  padding:26px 20px 22px;box-shadow:8px 8px 0 #000;
+}
+.panel .tag{
+  position:absolute;top:-19px;left:18px;font-family:'Bangers',cursive;font-size:22px;letter-spacing:1.5px;
+  background:var(--red);color:#fff;border:3px solid var(--ink);padding:3px 14px;border-radius:10px;transform:rotate(-3deg);
+  box-shadow:3px 3px 0 var(--ink);
+}
+.panel .tag.gold{background:var(--gold);color:var(--ink)}
+.panel .tag.navy{background:var(--navy-3)}
+.panel h2{font-family:'Bangers',cursive;font-weight:400;letter-spacing:1px;font-size:30px;color:var(--navy);margin-bottom:6px}
+
+.facts{display:grid;gap:12px;margin-top:6px}
+.fact{display:flex;gap:14px;align-items:center;background:#fff;border:3px solid var(--ink);border-radius:14px;padding:12px 14px}
+.fact .ic{flex:none;width:48px;height:48px;border-radius:12px;background:var(--navy);display:grid;place-items:center;font-size:24px;border:2px solid var(--ink)}
+.fact small{display:block;font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--red)}
+.fact b{font-size:18px;font-weight:800;line-height:1.25;display:block}
+.fact span{font-size:14px;color:#3d4868}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.row .btn{flex:1 1 150px}
+.map{margin-top:14px;border:3px solid var(--ink);border-radius:14px;overflow:hidden;height:190px;background:#dde}
+.map iframe{width:100%;height:100%;border:0;display:block}
+
+/* countdown */
+.count{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+.count div{background:var(--navy);color:var(--gold);border:3px solid var(--ink);border-radius:14px;text-align:center;padding:10px 0 8px}
+.count b{display:block;font-family:'Bangers',cursive;font-weight:400;font-size:clamp(32px,10vw,46px);line-height:1}
+.count span{font-size:11px;font-weight:800;letter-spacing:1.5px;color:#cfd8ee;text-transform:uppercase}
+.count-msg{text-align:center;font-weight:800;margin-top:10px;color:var(--navy)}
+
+/* dress code */
+.bubble{
+  position:relative;background:#fff;border:3px solid var(--ink);border-radius:22px;padding:16px 18px;font-size:16px;line-height:1.5;margin-top:4px
+}
+.boom{font-family:'Bangers',cursive;font-size:24px;letter-spacing:1px;color:var(--red)}
+
+/* RSVP */
+.deadline{display:inline-block;background:var(--gold);border:3px solid var(--ink);border-radius:10px;padding:6px 12px;font-weight:800;font-size:15px;margin:4px 0 14px;transform:rotate(-1deg)}
+label.lbl{display:block;font-weight:800;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;margin:14px 0 6px;color:var(--navy)}
+input[type=text],select{
+  width:100%;font:600 17px 'Rubik',sans-serif;padding:13px 14px;border:3px solid var(--ink);border-radius:12px;background:#fff;color:var(--ink);outline:none
+}
+input[type=text]:focus,select:focus{box-shadow:0 0 0 4px var(--gold)}
+.steppers{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stepper{display:flex;align-items:center;justify-content:space-between;background:#fff;border:3px solid var(--ink);border-radius:12px;padding:6px}
+.stepper button{width:40px;height:40px;border-radius:10px;border:2px solid var(--ink);background:var(--navy);color:var(--gold);font:900 22px 'Rubik';cursor:pointer}
+.stepper output{font:900 24px 'Rubik'}
+.stepper-lbl{font-size:13px;font-weight:700;text-align:center;margin-top:4px;color:#3d4868}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{flex:1 1 90px;border:3px solid var(--ink);background:#fff;border-radius:12px;padding:10px 8px;font:800 15px 'Rubik';cursor:pointer;color:var(--ink)}
+.chip[aria-pressed=true]{background:var(--navy);color:var(--gold)}
+.rsvp-actions{display:grid;gap:10px;margin-top:20px}
+.rsvp-actions .btn{width:100%}
+.decline{background:none;border:none;color:#5a6484;font:700 15px 'Rubik';text-decoration:underline;cursor:pointer;padding:6px}
+
+/* carnet */
+.carnet-wrap{margin-top:14px;border-radius:14px;overflow:hidden;border:3px solid var(--ink);background:var(--navy);box-shadow:4px 4px 0 var(--ink)}
+#card{display:block;width:100%;height:auto}
+.file{display:flex;align-items:center;gap:10px}
+.file label{cursor:pointer}
+.file input{display:none}
+.hint{font-size:13px;color:#5a6484;margin-top:6px}
+
+/* footer */
+footer{position:relative;margin-top:44px;text-align:center;padding-bottom:0}
+footer .sign{font-family:'Bangers',cursive;font-size:30px;letter-spacing:1px;color:var(--gold);text-shadow:2px 2px 0 #000}
+footer p{color:#b9c4de;font-size:15px;margin-top:4px}
+.skyline{display:block;width:100%;height:auto;margin-top:18px}
+
+.toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,200%);visibility:hidden;background:var(--gold);color:var(--ink);font-weight:800;border:3px solid var(--ink);
+  border-radius:14px;padding:12px 18px;box-shadow:4px 4px 0 #000;z-index:60;transition:transform .35s;max-width:90vw;text-align:center}
+.toast.show{transform:translate(-50%,0);visibility:visible}
+#burst{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:40}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+<canvas id="stars"></canvas>
+<canvas id="burst"></canvas>
+
+<!-- INTRO -->
+<section id="intro" aria-live="polite">
+  <div class="siren" aria-hidden="true">🚨</div>
+  <div class="alert-title">¡ALERTA DE LA LIGA!</div>
+  <p class="typing" id="typing"></p>
+  <button class="btn" id="openBtn">⚡ ABRIR TRANSMISIÓN</button>
+</section>
+
+<main>
+  <header class="hero">
+    <img class="logo" src="img/logo-liga.png" alt="La Liga de Salvador · 1 año">
+    <div class="callsign reveal" id="callsign">Transmisión para: Agente</div>
+    <h1 class="reveal">¡Has sido convocado<br>a una <span class="n">misión especial!</span></h1>
+    <p class="lead reveal">Nuestro pequeño gran héroe <b>Salvador cumple 1 año</b> y necesita a su liga completa para celebrarlo. ¡No puede ser sin ti!</p>
+  </header>
+
+  <section class="panel">
+    <span class="tag">Detalles de la misión</span>
+    <div class="facts">
+      <div class="fact"><div class="ic">📅</div><div><small>Día</small><b>Domingo 11 de octubre</b></div></div>
+      <div class="fact"><div class="ic">⏰</div><div><small>Hora</small><b>3:00 pm</b></div></div>
+      <div class="fact"><div class="ic">📍</div><div><small>Base secreta</small><b>Av. El Sol Este 176, Barranco</b><span>En la terraza</span></div></div>
+    </div>
+    <div class="map"><iframe loading="lazy" title="Mapa" src="https://www.google.com/maps?q=Av.+El+Sol+Este+176,+Barranco,+Lima&output=embed"></iframe></div>
+    <div class="row">
+      <a class="btn small" href="https://maps.app.goo.gl/CSnGSTLnidMWYhhT8" target="_blank" rel="noopener">🗺️ Cómo llegar</a>
+      <button class="btn small ghost" id="calBtn">🗓️ A mi calendario</button>
+    </div>
+  </section>
+
+  <section class="panel">
+    <span class="tag gold">Cuenta regresiva</span>
+    <div class="count" id="count">
+      <div><b id="cd-d">--</b><span>días</span></div>
+      <div><b id="cd-h">--</b><span>horas</span></div>
+      <div><b id="cd-m">--</b><span>min</span></div>
+      <div><b id="cd-s">--</b><span>seg</span></div>
+    </div>
+    <p class="count-msg" id="countMsg">para que empiece la misión</p>
+  </section>
+
+  <section class="panel">
+    <span class="tag navy">Uniforme</span>
+    <div class="bubble">
+      <span class="boom">¡POW! ¿Te animas?</span><br>
+      Si quieres, ven vestido de tu <b>superhéroe favorito</b> o con una capa. Es opcional… ¡pero sumas puntos de héroe! 🦸‍♀️🦸
+    </div>
+  </section>
+
+  <section class="panel" id="rsvp">
+    <span class="tag">Confírmanos tu asistencia</span>
+    <h2>¿Aceptas la misión?</h2>
+    <div class="deadline">⏳ Confírmanos antes del miércoles 7 de octubre</div>
+
+    <label class="lbl" for="fam">Nombre o familia</label>
+    <input type="text" id="fam" placeholder="Ej: Familia Pérez" autocomplete="off">
+
+    <label class="lbl">¿Cuántos héroes vienen?</label>
+    <div class="steppers">
+      <div>
+        <div class="stepper" data-k="adultos"><button type="button" data-d="-1" aria-label="Menos adultos">−</button><output id="adultos">2</output><button type="button" data-d="1" aria-label="Más adultos">+</button></div>
+        <div class="stepper-lbl">Adultos</div>
+      </div>
+      <div>
+        <div class="stepper" data-k="ninos"><button type="button" data-d="-1" aria-label="Menos niños">−</button><output id="ninos">1</output><button type="button" data-d="1" aria-label="Más niños">+</button></div>
+        <div class="stepper-lbl">Niños</div>
+      </div>
+    </div>
+
+    <label class="lbl">¿Vendrán disfrazados?</label>
+    <div class="chips" id="disfraz">
+      <button type="button" class="chip" aria-pressed="false" data-v="¡Sí! 🦸">¡Sí! 🦸</button>
+      <button type="button" class="chip" aria-pressed="true" data-v="Tal vez 🤔">Tal vez 🤔</button>
+      <button type="button" class="chip" aria-pressed="false" data-v="Esta vez no 🙈">No 🙈</button>
+    </div>
+
+    <div class="rsvp-actions">
+      <button class="btn red" id="yesBtn">🦸 ¡ACEPTO LA MISIÓN!</button>
+      <button class="decline" id="noBtn">No podré asistir 😢</button>
+    </div>
+    <p class="hint">Se abrirá WhatsApp con tu mensaje listo para enviar.</p>
+  </section>
+
+  <section class="panel">
+    <span class="tag gold">Credencial de héroe</span>
+    <h2>Crea tu carnet de la Liga</h2>
+    <p style="font-size:15px;line-height:1.5">Ponle nombre a tu héroe, elige su superpoder y agrega una foto si quieres. ¡Descárgalo y compártelo!</p>
+
+    <label class="lbl" for="heroName">Nombre del héroe</label>
+    <input type="text" id="heroName" maxlength="22" placeholder="Ej: Mateo">
+
+    <label class="lbl" for="power">Superpoder</label>
+    <select id="power">
+      <option>Súper fuerza 💪</option>
+      <option>Velocidad del rayo ⚡</option>
+      <option>Vuelo 🚀</option>
+      <option>Invisibilidad 👻</option>
+      <option>Súper abrazos 🤗</option>
+      <option>Risa contagiosa 😂</option>
+      <option>Visión láser 👀</option>
+      <option>Escudo indestructible 🛡️</option>
+    </select>
+
+    <label class="lbl">Foto (opcional)</label>
+    <div class="file">
+      <label class="btn small ghost" for="photo">📷 Elegir foto</label>
+      <input type="file" id="photo" accept="image/*">
+      <span class="hint" id="photoName">Sin foto: usamos el escudo</span>
+    </div>
+
+    <div class="carnet-wrap"><canvas id="card" width="1080" height="680" aria-label="Vista previa del carnet"></canvas></div>
+    <div class="row">
+      <button class="btn small" id="dlBtn">⬇️ Descargar</button>
+      <button class="btn small ghost" id="shareBtn" hidden>📤 Compartir</button>
+    </div>
+  </section>
+
+  <footer>
+    <div class="sign">¡Te esperamos, héroe!</div>
+    <p>Con cariño, Papá y Mamá de Salvador 💙</p>
+    <p style="font-size:13px;margin-top:10px;opacity:.8">Pequeños héroes · Grandes aventuras</p>
+    <svg class="skyline" id="skyline" viewBox="0 0 560 150" preserveAspectRatio="xMidYMax slice" aria-hidden="true"></svg>
+  </footer>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const WA = '51925130858';
+const PARTY = new Date('2026-10-11T15:00:00-05:00');
+const params = new URLSearchParams(location.search);
+const guest = (params.get('para') || '').trim().slice(0, 40);
+const $ = id => document.getElementById(id);
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- starfield ---------- */
+const sc = $('stars'), sx = sc.getContext('2d');
+let stars = [];
+function sizeStars(){
+  sc.width = innerWidth * devicePixelRatio; sc.height = innerHeight * devicePixelRatio;
+  stars = Array.from({length: Math.round(innerWidth*innerHeight/5000)}, () => ({
+    x: Math.random()*sc.width, y: Math.random()*sc.height, r: (Math.random()*1.4+.3)*devicePixelRatio,
+    p: Math.random()*Math.PI*2, gold: Math.random() < .15
+  }));
+}
+function drawStars(t){
+  sx.clearRect(0,0,sc.width,sc.height);
+  for (const s of stars){
+    const a = .35 + .65*Math.abs(Math.sin(t/1400 + s.p));
+    sx.fillStyle = s.gold ? `rgba(255,215,102,${a})` : `rgba(220,230,255,${a})`;
+    sx.beginPath(); sx.arc(s.x,s.y,s.r,0,7); sx.fill();
+  }
+  if (!reduced) requestAnimationFrame(drawStars);
+}
+sizeStars(); addEventListener('resize', sizeStars); requestAnimationFrame(drawStars);
+
+/* ---------- seeded skyline (shared by footer + carnet) ---------- */
+function skylineBuildings(width, height, seed){
+  let s = seed; const rnd = () => (s = (s*9301+49297)%233280)/233280;
+  const out = []; let x = 0;
+  while (x < width){
+    const w = 26 + rnd()*44, h = height*(.35 + rnd()*.6);
+    out.push({x, w, h, spire: rnd() < .18}); x += w + 2;
+  }
+  return out;
+}
+(function footerSkyline(){
+  const svg = $('skyline'), W = 560, H = 150;
+  let html = '';
+  for (const b of skylineBuildings(W, H, 7)){
+    html += `<rect x="${b.x}" y="${H-b.h}" width="${b.w}" height="${b.h}" fill="#0a1328"/>`;
+    if (b.spire) html += `<polygon points="${b.x+b.w/2-4},${H-b.h} ${b.x+b.w/2},${H-b.h-26} ${b.x+b.w/2+4},${H-b.h}" fill="#0a1328"/>`;
+    for (let wy = H-b.h+10; wy < H-10; wy += 14)
+      for (let wx = b.x+6; wx < b.x+b.w-8; wx += 11)
+        if (Math.sin(wx*12.9+wy*78.2) > .1) html += `<rect x="${wx}" y="${wy}" width="5" height="7" fill="#f5b82e" opacity="${.55+.45*Math.abs(Math.sin(wx+wy))}"/>`;
+  }
+  svg.innerHTML = html;
+})();
+
+/* ---------- intro ---------- */
+const who = guest || 'Agente de la Liga';
+$('callsign').textContent = guest ? `Transmisión para: ${guest}` : 'Transmisión para: Agente de la Liga';
+if (guest) $('fam').value = guest;
+
+const msg = [['Transmisión entrante para ', ''], [who, 'who'], ['… Salvador te necesita.', '']];
+(function type(){
+  const el = $('typing'); let i = 0, j = 0;
+  const caret = '<span class="caret">&nbsp;</span>';
+  const esc = t => t.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  function render(){
+    let h = '';
+    msg.forEach(([t, cls], k) => {
+      const part = k < i ? t : k === i ? t.slice(0, j) : '';
+      h += cls ? `<span class="${cls}">${esc(part)}</span>` : esc(part);
+    });
+    el.innerHTML = h + caret;
+  }
+  function step(){
+    if (i >= msg.length){ $('openBtn').classList.add('show'); return; }
+    j++; if (j > msg[i][0].length){ i++; j = 0; }
+    render(); setTimeout(step, reduced ? 0 : 42);
+  }
+  step();
+})();
+
+if (params.has('skip')) setTimeout(() => $('openBtn').click(), 0);
+$('openBtn').addEventListener('click', () => {
+  $('intro').classList.add('gone');
+  document.body.classList.add('ready');
+  if (navigator.vibrate) navigator.vibrate([60,40,60]);
+  setTimeout(() => burst(innerWidth/2, innerHeight*.28), 700);
+});
+
+/* ---------- star burst confetti ---------- */
+const bc = $('burst'), bx = bc.getContext('2d');
+let parts = [];
+function starPath(ctx, x, y, r){
+  ctx.beginPath();
+  for (let k = 0; k < 10; k++){
+    const a = Math.PI/5*k - Math.PI/2, rr = k%2 ? r*.45 : r;
+    ctx.lineTo(x + Math.cos(a)*rr, y + Math.sin(a)*rr);
+  }
+  ctx.closePath();
+}
+function burst(x, y){
+  if (reduced) return;
+  bc.width = innerWidth; bc.height = innerHeight;
+  const colors = ['#f5b82e','#ffd766','#b3191c','#ffffff','#5b7fd6'];
+  for (let k = 0; k < 90; k++){
+    const a = Math.random()*Math.PI*2, v = 4 + Math.random()*9;
+    parts.push({x, y, vx: Math.cos(a)*v, vy: Math.sin(a)*v - 4, r: 5+Math.random()*9, rot: Math.random()*6, vr: (Math.random()-.5)*.3, c: colors[k%colors.length], life: 1});
+  }
+  if (parts.length === 90) requestAnimationFrame(tick);
+}
+function tick(){
+  bx.clearRect(0,0,bc.width,bc.height);
+  parts = parts.filter(p => p.life > 0);
+  for (const p of parts){
+    p.vy += .28; p.vx *= .985; p.x += p.vx; p.y += p.vy; p.rot += p.vr; p.life -= .009;
+    bx.save(); bx.globalAlpha = Math.max(p.life,0); bx.translate(p.x,p.y); bx.rotate(p.rot);
+    bx.fillStyle = p.c; starPath(bx,0,0,p.r); bx.fill(); bx.restore();
+  }
+  if (parts.length) requestAnimationFrame(tick); else bx.clearRect(0,0,bc.width,bc.height);
+}
+
+/* ---------- countdown ---------- */
+function pad(n){ return String(n).padStart(2,'0'); }
+function countdown(){
+  const diff = PARTY - Date.now();
+  if (diff <= 0){
+    $('count').style.display = 'none';
+    $('countMsg').textContent = Date.now() - PARTY < 5*3600e3 ? '¡La misión está en curso! 🎉' : '¡Misión cumplida! Gracias por ser parte de la Liga 💙';
+    return;
+  }
+  $('cd-d').textContent = Math.floor(diff/864e5);
+  $('cd-h').textContent = pad(Math.floor(diff/36e5)%24);
+  $('cd-m').textContent = pad(Math.floor(diff/6e4)%60);
+  $('cd-s').textContent = pad(Math.floor(diff/1e3)%60);
+}
+countdown(); setInterval(countdown, 1000);
+
+/* ---------- calendar ---------- */
+$('calBtn').addEventListener('click', () => {
+  const isApple = /iPhone|iPad|Macintosh/.test(navigator.userAgent);
+  const title = 'Cumpleaños de Salvador 🦸 La Liga de Salvador';
+  const loc = 'Av. El Sol Este 176, Barranco (terraza)';
+  const details = 'Misión: ¡Salvador cumple 1 año! ' + location.href.split('?')[0];
+  if (isApple){
+    const ics = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//LigaSalvador//ES','BEGIN:VEVENT',
+      'UID:liga-salvador-20261011@invitacion','DTSTAMP:20260928T000000Z',
+      'DTSTART:20261011T200000Z','DTEND:20261012T000000Z',
+      `SUMMARY:${title}`,`LOCATION:${loc.replace(/,/g,'\\,')}`,`DESCRIPTION:${details.replace(/,/g,'\\,')}`,
+      'BEGIN:VALARM','TRIGGER:-P1D','ACTION:DISPLAY','DESCRIPTION:Mañana es la misión de Salvador','END:VALARM',
+      'END:VEVENT','END:VCALENDAR'].join('\r\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([ics], {type:'text/calendar'}));
+    a.download = 'mision-salvador.ics'; a.click();
+  } else {
+    const u = new URL('https://calendar.google.com/calendar/render');
+    u.searchParams.set('action','TEMPLATE'); u.searchParams.set('text',title);
+    u.searchParams.set('dates','20261011T200000Z/20261012T000000Z');
+    u.searchParams.set('location',loc); u.searchParams.set('details',details);
+    open(u, '_blank', 'noopener');
+  }
+});
+
+/* ---------- RSVP ---------- */
+const counts = {adultos: 2, ninos: 1};
+document.querySelectorAll('.stepper').forEach(st => {
+  st.addEventListener('click', e => {
+    const d = +e.target.dataset.d; if (!d) return;
+    const k = st.dataset.k; counts[k] = Math.max(0, Math.min(15, counts[k] + d)); $(k).textContent = counts[k];
+  });
+});
+let disfraz = 'Tal vez 🤔';
+$('disfraz').addEventListener('click', e => {
+  const b = e.target.closest('.chip'); if (!b) return;
+  document.querySelectorAll('#disfraz .chip').forEach(c => c.setAttribute('aria-pressed', c === b));
+  disfraz = b.dataset.v;
+});
+function toast(t){ const el = $('toast'); el.textContent = t; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 3200); }
+function sendWA(text){ location.href = `https://wa.me/${WA}?text=${encodeURIComponent(text)}`; }
+$('yesBtn').addEventListener('click', e => {
+  const fam = $('fam').value.trim();
+  if (!fam){ $('fam').focus(); toast('Escribe tu nombre o familia 🦸'); return; }
+  const r = e.target.getBoundingClientRect(); burst(r.left + r.width/2, r.top);
+  setTimeout(() => sendWA(
+`🦸 ¡MISIÓN ACEPTADA!
+La Liga de Salvador · 1 año
+
+👤 ${fam}
+🧑 Adultos: ${counts.adultos}
+🧒 Niños: ${counts.ninos}
+🎭 ¿Disfrazados?: ${disfraz}
+
+¡Nos vemos el domingo 11 a las 3pm! 🎉`), reduced ? 0 : 900);
+});
+$('noBtn').addEventListener('click', () => {
+  const fam = $('fam').value.trim();
+  if (!fam){ $('fam').focus(); toast('Escribe tu nombre o familia primero'); return; }
+  sendWA(`😢 ${fam} no podrá asistir a la misión de Salvador esta vez, ¡pero le mandamos un súper abrazo de héroe por su primer añito! 💙`);
+});
+
+/* ---------- carnet ---------- */
+const cv = $('card'), cx = cv.getContext('2d');
+const logo = new Image(); logo.src = 'img/logo-liga.png';
+const shield = new Image(); shield.src = 'img/escudo-s.png';
+let photo = null;
+const memberNo = String(Math.floor(Math.random()*900)+100);
+const loaded = img => img.complete && img.naturalWidth ? Promise.resolve() : new Promise(r => { img.onload = r; img.onerror = r; });
+
+function roundRect(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.roundRect(x,y,w,h,r); }
+function fitText(ctx, text, maxW, size, font, weight = ''){
+  do { ctx.font = `${weight}${size}px ${font}`; size -= 2; } while (ctx.measureText(text).width > maxW && size > 20);
+}
+function drawCard(){
+  const W = 1080, H = 680;
+  const g = cx.createLinearGradient(0,0,W,H); g.addColorStop(0,'#22386b'); g.addColorStop(1,'#0d1730');
+  cx.fillStyle = g; cx.fillRect(0,0,W,H);
+
+  cx.save(); cx.globalAlpha = .07; cx.fillStyle = '#fff';
+  for (let y = 0; y < H; y += 22) for (let x = (y/22)%2*11; x < W; x += 22){ cx.beginPath(); cx.arc(x,y,3,0,7); cx.fill(); }
+  cx.restore();
+
+  for (const b of skylineBuildings(W, 170, 3)){
+    cx.fillStyle = '#081024'; cx.fillRect(b.x, H-b.h, b.w, b.h);
+    cx.fillStyle = 'rgba(245,184,46,.75)';
+    for (let wy = H-b.h+14; wy < H-12; wy += 20) for (let wx = b.x+8; wx < b.x+b.w-10; wx += 15)
+      if (Math.sin(wx*12.9+wy*78.2) > .1) cx.fillRect(wx, wy, 7, 10);
+  }
+
+  cx.fillStyle = '#b3191c'; cx.fillRect(0,0,W,86);
+  cx.fillStyle = '#f5b82e'; cx.fillRect(0,86,W,8);
+  cx.fillStyle = '#fff'; cx.font = '50px Bangers'; cx.textBaseline = 'middle';
+  cx.fillText('LIGA DE SALVADOR · CREDENCIAL OFICIAL', 36, 46);
+
+  const px = 60, py = 140, ps = 330;
+  cx.save(); roundRect(cx, px-10, py-10, ps+20, ps+20, 34); cx.fillStyle = '#f5b82e'; cx.fill();
+  roundRect(cx, px, py, ps, ps, 26); cx.fillStyle = '#f6eedf'; cx.fill(); cx.clip();
+  if (photo){
+    const s = Math.max(ps/photo.width, ps/photo.height), w = photo.width*s, h = photo.height*s;
+    cx.drawImage(photo, px+(ps-w)/2, py+(ps-h)/2, w, h);
+  } else if (shield.naturalWidth){
+    const w = ps*.86, h = w*shield.height/shield.width; cx.drawImage(shield, px+(ps-w)/2, py+(ps-h)/2, w, h);
+  }
+  cx.restore();
+
+  const tx = 440, maxW = W - tx - 50;
+  cx.fillStyle = '#ffd766'; cx.font = '800 26px Rubik'; cx.fillText('AGENTE', tx, 160);
+  const name = ($('heroName').value.trim() || 'Tu nombre').toUpperCase();
+  cx.fillStyle = '#fff'; fitText(cx, name, maxW, 96, 'Bangers');
+  cx.lineWidth = 8; cx.strokeStyle = '#000'; cx.strokeText(name, tx, 225); cx.fillText(name, tx, 225);
+
+  cx.fillStyle = '#ffd766'; cx.font = '800 24px Rubik'; cx.fillText('SUPERPODER', tx, 305);
+  cx.fillStyle = '#fff'; fitText(cx, $('power').value, maxW, 42, 'Rubik', '800 ');
+  cx.fillText($('power').value, tx, 350);
+
+  cx.fillStyle = '#ffd766'; cx.font = '800 24px Rubik'; cx.fillText('MIEMBRO N°', tx, 420);
+  cx.fillStyle = '#fff'; cx.font = '800 40px Rubik'; cx.fillText(memberNo, tx, 462);
+  cx.fillStyle = '#ffd766'; cx.font = '800 24px Rubik'; cx.fillText('MISIÓN', tx+230, 420);
+  cx.fillStyle = '#fff'; cx.font = '800 40px Rubik'; cx.fillText('11 · 10 · 2026', tx+230, 462);
+
+  if (logo.naturalWidth){ const w = 250, h = w*logo.height/logo.width; cx.drawImage(logo, W-w-24, H-h-18, w, h); }
+}
+Promise.all([loaded(logo), loaded(shield), document.fonts.ready,
+  document.fonts.load('50px Bangers'), document.fonts.load('800 30px Rubik')]).then(drawCard);
+['input','change'].forEach(ev => { $('heroName').addEventListener(ev, drawCard); $('power').addEventListener(ev, drawCard); });
+$('photo').addEventListener('change', e => {
+  const f = e.target.files[0]; if (!f) return;
+  const img = new Image(); img.onload = () => { photo = img; drawCard(); };
+  img.src = URL.createObjectURL(f); $('photoName').textContent = f.name;
+});
+function cardBlob(){ return new Promise(r => cv.toBlob(r, 'image/png')); }
+function fileName(){ return `carnet-liga-salvador-${($('heroName').value.trim() || 'heroe').toLowerCase().replace(/[^a-z0-9ñáéíóú]+/gi,'-')}.png`; }
+$('dlBtn').addEventListener('click', async () => {
+  const a = document.createElement('a'); a.href = URL.createObjectURL(await cardBlob()); a.download = fileName(); a.click();
+  toast('¡Carnet descargado! 🦸');
+});
+if (navigator.canShare && navigator.canShare({files: [new File([''], 'x.png', {type:'image/png'})]})){
+  $('shareBtn').hidden = false;
+  $('shareBtn').addEventListener('click', async () => {
+    const file = new File([await cardBlob()], fileName(), {type:'image/png'});
+    try { await navigator.share({files: [file], title: 'Mi carnet de la Liga de Salvador'}); } catch {}
+  });
+}
+</script>
+</body>
+</html>
