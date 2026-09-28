@@ -48,6 +48,13 @@ body{font-family:'Patrick Hand',cursive;color:var(--ink);background:#070d27;over
 .leaf:after{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(0,0,0,.2),transparent 4%,transparent 97%,rgba(255,255,255,.06))}
 .leaf > img.art{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:cover;user-select:none;-webkit-user-drag:none}
 .cover{cursor:pointer}
+/* dog-ear: the flap lives on the curled page, the shade on the page underneath */
+.flap,.shade{position:absolute;right:0;bottom:0;width:var(--curl,0);height:var(--curl,0);pointer-events:none;z-index:6}
+.flap{filter:drop-shadow(-2px -3px 5px rgba(0,0,0,.5))}
+.flap i{position:absolute;inset:0;clip-path:polygon(0 0,100% 0,0 100%);
+  background:radial-gradient(rgba(90,60,20,.09) 1px,transparent 1.4px) 0 0/5px 5px,
+    linear-gradient(to bottom right,#bba77a 0%,#e4d3aa 28%,#f8eed4 42%,#fffaf0 46%,#d3bf92 50%)}
+.shade{background:linear-gradient(to top left,transparent 18%,rgba(0,0,0,.42) 50%,transparent 50%)}
 
 [data-box]{position:absolute}
 .hot{background:transparent;border:0;cursor:pointer;border-radius:1.5cqw;color:inherit;font:inherit;-webkit-tap-highlight-color:transparent}
@@ -431,6 +438,8 @@ function go(to){
   to = Math.max(0, Math.min(N - 1, to));
   if (to === cur || busy) return;
   busy = true;
+  clearTimeout(settleT);
+  if (curlC) tweenCurl(0, 380);
   const step = to > cur ? 1 : -1;
   const moving = step > 0 ? leaves[cur] : leaves[cur - 1];
   moving.classList.add('turning');
@@ -440,10 +449,51 @@ function go(to){
   if (navigator.vibrate) navigator.vibrate(15);
   setTimeout(() => {
     moving.classList.remove('turning'); layout(); busy = false;
-    if (cur !== to) go(to);
+    if (cur !== to) go(to); else { peeks = 0; hintLater(); }
   }, reduced ? 0 : (to !== cur ? 240 : 900));
 }
+
+/* ---------- dog-ear: the corner peeks to invite the swipe and follows the finger ---------- */
+const flap = document.createElement('i'), shade = document.createElement('i');
+flap.className = 'flap'; flap.innerHTML = '<i></i>'; shade.className = 'shade';
+let curlLeaf = null, curlC = 0, curlRaf = 0, settleT = 0, hintT = 0, peeks = 0, dragging = false, swiped = false;
+function setCurl(c, leaf = curlLeaf || leaves[cur]){
+  const under = leaves[leaves.indexOf(leaf) + 1];
+  if (c <= .5 || !under){
+    if (curlLeaf) curlLeaf.style.clipPath = '';
+    flap.remove(); shade.remove(); curlLeaf = null; curlC = 0; return;
+  }
+  if (curlLeaf !== leaf){
+    if (curlLeaf) curlLeaf.style.clipPath = '';
+    curlLeaf = leaf; leaf.append(flap); under.append(shade);
+  }
+  curlC = c;
+  // the polygon reaches 80px outside the page so its drop shadow and stacked edges survive the clip
+  const m = c + 80;
+  leaf.style.clipPath = `polygon(-80px -80px,calc(100% + 80px) -80px,calc(100% + 80px) calc(100% - ${m}px),calc(100% - ${m}px) calc(100% + 80px),-80px calc(100% + 80px))`;
+  $('book').style.setProperty('--curl', c + 'px');
+}
+function tweenCurl(to, ms, done){
+  cancelAnimationFrame(curlRaf);
+  const from = curlC, t0 = performance.now();
+  const tick = now => {
+    const k = Math.min(1, (now - t0) / ms);
+    setCurl(from + (to - from) * (1 - (1 - k) ** 3));
+    if (k < 1) curlRaf = requestAnimationFrame(tick); else if (done) done();
+  };
+  curlRaf = requestAnimationFrame(tick);
+}
+function peek(){
+  if (swiped || busy || dragging || document.hidden || cur >= N - 1 || !$('game').hidden || !$('reg').hidden) return;
+  peeks++;
+  tweenCurl($('book').clientWidth * .15, 750, () => { settleT = setTimeout(() => tweenCurl(0, 600), 450); });
+}
+function hintLater(ms = 2800){
+  clearTimeout(hintT);
+  if (!swiped && !reduced && peeks < 2) hintT = setTimeout(() => { peek(); hintLater(6500); }, ms);
+}
 layout();
+hintLater();
 $('nextBtn').addEventListener('click', () => go(cur + 1));
 $('prevBtn').addEventListener('click', () => go(cur - 1));
 leaves[0].addEventListener('click', () => cur === 0 && go(1));
@@ -451,17 +501,33 @@ addEventListener('keydown', e => {
   if (e.target.matches('input,select,textarea') || !$('game').hidden || !$('reg').hidden) return;
   if (e.key === 'ArrowRight') go(cur + 1);
   if (e.key === 'ArrowLeft') go(cur - 1);
+  hintLater();
 });
 (function swipe(){
   let x0 = null, y0 = 0, t0 = 0;
   const book = $('book');
-  book.addEventListener('pointerdown', e => { if (e.target.closest('input,select,button,a,canvas,label')) return; x0 = e.clientX; y0 = e.clientY; t0 = Date.now(); });
+  const release = () => { if (dragging){ dragging = false; tweenCurl(0, 260); } };
+  book.addEventListener('pointerdown', e => { hintLater(); if (e.target.closest('input,select,button,a,canvas,label')) return; x0 = e.clientX; y0 = e.clientY; t0 = Date.now(); });
+  book.addEventListener('pointermove', e => {
+    if (x0 === null || busy || cur >= N - 1) return;
+    const pull = x0 - e.clientX;
+    if (!dragging && pull > 14 && pull > Math.abs(e.clientY - y0) * 1.3){
+      dragging = true; clearTimeout(settleT); cancelAnimationFrame(curlRaf);
+      try { book.setPointerCapture(e.pointerId); } catch {}
+    }
+    if (dragging) setCurl(Math.min(Math.max(pull * 1.15, 0), book.clientWidth * .55));
+  });
   book.addEventListener('pointerup', e => {
     if (x0 === null) return;
     const dx = e.clientX - x0, dy = e.clientY - y0; x0 = null;
-    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)*1.3 && Date.now() - t0 < 800) go(cur + (dx < 0 ? 1 : -1));
+    const flick = Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)*1.3 && Date.now() - t0 < 800;
+    if (flick || (dragging && dx < -book.clientWidth * .22)){
+      dragging = false;
+      if (dx < 0) swiped = true;
+      go(cur + (dx < 0 ? 1 : -1));
+    } else release();
   });
-  book.addEventListener('pointercancel', () => x0 = null);
+  book.addEventListener('pointercancel', () => { x0 = null; release(); });
 })();
 if (params.has('pag')){ cur = Math.min(N-1, Math.max(0, +params.get('pag') || 0)); layout(); }
 
