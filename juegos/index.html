@@ -836,6 +836,63 @@ button.agente-fila:disabled { opacity: 0.5; cursor: default; }
 }
 @keyframes sirena { 0% { background: rgba(168, 26, 18, 0.9); } 50% { background: rgba(23, 58, 143, 0.9); } }
 
+/* ---------- Cómo se juega y prácticas ---------- */
+.pasos { list-style: none; counter-reset: paso; margin: 0; padding: 0; display: grid; gap: 8px; }
+.pasos li { counter-increment: paso; position: relative; padding-left: 42px; font-size: 19px; line-height: 1.2; min-height: 32px; }
+.pasos li::before {
+  content: counter(paso);
+  position: absolute;
+  left: 0;
+  top: -2px;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  background: var(--rojo);
+  color: var(--blanco);
+  border: 2px solid var(--tinta);
+  border-radius: 50%;
+  font-family: var(--f-titulo);
+  font-size: 17px;
+  line-height: 1;
+}
+.practica { gap: 10px; }
+.arena.mini { height: 190px; box-shadow: var(--sombra); }
+.arena.mini .arena-texto { font-size: clamp(28px, 9vw, 40px); }
+.arena.mini .arena-texto small { font-size: 18px; }
+.pies.mini .pie { min-height: 78px; font-size: 22px; }
+.cinta-practica, .cinta-juego {
+  align-self: center;
+  border: var(--borde);
+  box-shadow: var(--sombra);
+  padding: 5px 14px 3px;
+  font-family: var(--f-etiqueta);
+  font-size: 20px;
+  letter-spacing: 1px;
+  transform: rotate(-1.5deg);
+}
+.cinta-practica { background: var(--azul-claro); color: var(--tinta); }
+.cinta-juego { background: var(--rojo); color: var(--blanco); }
+.mi-codigo {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  padding: 10px 12px 8px;
+  background: var(--blanco);
+  color: var(--tinta);
+  border: var(--borde);
+  box-shadow: var(--sombra);
+  text-align: center;
+}
+.mi-codigo span { font-family: var(--f-etiqueta); font-size: 18px; letter-spacing: 1px; }
+.mi-codigo b { font-family: var(--f-titulo); font-weight: 400; font-size: clamp(54px, 18vw, 76px); line-height: 1; color: var(--azul); letter-spacing: 6px; font-variant-numeric: tabular-nums; }
+.mi-codigo small { font-size: 16px; color: var(--cafe); }
+.campo.codigo-grande { font-family: var(--f-titulo); font-size: 40px; letter-spacing: 10px; text-align: center; min-height: 66px; }
+.exito { min-height: 1.3em; color: var(--azul-hondo); font-family: var(--f-etiqueta); letter-spacing: 0.5px; font-size: 19px; }
+.alarma-bomba { display: grid; justify-items: center; gap: 2px; }
+.alarma-bomba .estallido { width: min(72%, 260px); margin: 0 auto; }
+.alarma-bomba .bomba { width: min(34%, 120px); }
+
 /* ---------- Demo ---------- */
 .demo-barra { position: relative; z-index: 5; background: var(--tinta); border-bottom: 3px solid var(--amarillo); padding: 10px 16px; display: flex; gap: 8px 14px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
 .demo-barra p { font-size: 17px; color: var(--crema); max-width: 70ch; }
@@ -3487,7 +3544,8 @@ const Sonido = (function () {
   const efectos = {
     tic: () => tono(1046, 0, 0.07, "square", 0.035),
     toque: () => tono(660, 0, 0.05, "square", 0.03),
-    alerta: () => { tono(880, 0, 0.18, "square", 0.06); tono(1175, 0.2, 0.25, "square", 0.06); tono(880, 0.48, 0.18, "square", 0.06); tono(1175, 0.68, 0.3, "square", 0.06); },
+    alerta: () => { tono(880, 0, 0.18, "square", 0.1); tono(1175, 0.2, 0.25, "square", 0.1); tono(880, 0.48, 0.18, "square", 0.1); tono(1175, 0.68, 0.3, "square", 0.1); },
+    tictac: () => { tono(1320, 0, 0.06, "square", 0.09); tono(940, 0.16, 0.06, "square", 0.09); },
     inicio: () => { tono(523, 0, 0.16); tono(784, 0.13, 0.26); },
     exito: () => { tono(659, 0, 0.12); tono(880, 0.1, 0.24); },
     error: () => { tono(220, 0, 0.25, "sawtooth", 0.05); },
@@ -4325,8 +4383,10 @@ function chipAgente(S, id, clase) {
 function listosDe(ctx) { return Object.keys((ctx.mj && ctx.mj.listos) || {}).filter((id) => ctx.S.agentes && ctx.S.agentes[id] && ctx.S.agentes[id].nombre); }
 function introHTML(tipo, extra) {
   return `<section class="pagina"><span class="cap">${tipo.cat === "fiesta" ? "Misión en la fiesta" : "Misión en el celular"}</span>` +
-    `<h1 class="titulo">${esc(tipo.nombre)}</h1><p>${esc(tipo.ayuda)}</p>${extra || ""}</section>`;
+    `<h1 class="titulo">${esc(tipo.nombre)}</h1>${tipo.pasos ? `<p class="subtitulo">Cómo se juega</p>${pasosHTML(tipo.pasos)}` : `<p>${esc(tipo.ayuda)}</p>`}${extra || ""}</section>`;
 }
+function practicaHecha(id) { return almacenAgente.get(`liga2:practica:${id}`) === "1"; }
+function marcarPractica(id) { almacenAgente.set(`liga2:practica:${id}`, "1"); }
 function filaResultado(S, r, i, yo) {
   return `<li class="${r.id === yo ? "yo" : ""}"><span class="pos">${r.pos || i + 1}</span>${poderHTML(poderDeAgente(S, r.id))}` +
     `<span class="nom">${esc(nombreDe(S, r.id))}</span><span class="val">+${fmt(r.pts)}<small>${esc(r.txt || "")}</small></span></li>`;
@@ -4393,14 +4453,27 @@ function tipoSolo(id) {
       clave(ctx) {
         const r = ctx.mj && ctx.mj.res && ctx.mj.res[ctx.yo];
         if (ctx.local.estado === "jugando") return "jugando";
-        return r ? "hecho" : "intro";
+        if (r) return "hecho";
+        if (ctx.local.estado === "practica") return "practica";
+        if (ctx.local.estado === "practicado") return "practicado";
+        return "intro";
       },
       html(ctx) {
         const clave = this.clave(ctx);
-        if (clave === "jugando") return `<div class="arena" data-arena></div><button class="enlace" data-accion="abandonar">Salir sin terminar</button>`;
+        if (clave === "jugando") return `<div class="cinta-juego">¡En serio! Esta vez cuenta</div><div class="arena" data-arena></div><button class="enlace" data-accion="abandonar">Salir sin terminar</button>`;
+        if (clave === "practica") return `<div class="cinta-practica">Práctica · no cuenta</div><div class="arena" data-arena></div><button class="enlace" data-accion="dejar-practica">Salir de la práctica</button>`;
+        if (clave === "practicado") {
+          return `<section class="pagina"><span class="cap">Práctica · no cuenta</span><h1 class="titulo chico">${esc(mj.formato(Number(ctx.local.practica) || 0, ctx.local.practica2))}</h1>` +
+            `<p>¡Así se juega! Ahora va en serio: <b>tienes un solo intento</b> y ese sí suma puntos.</p><p class="suave" data-vivo="queda"></p></section>` +
+            `<button class="boton rojo grande bloque" data-accion="jugar">¡Jugar en serio!</button>` +
+            `<button class="enlace" data-accion="practicar">Practicar otra vez</button>`;
+        }
         if (clave === "intro") {
+          const hecha = practicaHecha(id);
           return introHTML(TIPOS[id], `<p class="suave" data-vivo="queda"></p>`) +
-            `<button class="boton rojo grande bloque" data-accion="jugar">¡Jugar!</button>` +
+            (hecha
+              ? `<button class="boton rojo grande bloque" data-accion="jugar">¡Jugar!</button><button class="enlace" data-accion="practicar">Practicar antes (no cuenta)</button>`
+              : `<button class="boton rojo grande bloque" data-accion="practicar">Primero, una práctica</button><p class="centro nota">La práctica no cuenta. Después juegas en serio, una sola vez.</p><button class="enlace" data-accion="jugar">Ya sé jugar: ir directo</button>`) +
             `<button class="enlace" data-accion="cuartel">Volver al cuartel</button>`;
         }
         const r = ctx.mj.res[ctx.yo];
@@ -4441,7 +4514,22 @@ function tipoSolo(id) {
             setTimeout(() => { ctx.local.estado = "hecho"; ctx.pintar(); }, 400);
           });
         }
-        if (accion === "abandonar") {
+        if (accion === "practicar") {
+          ctx.local.estado = "practica";
+          ctx.marcarOcupado(true);
+          ctx.pintar();
+          const arena = $("[data-arena]", ctx.raiz);
+          if (ctx.local.limpiar) ctx.local.limpiar();
+          ctx.local.limpiar = mj.jugar(arena, (v, v2) => {
+            ctx.local.limpiar = null;
+            ctx.local.practica = v;
+            ctx.local.practica2 = v2 || 0;
+            marcarPractica(id);
+            ctx.marcarOcupado(false);
+            setTimeout(() => { if (ctx.local.estado === "practica") { ctx.local.estado = "practicado"; ctx.pintar(); } }, 400);
+          });
+        }
+        if (accion === "abandonar" || accion === "dejar-practica") {
           if (ctx.local.limpiar) ctx.local.limpiar();
           ctx.local.limpiar = null;
           ctx.local.estado = "intro";
@@ -4940,8 +5028,18 @@ TIPOS.ultimo = {
         arena.onpointerdown = (e) => {
           e.preventDefault();
           if (L.hecho || L.ronda !== ctx.m.sub.ronda) return;
-          L.hecho = true;
           const aviso = $('[data-vivo="aviso"]', arena);
+          if (!L.t0 && !L.avisado) {
+            // Primer toque antes de tiempo en la partida: solo un aviso.
+            L.avisado = true;
+            arena.className = "arena roja";
+            aviso.innerHTML = "¡Todavía no!<small>Espera el amarillo. La próxima vez quedas fuera</small>";
+            vibrar(150);
+            Sonido.tocar("error");
+            setTimeout(() => { if (!L.t0 && !L.hecho) { arena.className = "arena noche"; aviso.innerHTML = "Prepárate…<small>Toca cuando se ponga amarilla</small>"; } }, 1300);
+            return;
+          }
+          L.hecho = true;
           if (!L.t0) { ctx.T.escribir(`mj/${ctx.m.id}/t/r${L.ronda}/${ctx.yo}`, -1); arena.className = "arena roja"; aviso.innerHTML = "¡Muy pronto!"; vibrar(200); return; }
           const ms = clamp(Math.round(tiempoEvento(e) - L.t0), 60, 2500);
           ctx.T.escribir(`mj/${ctx.m.id}/t/r${L.ronda}/${ctx.yo}`, ms);
@@ -5124,7 +5222,10 @@ TIPOS.charadas = {
           `<p class="centro">${yo ? "¡Fuiste el primero!" : `La adivinó ${esc(nombreDe(ctx.S, g.id))}.`}</p>` + pie;
       }
       if (s.estado === "saltada") return `<section class="pagina"><span class="cap">Ronda ${s.ronda}</span><p>Nadie la adivinó. Era «${esc(revelar(s.palabra))}».</p></section>` + pie;
-      if (s.estado !== "jugando") return `<section class="pagina"><span class="cap">Charadas</span><h1 class="titulo chico">Atento al anfitrión</h1><p>Cuando empiece la mímica, escribe aquí la palabra. El primero en escribirla bien gana.</p></section>` + pie;
+      if (s.estado !== "jugando") {
+        return `<section class="pagina"><span class="cap">Charadas</span><h1 class="titulo chico">Atento al anfitrión</h1>${pasosHTML(TIPOS.charadas.pasos)}</section>` +
+          `<section class="pagina"><span class="cap">Práctica · no cuenta</span><div data-practica="texto"></div></section>` + pie;
+      }
       return `<section class="pagina"><span class="cap">Ronda ${s.ronda}</span><h1 class="titulo chico">¿Qué está actuando?</h1>${s.pista ? `<p>Pista: <b>${esc(s.pista)}</b></p>` : ""}` +
         `<form data-form="adivinar" class="columna"><div class="campo-grupo"><label class="etiqueta" for="intento">Tu respuesta</label><input class="campo" id="intento" autocomplete="off" autocapitalize="none" enterkeyhint="send"></div>` +
         `<p class="error" data-vivo="error"></p><button class="boton rojo grande bloque" type="submit">Enviar</button></form></section>` + pie;
@@ -5283,7 +5384,7 @@ TIPOS.infiltrado = {
 TIPOS.bomba = {
   id: "bomba", nombre: "La bomba de la Liga", icono: "bomba", cat: "fiesta", usaSala: true,
   resumen: "Una papa caliente virtual: pásala antes de que explote.",
-  ayuda: "Si te llega la bomba, pásala rápido: toca a otro agente de la lista. Explota en un momento al azar que nadie conoce. Son 3 bombas: en cada explosión, quien la tiene no suma y los demás sí.",
+  ayuda: "Si te llega la bomba, tu celular suena: busca a otro agente y escribe su código para pasársela. Explota en un momento al azar que nadie conoce. Son 3 bombas: en cada explosión, quien la tiene no suma y los demás sí.",
   campos: [],
   nuevaBomba(ctx, k, jugadores, evitar) {
     const posibles = jugadores.filter((id) => id !== evitar && ctx.S.agentes[id]);
@@ -5356,25 +5457,53 @@ TIPOS.bomba = {
           `<p class="centro">${yo ? "Te explotó en las manos. No sumas esta vez." : `Le explotó a ${esc(nombreDe(ctx.S, victima))}. ¡Tú sumas 50!`}</p>` +
           `<p class="centro nota">${s.k < 3 ? "Atento: viene otra bomba." : "Esa fue la última bomba."}</p>`;
       }
+      const miCodigo = `<div class="mi-codigo"><span>Tu código</span><b>${esc((ctx.S.agentes[ctx.yo] || {}).codigo || "–")}</b><small>Muéstralo a quien tenga la bomba</small></div>`;
       if (b.holder === ctx.yo) {
-        const otros = s.jugadores.filter((id) => id !== ctx.yo && ctx.S.agentes[id]);
-        const nopuedo = otros.length > 1 ? b.de : "";
-        return `<div class="estallido rojo latido"><div><strong>¡TIENES LA BOMBA!</strong></div></div>${dibujo}` +
-          `<p class="centro">¡Pásala rápido! Toca a quién se la mandas.</p>` +
-          `<div class="lista-objetivos">${otros.map((id) => `<button class="boton blanco" data-accion="pasar" data-id="${id}"${id === nopuedo ? " disabled" : ""}>${esc(nombreDe(ctx.S, id))}<small>Agente ${esc((ctx.S.agentes[id] || {}).codigo || "")}</small></button>`).join("")}</div>`;
+        const de = b.de && s.jugadores.length > 2 ? `<p class="suave centro">No se la puedes devolver a ${esc(nombreDe(ctx.S, b.de))}.</p>` : "";
+        return `<div class="alarma-bomba"><div class="estallido rojo latido"><div><strong>¡TIENES LA BOMBA!</strong></div></div>${dibujo}</div>` +
+          `<section class="pagina"><span class="cap roja">¡Pásala ya!</span><p>Busca a otro agente, mira el código en su pantalla y escríbelo aquí.</p>` +
+          `<form data-form="bomba" class="columna"><div class="campo-grupo"><label class="etiqueta" for="codigo-bomba">Código del agente</label>` +
+          `<input class="campo codigo-grande" id="codigo-bomba" inputmode="numeric" pattern="[0-9]*" maxlength="3" autocomplete="off" enterkeyhint="send" data-auto></div>` +
+          `<p class="error" data-vivo="error" role="alert"></p><button class="boton rojo grande bloque" type="submit">¡Pasar la bomba!</button></form>${de}</section>`;
       }
-      return `<section class="pagina"><span class="cap">Bomba ${s.k} de 3</span><p>La tiene <b>${esc(nombreDe(ctx.S, b.holder))}</b>.</p>${dibujo}<p class="suave">Si te la pasan, tu celular vibra: ¡pásala rápido!</p></section>`;
+      return `<section class="pagina"><span class="cap">Bomba ${s.k} de 3</span><p>La tiene <b>${esc(nombreDe(ctx.S, b.holder))}</b>. Si te la pasa, tu celular suena: ¡pásala rápido!</p>${dibujo}</section>${miCodigo}`;
     },
-    click(accion, el, ctx) {
-      if (accion !== "pasar") return;
+    actualizar(ctx) {
       const s = ctx.m.sub, b = (ctx.mj && ctx.mj.bomba) || {};
+      // Mientras tengas la bomba, suena un tic-tac (no depende de la vibración, que los iPhone no tienen).
+      if (b.holder === ctx.yo && s.estado === "bomba" && ctx.ahora() < s.explota && ctx.ahora() >= s.inicio) {
+        const L = ctx.local;
+        if (!L.tic || performance.now() - L.tic > 650) { L.tic = performance.now(); Sonido.tocar("tictac"); }
+      }
+    },
+    enviar(form, ctx) {
+      const s = ctx.m.sub, b = (ctx.mj && ctx.mj.bomba) || {};
+      const err = $('[data-vivo="error"]', form);
+      const input = $("#codigo-bomba", form);
       if (b.holder !== ctx.yo || ctx.ahora() >= s.explota) return;
-      ctx.T.escribir(`mj/${ctx.m.id}/bomba`, { k: s.k, holder: el.dataset.id, de: ctx.yo, t: ctx.ahora() });
+      const codigo = input.value.trim();
+      const id = Object.keys(ctx.S.agentes || {}).find((a) => ctx.S.agentes[a].codigo === codigo);
+      const falla = (t) => { err.textContent = t; vibrar(80); Sonido.tocar("error"); input.select(); };
+      if (!id) return falla("Ese código no existe. Revísalo en su pantalla.");
+      if (id === ctx.yo) return falla("Ese es tu código: pásasela a otro.");
+      if (!s.jugadores.includes(id)) return falla(`${nombreDe(ctx.S, id)} no está jugando esta bomba.`);
+      if (id === b.de && s.jugadores.length > 2) return falla(`No se la puedes devolver a ${nombreDe(ctx.S, id)}.`);
+      ctx.T.escribir(`mj/${ctx.m.id}/bomba`, { k: s.k, holder: id, de: ctx.yo, t: ctx.ahora() });
+      Sonido.tocar("exito");
       vibrar(30);
     },
     efectos(ctx, clave) {
-      if (/:tengo:/.test(clave)) { vibrar([200, 100, 200, 100, 200]); Sonido.tocar("alerta"); }
-      if (clave.startsWith("boom") || clave.startsWith("pausa")) { const s = ctx.m.sub; const v = s.estado === "pausa" ? s.victimas["b" + s.k] : ((ctx.mj || {}).bomba || {}).holder; if (v === ctx.yo) { vibrar(700); Sonido.tocar("boom"); } }
+      if (/:tengo:/.test(clave)) {
+        vibrar([200, 100, 200, 100, 200]);
+        Sonido.tocar("alerta");
+        setTimeout(() => { const i = $("#codigo-bomba", ctx.raiz); if (i) i.focus({ preventScroll: true }); }, 60);
+      }
+      if (clave.startsWith("boom") || clave.startsWith("pausa")) {
+        const s = ctx.m.sub;
+        const v = s.estado === "pausa" ? s.victimas["b" + s.k] : ((ctx.mj || {}).bomba || {}).holder;
+        if (v === ctx.yo) vibrar(700);
+        if (!ctx.local["boom" + s.k]) { ctx.local["boom" + s.k] = true; Sonido.tocar("boom"); }
+      }
     },
   },
 };
@@ -5550,6 +5679,7 @@ TIPOS.duo = {
       const codigos = $$("input", form).map((i) => i.value.trim());
       const ids = codigos.map((c) => Object.keys(ctx.S.agentes).find((id) => ctx.S.agentes[id].codigo === c));
       const otros = g.miembros.filter((id) => id !== ctx.yo);
+      if (codigos.some((c) => !c)) { err.textContent = codigos.length > 1 ? "Escribe los dos códigos: tu emblema tiene 3 partes." : "Escribe el código de tu compañero."; vibrar(80); return; }
       if (ids.some((id) => !id)) { err.textContent = "Ese código no existe. Revísalo en la pantalla de tu compañero."; vibrar(80); return; }
       if (!otros.every((id) => ids.includes(id))) { err.textContent = "¡No es tu dúo! Sigue buscando."; vibrar(120); return; }
       ctx.T.transaccion(`mj/${ctx.m.id}/completo/g${g.i}`, (a) => (a ? undefined : { t: ctx.ahora(), por: ctx.yo }));
@@ -5640,6 +5770,33 @@ TIPOS.bingo = {
   },
 };
 
+/* ---------- Cómo se juega: pasos cortos que se ven antes de cada misión ---------- */
+const PASOS = {
+  trivia: ["Lee la pregunta: tienes unos segundos antes de poder responder.", "Toca la respuesta correcta.", "Acertar rápido suma más puntos."],
+  reflejos: ["Espera con el dedo listo: la pantalla está oscura.", "Cuando se ponga AMARILLA, toca lo más rápido que puedas.", "Son 3 intentos. Si tocas antes de tiempo, ese intento vale 1 segundo."],
+  supervelocidad: ["Espera la cuenta regresiva: 3, 2, 1.", "Toca el botón gigante sin parar durante 10 segundos.", "Gana quien hace más toques."],
+  cuanto: ["Lee la pregunta.", "Escribe tu número y envíalo. Puedes cambiarlo hasta que se cierre.", "Gana quien quede más cerca del número real."],
+  villano: ["Se asoman personajes por las ventanas durante 20 segundos.", "Toca a los villanos (antifaz negro): suman 1.", "No toques a los ciudadanos (cara amarilla): restan 1."],
+  reloj: ["El cronómetro arranca y se esconde a los 3 segundos.", "Sigue contando en tu cabeza.", "Toca ¡ALTO! cuando creas que van 10 segundos exactos."],
+  memoria: ["Mira el orden en que se encienden los botones.", "Repítelo tocando en el mismo orden.", "Cada ronda suma uno más. Un error y se acaba."],
+  rescate: ["Busca el 1 y tócalo, luego el 2, el 3…", "Llega hasta el 20 lo más rápido que puedas.", "Cada número equivocado suma 1 segundo."],
+  capa: ["Salvador aparece unos segundos y desaparece.", "Fíjate dónde está el escudo de su pecho.", "Toca donde estaba. Son 3 intentos."],
+  impostor: ["Todos los símbolos son iguales menos uno.", "Encuentra el distinto y tócalo.", "Son 5 niveles. Cada error suma 2 segundos."],
+  estrellas: ["Arrastra el dedo para mover tu escudo.", "Atrapa las estrellas: suman 1.", "Esquiva las bombas: restan 3. Dura 25 segundos."],
+  ultimo: ["Espera con el dedo listo: la pantalla está oscura.", "Cuando se ponga AMARILLA, toca.", "Los más lentos de cada ronda quedan fuera. Si tocas antes de tiempo, te avisamos una vez; la segunda, quedas fuera."],
+  carrera: ["Cuando arranque, toca IZQUIERDO y DERECHO, alternando.", "Cada toque alternado es un paso.", "Gana quien llega primero a la meta: 50 pasos."],
+  foto: ["Lee el reto de foto.", "Ve al lugar, toca Tomar foto y luego Enviar.", "El primero en llegar gana más puntos."],
+  charadas: ["Mira la mímica del anfitrión.", "Escribe la palabra en tu celular y envíala, sin decirla en voz alta.", "El primero en escribirla bien gana la ronda."],
+  agente: ["Mantén presionado para ver tu misión secreta: nadie más debe verla.", "Cúmplela sin que se note.", "Toca ¡Misión cumplida!: tu objetivo lo confirma en su celular."],
+  duo: ["Tu pantalla muestra un pedazo de emblema.", "Busca a quien tiene la otra parte: comparen pantallas.", "Escribe su código de agente, que está en su pantalla."],
+  bingo: ["Cada casilla describe a alguien, por ejemplo «Tiene perro».", "Busca a un invitado que la cumpla y pídele su código.", "Toca la casilla y escribe el código. Tres en línea gana."],
+  infiltrado: ["Mantén presionado para ver tu secreto: la palabra o «Eres el villano».", "Conversen haciendo preguntas sin decir la palabra.", "Voten quién es el villano. El villano gana si no lo descubren."],
+  bomba: ["Tu código está en tu pantalla: muéstralo cuando te lo pidan.", "Si te llega la bomba, tu celular suena: busca a alguien y escribe su código para pasársela.", "Explota en un momento al azar. Quien la tenga no suma; los demás, sí."],
+};
+const PRACTICA_DE = { trivia: "pregunta", ultimo: "reflejos", carrera: "carrera", bomba: "codigo:bomba", duo: "codigo:duo", infiltrado: "secreto", agente: "secreto" };
+for (const [id, pasos] of Object.entries(PASOS)) if (TIPOS[id]) TIPOS[id].pasos = pasos;
+for (const [id, p] of Object.entries(PRACTICA_DE)) if (TIPOS[id]) TIPOS[id].practica = p;
+
 const CATEGORIAS = [
   { id: "celular", titulo: "En el celular", tipos: ["trivia", "reflejos", "supervelocidad", "cuanto", "villano", "reloj", "memoria", "rescate", "capa", "impostor", "estrellas", "ultimo", "carrera"] },
   { id: "fiesta", titulo: "En la fiesta", tipos: ["foto", "charadas", "agente", "duo", "bingo", "infiltrado", "bomba"] },
@@ -5661,6 +5818,7 @@ async function asignarCodigo(T, id) {
 
 /* ---------- Robo de puntos: duelos de reflejos ---------- */
 const DUELO_ACEPTAR_MS = 30000; // tiempo para aceptar un reto
+const DUELO_PREPARAR_MS = 30000; // tiempo para practicar y tocar «¡Listo!» antes de que arranque solo
 const DUELO_TOQUE_MS = 6000; // después del ¡YA!, tiempo máximo para tocar
 const DUELO_VIGENTE_MS = 120000; // un duelo resuelto se sigue mostrando hasta 2 minutos
 
@@ -5697,6 +5855,11 @@ function puedoRetarYo(S, yo) {
   return { ok: true, motivo: "" };
 }
 
+const PASOS_DUELO = [
+  "Primero practica abajo: no cuenta.",
+  "En el duelo, la pantalla se pone oscura: espera con el dedo listo.",
+  "Cuando se ponga AMARILLA, toca. Si tocas antes, te avisamos una vez; la segunda, pierdes.",
+];
 function crearDuelo(T, S, de, a) {
   const did = nuevoId("d");
   T.escribir(`duelos/${did}`, { de, a, estado: "pendiente", creado: T.ahora(), apuesta: apuestaDuelo(S, de, a) });
@@ -5709,8 +5872,21 @@ function cambiarDuelo(T, did, desde, cambios) {
     return Object.assign({}, d, typeof cambios === "function" ? cambios(d) : cambios);
   });
 }
+// Al aceptar, los dos practican y tocan «¡Listo!». El duelo arranca cuando ambos están listos
+// (o solo, pasado el tiempo de preparación).
 function aceptarDuelo(T, did) {
-  return cambiarDuelo(T, did, "pendiente", () => ({ estado: "aceptado", go: T.ahora() + 3200 + azar(400, 2600) }));
+  return cambiarDuelo(T, did, "pendiente", () => ({ estado: "aceptado", aceptadoT: T.ahora() }));
+}
+function marcarListoDuelo(T, did, id) {
+  return cambiarDuelo(T, did, "aceptado", (d) => {
+    const listo = Object.assign({}, d.listo || {}, { [id]: true });
+    const cambios = { listo };
+    if (!d.go && listo[d.de] && listo[d.a]) cambios.go = T.ahora() + 2500 + azar(600, 2600);
+    return cambios;
+  });
+}
+function largarDuelo(T, did) {
+  return cambiarDuelo(T, did, "aceptado", (d) => (d.go ? {} : { go: T.ahora() + 3000 + azar(400, 1600), forzado: true }));
 }
 function rechazarDuelo(T, did, estado) {
   return cambiarDuelo(T, did, "pendiente", { estado: estado || "rechazado", cerrado: T.ahora() }).then((r) => {
@@ -5734,7 +5910,7 @@ function ganadorDuelo(d) {
 }
 function dueloListo(d, ahora) {
   const r = d.r || {};
-  return d.estado === "aceptado" && ((r[d.de] !== undefined && r[d.a] !== undefined) || ahora > d.go + DUELO_TOQUE_MS);
+  return d.estado === "aceptado" && !!d.go && ((r[d.de] !== undefined && r[d.a] !== undefined) || ahora > d.go + DUELO_TOQUE_MS);
 }
 // Cierra el duelo una sola vez (transacción) y mueve los puntos.
 function resolverDuelo(T, S, did, quien) {
@@ -5820,6 +5996,158 @@ function reglasHTML() {
     `<p><b>Robo de puntos.</b> Puedes retar a cualquier agente a un duelo de reflejos. Si acepta, el más rápido le roba hasta ${fmt(CONFIG.puntosDuelo)} puntos al otro. Si rechaza, no podrás retarlo por ${CONFIG.esperaTrasRechazoMin} minutos.</p>` +
     `<p><b>Tu código.</b> Tus 3 cifras de agente sirven para encontrarte en el bingo, el dúo y la bomba.</p>` +
     `<p><b>El premio.</b> Al final se revela el podio. Quien quede 1.º gana el premio, para sí o para el pequeño héroe que elija.</p>`;
+}
+
+/* ---------- Prácticas: se juegan antes de lo real y no cuentan ---------- */
+// Cada práctica se monta en un <div data-practica="..."> y devuelve una función para desmontarla.
+const PRACTICAS = {
+  // Toca cuando se ponga amarilla.
+  reflejos(el) {
+    el.innerHTML = `<div class="arena noche mini" data-p-arena><div class="arena-texto">Toca para probar<small>Espera el amarillo y toca</small></div></div>`;
+    const arena = $("[data-p-arena]", el), texto = $(".arena-texto", arena);
+    let estado = "libre", t0 = 0, espera = 0, vuelta = 0;
+    const poner = (clase, html) => { arena.className = `arena ${clase} mini`; texto.innerHTML = html; };
+    function empezar() {
+      estado = "espera";
+      poner("noche", "Espera…<small>Todavía no toques</small>");
+      espera = setTimeout(() => {
+        estado = "ya";
+        poner("amarilla", "¡YA!");
+        t0 = performance.now();
+        requestAnimationFrame((t) => { if (estado === "ya") t0 = Math.max(t0, t); });
+      }, azar(1300, 3200));
+    }
+    function toque(e) {
+      e.preventDefault();
+      if (estado === "libre") { empezar(); return; }
+      if (estado === "espera") {
+        clearTimeout(espera);
+        estado = "pausa";
+        poner("roja", "¡Muy pronto!<small>Espera a que se ponga amarilla</small>");
+        vibrar(120);
+        vuelta = setTimeout(() => { estado = "libre"; poner("noche", "Toca para probar otra vez"); }, 1500);
+        return;
+      }
+      if (estado === "ya") {
+        estado = "pausa";
+        const ms = clamp(Math.round(tiempoEvento(e) - t0), 60, 3000);
+        poner("amarilla", `${fmt(ms)} ms<small>¡Así se juega!</small>`);
+        Sonido.tocar("toque");
+        vuelta = setTimeout(() => { estado = "libre"; poner("noche", "Toca para probar otra vez"); }, 1600);
+      }
+    }
+    arena.addEventListener("pointerdown", toque);
+    return () => { clearTimeout(espera); clearTimeout(vuelta); arena.removeEventListener("pointerdown", toque); };
+  },
+  // Alternar izquierdo y derecho.
+  carrera(el) {
+    const META = 20;
+    el.innerHTML = `<div class="medidor"><i></i><b>0 de ${META} pasos</b></div><div class="pies mini"><button class="pie" data-p-pie="0">Izquierdo</button><button class="pie" data-p-pie="1">Derecho</button></div>`;
+    const barra = $(".medidor i", el), rotulo = $(".medidor b", el);
+    let pasos = 0, ultimo = 1, pausa = false, vuelta = 0;
+    function toque(e) {
+      const b = e.target.closest("[data-p-pie]");
+      if (!b || pausa) return;
+      e.preventDefault();
+      const lado = Number(b.dataset.pPie);
+      b.classList.add("toca");
+      setTimeout(() => b.classList.remove("toca"), 70);
+      if (lado === ultimo) { rotulo.textContent = "¡Alterna! Izquierdo, derecho…"; return; }
+      ultimo = lado;
+      pasos++;
+      barra.style.width = (pasos / META) * 100 + "%";
+      rotulo.textContent = `${pasos} de ${META} pasos`;
+      if (pasos >= META) {
+        pausa = true;
+        rotulo.textContent = "¡Así se corre! En la carrera son 50 pasos";
+        Sonido.tocar("exito");
+        vuelta = setTimeout(() => { pasos = 0; ultimo = 1; pausa = false; barra.style.width = "0"; rotulo.textContent = `0 de ${META} pasos`; }, 2200);
+      }
+    }
+    el.addEventListener("pointerdown", toque);
+    return () => { clearTimeout(vuelta); el.removeEventListener("pointerdown", toque); };
+  },
+  // Escribir el código de otro agente (bomba y dúo).
+  codigo(el, ctx) {
+    const yo = ctx.S.agentes[ctx.yo] || {};
+    const otros = agentesValidos(ctx.S.agentes).filter((a) => a.id !== ctx.yo && a.codigo);
+    const ejemplo = otros.length ? otros[Math.floor(Math.random() * otros.length)] : { nombre: "un agente", codigo: "777" };
+    const para = el.dataset.para === "duo" ? "para encontrar a tu dúo" : "para pasarle la bomba";
+    el.innerHTML = `<div class="mi-codigo"><span>Tu código</span><b>${esc(yo.codigo || "–")}</b><small>Los demás lo leen en tu pantalla</small></div>` +
+      `<form class="columna" data-p-form><div class="campo-grupo"><label class="etiqueta" for="p-codigo">Practica: escribe ${esc(ejemplo.codigo)} (el de ${esc(ejemplo.nombre)})</label>` +
+      `<input class="campo codigo-grande" id="p-codigo" inputmode="numeric" pattern="[0-9]*" maxlength="3" autocomplete="off" data-auto></div>` +
+      `<p class="error" data-p-error></p></form>`;
+    const form = $("[data-p-form]", el), input = $("#p-codigo", el), err = $("[data-p-error]", el);
+    function enviar(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const v = input.value.trim();
+      if (v === String(ejemplo.codigo)) {
+        err.className = "exito";
+        err.textContent = `¡Listo! Así se escribe un código ${para}. En el juego lo lees en su pantalla.`;
+        Sonido.tocar("exito");
+      } else {
+        err.className = "error";
+        err.textContent = v === String(yo.codigo) ? "Ese es tu código: escribe el de otro." : "No es ese: revisa los números.";
+        vibrar(80);
+      }
+      input.select();
+    }
+    form.addEventListener("submit", enviar);
+    return () => form.removeEventListener("submit", enviar);
+  },
+  // Una pregunta de prueba.
+  pregunta(el) {
+    const q = { texto: "¿Cómo se llama el cumpleañero?", opciones: ["Bruce", "Salvador", "Peter", "Clark"], correcta: 1 };
+    el.innerHTML = `<p class="pregunta-texto">${q.texto}</p><div class="opciones">${q.opciones.map((t, i) => `<button class="opcion" data-o="${i}" data-p-o="${i}">${FORMAS_OPCION[i]}<span>${t}</span></button>`).join("")}</div><p class="error" data-p-error></p>`;
+    const err = $("[data-p-error]", el);
+    function toque(e) {
+      const b = e.target.closest("[data-p-o]");
+      if (!b) return;
+      const ok = Number(b.dataset.pO) === q.correcta;
+      err.className = ok ? "exito" : "error";
+      err.textContent = ok ? "¡Correcto! En la trivia, responder rápido suma más." : "¡Uy! Era Salvador. Prueba otra vez.";
+      Sonido.tocar(ok ? "exito" : "error");
+    }
+    el.addEventListener("click", toque);
+    return () => el.removeEventListener("click", toque);
+  },
+  // Mantener presionado para ver un secreto.
+  secreto(el) {
+    el.innerHTML = botonSecreto(`<p class="palabra">¡Así se mira!</p><p>Suelta y se tapa. Nadie más debe ver tu pantalla.</p>`);
+    return () => {};
+  },
+  // Escribir una palabra y enviarla (charadas).
+  texto(el) {
+    el.innerHTML = `<form class="columna" data-p-form><div class="campo-grupo"><label class="etiqueta" for="p-texto">Prueba: escribe SALVADOR y envía</label>` +
+      `<input class="campo" id="p-texto" autocomplete="off" autocapitalize="none" enterkeyhint="send"></div><p class="error" data-p-error></p>` +
+      `<button class="boton blanco bloque" type="submit">Enviar prueba</button></form>`;
+    const form = $("[data-p-form]", el), input = $("#p-texto", el), err = $("[data-p-error]", el);
+    function enviar(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const r = compararRespuesta(input.value, "Salvador");
+      err.className = r === "exacta" ? "exito" : "error";
+      err.textContent = r === "exacta" ? "¡Así se responde! En el juego, el primero en escribirla bien gana." : r === "casi" ? "¡Casi! Revisa cómo lo escribiste." : "No es esa. Escribe SALVADOR.";
+      if (r === "exacta") Sonido.tocar("exito");
+    }
+    form.addEventListener("submit", enviar);
+    return () => form.removeEventListener("submit", enviar);
+  },
+};
+function montarPracticas(raiz, ctx, montadas) {
+  $$("[data-practica]:not([data-montada])", raiz).forEach((el) => {
+    const f = PRACTICAS[el.dataset.practica];
+    if (!f) return;
+    el.dataset.montada = "1";
+    try { montadas.push(f(el, ctx) || (() => {})); } catch (e) { console.error(e); }
+  });
+}
+function desmontarPracticas(montadas) {
+  while (montadas.length) { try { montadas.pop()(); } catch (e) { /* nada */ } }
+}
+function pasosHTML(pasos) {
+  return pasos && pasos.length ? `<ol class="pasos">${pasos.map((p) => `<li>${esc(p)}</li>`).join("")}</ol>` : "";
 }
 
 /* =====================================================================
@@ -6124,7 +6452,12 @@ function crearBots(T, S, opc) {
           if (Math.random() < 0.75) aceptarDuelo(T, did); else rechazarDuelo(T, did, "rechazado");
         }
       }
-      if (d.estado === "aceptado") {
+      if (d.estado === "aceptado" && !d.go) {
+        for (const id of [d.de, d.a]) {
+          if (esBot(id) && !((d.listo || {})[id]) && toca(`dl:${did}:${id}`, ahora, () => ahora + azar(1500, 4500))) marcarListoDuelo(T, did, id);
+        }
+      }
+      if (d.estado === "aceptado" && d.go) {
         for (const id of [d.de, d.a]) {
           if (!esBot(id) || (d.r || {})[id] !== undefined) continue;
           const b = S.agentes[id];
@@ -6199,6 +6532,7 @@ function crearJugador(raiz, T, opc) {
     finalAntes: { paso: null, redoble: null },
     sonoAlerta: null,
     duelo: null,
+    practicas: [],
   };
   if (!opc.demo) Sonido.activo = almacen.get("liga2:sonido") !== "no";
 
@@ -6264,7 +6598,11 @@ function crearJugador(raiz, T, opc) {
   }
   function claveDe(p, ctx) {
     if (p.id === "final") return `final:${S.final.paso || 0}`;
-    if (p.id === "duelo") { const mio = ((p.d.r || {})[L.yo]); return `duelo:${p.did}:${p.d.estado}:${mio === undefined ? "" : "t"}`; }
+    if (p.id === "duelo") {
+      const mio = ((p.d.r || {})[L.yo]);
+      const prep = p.d.estado === "aceptado" && !p.d.go ? `prep${((p.d.listo || {})[L.yo]) ? "L" : ""}` : "go";
+      return `duelo:${p.did}:${p.d.estado}:${prep}:${mio === undefined ? "" : "t"}`;
+    }
     if (p.id === "cuartel") return `cuartel:${L.sub || ""}`;
     if (p.id !== "mision") return p.id;
     const m = p.m, tipo = tipoDe(m);
@@ -6300,7 +6638,9 @@ function crearJugador(raiz, T, opc) {
       // Durante una misión o un duelo la pantalla no se apaga; en el cuartel sí puede.
       if (p.id === "mision" || p.id === "duelo" || p.id === "final") pantallaEncendida(); else soltarPantalla();
       L.clave = clave;
+      desmontarPracticas(L.practicas);
       zPrincipal.innerHTML = htmlDe(p, ctx);
+      montarPracticas(zPrincipal, { S, yo: L.yo }, L.practicas);
       const cambioGrande = antes.split(":").slice(0, 3).join(":") !== clave.split(":").slice(0, 3).join(":");
       if (cambioGrande) desplazarArriba();
       if (p.id === "mision") {
@@ -6397,7 +6737,7 @@ function crearJugador(raiz, T, opc) {
       `<div class="zona" data-vivo="mision"></div>` +
       `<div class="zona" data-vivo="duelo"></div>` +
       `<section class="pagina"><span class="cap">Clasificación</span><div data-vivo="ranking"></div></section>` +
-      `<p class="nota centro" data-vivo="nota-sonido">Deja esta página abierta: cuando empiece una misión, tu celular suena y vibra.</p>` +
+      `<p class="nota centro" data-vivo="nota-sonido">Deja esta página abierta: cuando empiece una misión, tu celular suena.</p>` +
       `<div class="fila centro pie-cuartel"><button class="enlace" data-accion="sonido" data-vivo="sonido"></button><button class="enlace" data-accion="como">¿Cómo se juega?</button></div>`;
   }
   function htmlBannerMision() {
@@ -6449,7 +6789,7 @@ function crearJugador(raiz, T, opc) {
     if (s) { const v = Sonido.activo ? "Sonido: activado" : "Sonido: apagado"; if (s.textContent !== v) s.textContent = v; }
     pintarVivo("nota-sonido", Sonido.activo && !Sonido.listo
       ? "Toca la pantalla una vez para activar el sonido de las alertas. Y deja esta página abierta."
-      : "Deja esta página abierta: cuando empiece una misión, tu celular suena y vibra.");
+      : "Deja esta página abierta: cuando empiece una misión, tu celular suena.");
     const q = $('[data-vivo="reto-queda"]', zPrincipal);
     const activo = dueloActivoDe(S, L.yo);
     if (q && activo) q.textContent = `(${clamp(Math.ceil((activo[1].creado + DUELO_ACEPTAR_MS - T.ahora()) / 1000), 0, DUELO_ACEPTAR_MS / 1000)} s)`;
@@ -6498,13 +6838,22 @@ function crearJugador(raiz, T, opc) {
     const rival = d.de === L.yo ? d.a : d.de;
     const nr = esc(nombreDe(S, rival));
     const r = d.r || {};
+    if (d.estado === "aceptado" && !d.go) {
+      const listo = !!((d.listo || {})[L.yo]);
+      return `<section class="pagina"><span class="cap roja">¡Duelo aceptado!</span><h1 class="titulo chico">Tú contra ${nr}</h1>` +
+        `<p>${fmt(d.apuesta)} puntos en juego. Así se juega:</p>${pasosHTML(PASOS_DUELO)}</section>` +
+        `<section class="pagina practica"><span class="cap">Práctica · no cuenta</span><div data-practica="reflejos"></div></section>` +
+        (listo
+          ? `<p class="centro">¡Listo! Esperando a ${nr}… <span data-vivo="prep-queda"></span></p>`
+          : `<button class="boton rojo grande bloque" data-accion="listo-duelo" data-id="${did}">¡Estoy listo para el duelo!</button><p class="centro nota" data-vivo="prep-queda"></p>`);
+    }
     if (d.estado === "aceptado") {
       const mio = r[L.yo];
       if (mio !== undefined) {
         return `<section class="pagina"><span class="cap roja">Duelo</span><h1 class="titulo">${Number(mio) > 0 ? `${fmt(mio)} ms` : "¡Muy pronto!"}</h1>` +
-          `<p>${Number(mio) > 0 ? "¡Buen toque!" : "Tocaste antes de tiempo."} Esperando a ${nr}…</p></section>`;
+          `<p>${Number(mio) > 0 ? "¡Buen toque!" : "Tocaste antes de tiempo dos veces."} Esperando a ${nr}…</p></section>`;
       }
-      return `<div class="duelo-cabeza"><span class="cap roja">¡Duelo!</span><p>Tú contra <b>${nr}</b> · ${fmt(d.apuesta)} puntos en juego</p></div>` +
+      return `<div class="duelo-cabeza"><span class="cap roja">¡Va en serio!</span><p>Tú contra <b>${nr}</b> · ${fmt(d.apuesta)} puntos en juego</p></div>` +
         `<div class="arena noche" data-duelo><div class="arena-texto" data-vivo="aviso-duelo">Prepárate…<small>Toca cuando se ponga amarilla</small></div></div>`;
     }
     const gane = d.ganador === L.yo, empate = !d.ganador;
@@ -6521,16 +6870,31 @@ function crearJugador(raiz, T, opc) {
   }
   function actualizarDuelo(did, d) {
     if (d.estado !== "aceptado") return;
+    if (!d.go) {
+      const q = $('[data-vivo="prep-queda"]', zPrincipal);
+      if (q) { const t = `Empieza solo en ${Math.max(0, Math.ceil(((d.aceptadoT || 0) + DUELO_PREPARAR_MS - T.ahora()) / 1000))} s.`; if (q.textContent !== t) q.textContent = t; }
+      return;
+    }
     const arena = $("[data-duelo]", zPrincipal);
     if (!arena) return;
-    const D = L.duelo && L.duelo.did === did ? L.duelo : (L.duelo = { did, t0: 0, hecho: false });
+    const D = L.duelo && L.duelo.did === did ? L.duelo : (L.duelo = { did, t0: 0, hecho: false, avisado: false });
     if (!arena.dataset.enlazado) {
       arena.dataset.enlazado = "1";
       arena.addEventListener("pointerdown", (e) => {
         e.preventDefault();
         if (D.hecho) return;
-        D.hecho = true;
         const aviso_ = $('[data-vivo="aviso-duelo"]', arena);
+        if (!D.t0 && !D.avisado) {
+          // Primer toque antes de tiempo: solo un aviso.
+          D.avisado = true;
+          arena.className = "arena roja";
+          if (aviso_) aviso_.innerHTML = "¡Todavía no!<small>Espera el amarillo. La próxima vez pierdes</small>";
+          vibrar(150);
+          Sonido.tocar("error");
+          setTimeout(() => { if (!D.t0 && !D.hecho) { arena.className = "arena noche"; if (aviso_) aviso_.innerHTML = "Prepárate…<small>Toca cuando se ponga amarilla</small>"; } }, 1300);
+          return;
+        }
+        D.hecho = true;
         if (!D.t0) {
           T.escribir(`duelos/${did}/r/${L.yo}`, -1);
           arena.className = "arena roja";
@@ -6573,12 +6937,19 @@ function crearJugador(raiz, T, opc) {
     if (m.fase === "resultados") return cab + htmlResultados(m);
     return cab + tipo.jugador.html(ctx);
   }
+  function htmlPractica(practica) {
+    if (!practica) return "";
+    const [nombre, para] = String(practica).split(":");
+    return `<section class="pagina practica"><span class="cap">Práctica · no cuenta</span><p class="suave">Prueba aquí mientras esperan la largada.</p>` +
+      `<div data-practica="${esc(nombre)}"${para ? ` data-para="${esc(para)}"` : ""}></div></section>`;
+  }
   function htmlSala(m, tipo) {
     const listo = !!((S.mj.listos || {})[L.yo]);
     return introHTML(tipo, m.doble ? `<p class="doble">¡Esta misión vale doble!</p>` : "") +
       (listo
         ? `<div class="estallido azul"><div><strong>¡Listo!</strong><b>Atento</b></div></div><p class="centro">Espera a que el anfitrión dé la largada…</p>`
         : `<button class="boton rojo grande bloque" data-accion="listo">¡Estoy listo!</button>`) +
+      htmlPractica(tipo.practica) +
       `<section class="pagina"><span class="cap" data-vivo="n-listos">Listos</span><ul class="chips" data-vivo="listos"></ul></section>` +
       (listo ? `<button class="enlace centro" data-accion="no-listo">Mejor no participo</button>` : `<button class="enlace centro" data-accion="cuartel">Volver al cuartel</button>`);
   }
@@ -6732,7 +7103,8 @@ function crearJugador(raiz, T, opc) {
       const d = S.duelos[c.id];
       return `<div class="capa-modal" role="alertdialog" aria-labelledby="capa-t"><div class="pagina"><span class="cap roja">¡Te retan!</span>` +
         `<h2 class="titulo chico" id="capa-t">${esc(nombreDe(S, d.de))} te reta a un duelo</h2>` +
-        `<p>Duelo de reflejos: el más rápido le roba <b>${fmt(d.apuesta)}</b> puntos al otro.</p>` +
+        `<p>Duelo de reflejos: cuando la pantalla se ponga <b>amarilla</b>, toca. El más rápido le roba <b>${fmt(d.apuesta)}</b> puntos al otro.</p>` +
+        `<p class="suave">Antes de empezar tendrás una práctica que no cuenta.</p>` +
         `<div class="mecha-fila"><div class="mecha"><i></i></div><span class="segundos" data-vivo="reto-queda"></span></div>` +
         `<div class="fila"><button class="boton blanco" data-accion="rechazar-duelo" data-id="${c.id}">Rechazar</button><button class="boton rojo" data-accion="aceptar-duelo" data-id="${c.id}" data-foco>¡Acepto!</button></div>` +
         `<p class="suave">Si no aceptas, no podrá retarte de nuevo por ${CONFIG.esperaTrasRechazoMin} minutos.</p></div></div>`;
@@ -6837,6 +7209,10 @@ function crearJugador(raiz, T, opc) {
         L["exp" + did] = true;
         rechazarDuelo(T, did, "expirado");
       }
+      if (d.estado === "aceptado" && !d.go && ahora > (Number(d.aceptadoT) || 0) + DUELO_PREPARAR_MS + (d.de === L.yo ? 0 : 1500) && !L["go" + did]) {
+        L["go" + did] = true;
+        largarDuelo(T, did);
+      }
       if (dueloListo(d, ahora) && !L["res" + did]) {
         L["res" + did] = true;
         resolverDuelo(T, S, did, L.yo).finally(() => { setTimeout(() => { L["res" + did] = false; }, 1500); });
@@ -6857,6 +7233,14 @@ function crearJugador(raiz, T, opc) {
     if (f.dataset.form === "registro") { registrar(f); return; }
     const m = S.mision, tipo = tipoDe(m);
     if (m && m.fase === "juego" && L.dentro === m.id && tipo && tipo.jugador.enviar) tipo.jugador.enviar(f, ctxMision());
+  });
+  // Los campos de código se envían solos al escribir el tercer número.
+  raiz.addEventListener("input", (e) => {
+    const i = e.target;
+    if (!i.matches || !i.matches("[data-auto]") || !i.form) return;
+    if (i.value.replace(/\D/g, "").length >= (Number(i.maxLength) || 3)) {
+      if (i.form.requestSubmit) i.form.requestSubmit(); else i.form.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
+    }
   });
   raiz.addEventListener("change", (e) => {
     if (e.target.name === "poder") $$(".opcion-poder", raiz).forEach((o) => o.classList.toggle("activa", !!$("input", o).checked));
@@ -6885,6 +7269,7 @@ function crearJugador(raiz, T, opc) {
       case "retar": L.sub = "retar"; refrescar(); desplazarArriba(); return;
       case "retar-a": retarA(el.dataset.id); return;
       case "cancelar-duelo": cancelarDuelo(T, el.dataset.id); return;
+      case "listo-duelo": marcarListoDuelo(T, el.dataset.id, L.yo); Sonido.tocar("toque"); vibrar(30); return;
       case "aceptar-duelo": {
         const did = el.dataset.id;
         aceptarDuelo(T, did).then((r) => {
@@ -7376,7 +7761,8 @@ function crearComando(raiz, T, opc) {
     if (!tipo) return `<section class="pagina"><span class="cap">Misión</span><p>Esta misión no existe en esta versión.</p><button class="boton" data-accion="archivar">Cerrarla</button></section>`;
     if (m.fase === "sala") {
       return `<section class="pagina"><span class="cap">Sala de espera</span><div class="mision-cabeza"><span class="icono-mision">${icono(tipo.icono)}</span><h2 class="titulo chico">${esc(m.nombre)}</h2></div>` +
-        `<p>${esc(tipo.ayuda)}</p><p><b data-vivo="n-listos">0</b> listos de <b data-vivo="n-conectados">0</b> conectados.</p><ul class="chips" data-vivo="listos"></ul>` +
+        `${tipo.pasos ? `<p class="subtitulo">Explícalo así</p>${pasosHTML(tipo.pasos)}` : `<p>${esc(tipo.ayuda)}</p>`}<p class="suave">En la sala, cada uno tiene una práctica que no cuenta.</p>` +
+        `<p><b data-vivo="n-listos">0</b> listos de <b data-vivo="n-conectados">0</b> conectados.</p><ul class="chips" data-vivo="listos"></ul>` +
         `<button class="boton rojo grande" data-accion="empezar">¡Empezar ahora!</button></section>` +
         `<section class="pagina"><span class="cap">Avisa a todos</span><p>Los que tienen la página abierta ya recibieron la alerta. Para el resto, avisa por el grupo o suena la sirena.</p>` +
         `<div class="fila"><a class="boton blanco" href="${esc(enlaceWhatsApp(textoAviso()))}" target="_blank" rel="noopener">${icono("whatsapp")} WhatsApp</a><button class="boton blanco" data-accion="sirena">${icono("sirena")} Sirena</button></div></section>` +
@@ -7442,7 +7828,7 @@ function crearComando(raiz, T, opc) {
         (c.sugerencias ? `<div class="sugerencias">${c.sugerencias.map((s) => `<button type="button" data-accion="sug-campo" data-campo="${c.id}" data-v="${esc(s)}">${esc(s)}</button>`).join("")}</div>` : "") + `</div>`;
     }).join("");
     return `<section class="pagina"><span class="cap">${esc(cat ? cat.titulo : "Misión")}</span><div class="mision-cabeza"><span class="icono-mision">${icono(t.icono)}</span><h2 class="titulo chico">${esc(t.nombre)}</h2></div>` +
-      `<p>${esc(t.ayuda)}</p>${campos}` +
+      `${t.pasos ? pasosHTML(t.pasos) : `<p>${esc(t.ayuda)}</p>`}${campos}` +
       `<div class="campo-grupo"><span class="etiqueta">Puntos</span><div class="segmentado"><button data-accion="doble" data-v="0" aria-pressed="${!L.doble}">Normales</button><button data-accion="doble" data-v="1" aria-pressed="${L.doble}">¡Vale doble!</button></div></div>` +
       (t.usaSala ? `<p class="suave">Primero se abre una sala: los agentes tocan «Estoy listo» y tú das la largada.</p>` : "") +
       `<p class="error" data-vivo="error" role="alert"></p><div class="fila"><button class="boton blanco" data-accion="volver-catalogo">Volver</button><button class="boton rojo grande" data-accion="lanzar">${icono("lanzar")} Lanzar</button></div></section>`;
@@ -7605,7 +7991,8 @@ function crearComando(raiz, T, opc) {
     for (const [did, d] of Object.entries(S.duelos || {})) {
       if (!d || L.duelosHechos[did]) continue;
       if (d.estado === "pendiente" && ahora - d.creado > DUELO_ACEPTAR_MS + 8000) { L.duelosHechos[did] = true; rechazarDuelo(T, did, "expirado"); }
-      if (d.estado === "aceptado" && ahora > d.go + DUELO_TOQUE_MS + 6000) { L.duelosHechos[did] = true; resolverDuelo(T, S, did, "comando"); }
+      if (d.estado === "aceptado" && !d.go && ahora > (Number(d.aceptadoT) || 0) + DUELO_PREPARAR_MS + 6000 && !L.duelosHechos["go" + did]) { L.duelosHechos["go" + did] = true; largarDuelo(T, did); }
+      if (d.estado === "aceptado" && d.go && ahora > d.go + DUELO_TOQUE_MS + 6000) { L.duelosHechos[did] = true; resolverDuelo(T, S, did, "comando"); }
     }
   }
   const tic = setInterval(() => {
