@@ -368,12 +368,16 @@ const ACCIONES_AGENTE = [
   { agente: "Haz que {o} te diga a quién se parece más Salvador: a papá o a mamá.", objetivo: "¿{a} logró que le dijeras a quién se parece más Salvador?" },
 ];
 
-/* Bingo de la Liga: los superhéroes que canta el anfitrión. Cada cartón toma 8 al azar
-   y la casilla del centro es Salvador (ya viene marcada). */
+/* Bingo de la Liga: los superhéroes que canta el anfitrión. Cada cartón tiene 8 y la casilla
+   del centro es Salvador (ya viene marcada). Los cartones se arman para que nunca se llenen
+   dos al mismo tiempo. */
 const HEROES_BINGO = [
   "Spider-Man", "Batman", "Superman", "Mujer Maravilla", "Hulk", "Thor", "Iron Man", "Capitán América",
   "Flash", "Aquaman", "Pantera Negra", "Viuda Negra", "Linterna Verde", "Wolverine", "Groot", "Ant-Man",
   "Doctor Strange", "Capitana Marvel", "Chapulín Colorado", "Elastigirl", "Robin", "Ladybug", "Supergirl", "Shazam",
+  "Ojo de Halcón", "Falcon", "Bruja Escarlata", "Visión", "Star-Lord", "Gamora", "Rocket", "Drax",
+  "Daredevil", "Cíclope", "Tormenta", "Jean Grey", "Cyborg", "Flecha Verde", "Batgirl", "Nightwing",
+  "Chico Bestia", "Ms. Marvel", "She-Hulk", "Silver Surfer", "Mr. Increíble", "Frozono", "Cat Noir", "Miles Morales",
 ];
 
 </script>
@@ -3670,6 +3674,13 @@ function puntosPorPuesto(pos, n) {
   if (n <= 4) return 65;
   return Math.round(65 - (40 * (pos - 4)) / Math.max(1, n - 4));
 }
+// Puntos según la marca: el mejor se lleva 100 y los demás, en proporción (mínimo 10 por participar).
+function ptsProporcion(l, menorEsMejor, valor) {
+  const vs = l.map(valor).filter((v) => v > 0);
+  const best = vs.length ? (menorEsMejor ? Math.min(...vs) : Math.max(...vs)) : 0;
+  l.forEach((e) => { const v = valor(e); e.pts = v > 0 && best > 0 ? Math.round(10 + 90 * (menorEsMejor ? best / v : v / best)) : 10; });
+  return l;
+}
 // entradas: [{id, v, v2?}] -> [{id, v, v2, pos, pts}] con empates compartiendo puesto
 function rankear(entradas, menorEsMejor, multiplicador) {
   const signo = menorEsMejor ? 1 : -1;
@@ -4554,7 +4565,7 @@ const MINIJUEGOS = {
   },
 
   capa: {
-    nombre: "Ponle la capa a Salvador", icono: "capa",
+    nombre: "Ponle el escudo a Salvador", icono: "capa",
     resumen: "Salvador aparece y desaparece; toca donde estaba su escudo.",
     ayuda: "Salvador aparece dos segundos y desaparece. Toca donde estaba el escudo de su pecho. Son 3 intentos: gana la mejor puntería.",
     menorEsMejor: false,
@@ -4849,7 +4860,13 @@ function tipoSolo(id) {
     filas(ctx) {
       const res = (ctx.mj && ctx.mj.res) || {};
       const entradas = Object.entries(res).filter(([aid]) => ctx.S.agentes && ctx.S.agentes[aid]).map(([aid, r]) => ({ id: aid, v: Number(r.v) || 0, v2: Number(r.v2) || 0 }));
-      return rankear(entradas, mj.menorEsMejor, 1).map((e) => Object.assign(e, { txt: mj.formato(e.v, e.v2) }));
+      const l = rankear(entradas, mj.menorEsMejor, 1);
+      if (id === "reloj") {
+        // Diferencia con los 10 s: el más justo 100; cada 10 ms más lejos, un punto menos (mínimo 10).
+        const best = l.length ? Math.min(...l.map((e) => e.v)) : 0;
+        l.forEach((e) => { e.pts = Math.max(10, Math.round(100 - (e.v - best) / 10)); });
+      } else ptsProporcion(l, mj.menorEsMejor, (e) => e.v);
+      return l.map((e) => Object.assign(e, { txt: mj.formato(e.v, e.v2) }));
     },
     cerrar(ctx) { ctx.premiar(this.filas(ctx).map((e) => ({ id: e.id, pos: e.pos, pts: e.pts, txt: e.txt }))); },
     host: {
@@ -5032,7 +5049,7 @@ function correctaMostrada(sub, k) { return ordenPregunta(sub, k).indexOf(PREGUNT
 TIPOS.trivia = {
   id: "trivia", nombre: "Trivia de superhéroes", icono: "pregunta", cat: "celular", usaSala: true,
   resumen: "Preguntas de superhéroes y de Salvador; suma más quien acierta más rápido.",
-  ayuda: "Lee la pregunta y toca la respuesta correcta. Acertar rápido da más puntos.",
+  ayuda: "Lee la pregunta y toca la respuesta correcta. Cada acierto vale de 10 a 20 puntos: más mientras más rápido respondas.",
   campos: [
     { id: "tema", tipo: "opciones", etiqueta: "Preguntas sobre", opciones: [["mixta", "Mixta"], ["heroes", "Superhéroes"], ["salvador", "Salvador"]], defecto: "mixta" },
     { id: "cantidad", tipo: "opciones", etiqueta: "Preguntas en esta ronda", opciones: [[3, "3"], [5, "5"], [8, "8"], [10, "10"]], defecto: 5 },
@@ -5061,7 +5078,7 @@ TIPOS.trivia = {
   },
   puntaje(r, correcta, limiteMs) {
     if (!r || Number(r.o) !== correcta) return 0;
-    return Math.round(500 + 500 * (1 - clamp(Number(r.ms) || 0, 0, limiteMs) / limiteMs));
+    return Math.round(10 + 10 * (1 - clamp(Number(r.ms) || 0, 0, limiteMs) / limiteMs));
   },
   marcador(ctx, hasta) {
     const sub = ctx.m.sub, tabla = {};
@@ -5095,7 +5112,7 @@ TIPOS.trivia = {
     const tabla = (ctx.mj && ctx.mj.marcador) || this.marcador(ctx, Math.max(0, sub.k));
     const entradas = Object.entries(tabla).map(([id, t]) => ({ id, v: t.pts, v2: t.ms, ac: t.ac }));
     const filas = rankear(entradas, false, 1);
-    ctx.premiar(filas.map((e) => ({ id: e.id, pos: e.pos, pts: e.pts, txt: `${plural(e.ac, "acierto", "aciertos")} · ${fmt(e.v)}` })));
+    ctx.premiar(filas.map((e) => ({ id: e.id, pos: e.pos, pts: e.v, txt: plural(e.ac, "acierto", "aciertos") })));
   },
   host: {
     clave(ctx) { const s = ctx.m.sub; return `${s.k}:${s.estado}`; },
@@ -5207,7 +5224,8 @@ TIPOS.trivia = {
   },
 };
 /* ---------- Pregunta relámpago: una pregunta sorpresa; gana quien acierta primero ---------- */
-const PREMIOS_RELAMPAGO = [100, 50, 25];
+const PREMIOS_RELAMPAGO = [1, 2, 3]; // solo cuenta cuántos aciertos cierran la pregunta antes
+function ptsRelampago(ms, limiteMs) { return Math.round(20 + 80 * (1 - clamp(Number(ms) || 0, 0, limiteMs) / limiteMs)); }
 const CUENTA_RELAMPAGO_MS = 6000;
 function elegirRelampago(tema, usadas) {
   const delTema = PREGUNTAS.map((q, i) => ({ q, i })).filter((x) => tema === "mixta" || (x.q.tema || "heroes") === tema);
@@ -5219,8 +5237,8 @@ function elegirRelampago(tema, usadas) {
 }
 TIPOS.relampago = {
   id: "relampago", nombre: "Pregunta relámpago", icono: "rayo", cat: "celular", entraSolo: true,
-  resumen: "Una pregunta sorpresa salta en todos los celulares a la vez: el primero que acierta gana.",
-  ayuda: "Salta una pregunta en todos los celulares a la vez. Tienes un solo intento: el primero que acierta gana 100 puntos; el segundo, 50, y el tercero, 25.",
+  resumen: "Una pregunta sorpresa salta en todos los celulares a la vez: gana quien acierta más rápido.",
+  ayuda: "Salta una pregunta en todos los celulares a la vez. Tienes un solo intento: si aciertas, ganas de 20 a 100 puntos, más mientras más rápido respondas.",
   campos: [
     { id: "tema", tipo: "opciones", etiqueta: "Pregunta sobre", opciones: [["mixta", "Mixta"], ["heroes", "Superhéroes"], ["salvador", "Salvador"]], defecto: "mixta" },
     { id: "segundos", tipo: "opciones", etiqueta: "Tiempo para responder", opciones: [[15, "15 s"], [20, "20 s"], [30, "30 s"]], defecto: 20 },
@@ -5241,7 +5259,8 @@ TIPOS.relampago = {
       .map(([id, r]) => ({ id, ms: Number(r.ms) || 0, ok: Number(r.o) === correcta })).sort((a, b) => (b.ok - a.ok) || (a.ms - b.ms));
   },
   cerrar(ctx) {
-    const filas = this.respuestas(ctx).map((r, k) => ({ id: r.id, pos: k + 1, pts: r.ok ? PREMIOS_RELAMPAGO[k] || 0 : 0, txt: r.ok ? `acertó en ${segundosTexto(r.ms)}` : "se equivocó" }));
+    const lim = ctx.m.sub.limiteMs;
+    const filas = this.respuestas(ctx).map((r, k) => ({ id: r.id, pos: k + 1, pts: r.ok ? ptsRelampago(r.ms, lim) : 0, txt: r.ok ? `acertó en ${segundosTexto(r.ms)}` : "se equivocó" }));
     ctx.premiar(filas);
   },
   detalleHistorial(ctx) { return this.pregunta(ctx.m.sub).q.pregunta; },
@@ -5272,7 +5291,7 @@ TIPOS.relampago = {
       const ok = resp.filter((x) => x.ok).slice(0, 3);
       const a = $('[data-vivo="aciertos"]', raiz);
       if (a) {
-        const h = ok.length ? tablaParcial(ctx.S, ok.map((x, k) => ({ id: x.id, pos: k + 1, txt: `${segundosTexto(x.ms)} · +${PREMIOS_RELAMPAGO[k]}` }))) : "";
+        const h = ok.length ? tablaParcial(ctx.S, ok.map((x, k) => ({ id: x.id, pos: k + 1, txt: `${segundosTexto(x.ms)} · +${ptsRelampago(x.ms, s.limiteMs)}` }))) : "";
         if (a.dataset.h !== h) { a.dataset.h = h; a.innerHTML = h; }
       }
     },
@@ -5283,7 +5302,7 @@ TIPOS.relampago = {
       const resp = TIPOS.relampago.respuestas(ctx);
       const conectados = agentesValidos(ctx.S.agentes).filter((a) => a.conectado !== false);
       const todos = conectados.length > 0 && conectados.every((a) => resp.some((r) => r.id === a.id));
-      const podio = resp.filter((r) => r.ok).length >= PREMIOS_RELAMPAGO.length;
+      const podio = false; // cada acierto suma según su rapidez: se espera a todos o al tiempo
       if (ahora > s.inicio + s.limiteMs + GRACIA_MS) { ctx.cerrarMision(); return; }
       if ((todos || podio) && ctx.local.cierre === undefined) ctx.local.cierre = ahora + 1500; // un respiro por si llega otra respuesta
       if (ctx.local.cierre !== undefined && ahora > ctx.local.cierre) ctx.cerrarMision();
@@ -5301,7 +5320,7 @@ TIPOS.relampago = {
       const s = ctx.m.sub, clave = this.clave(ctx), { q, opciones, correcta } = TIPOS.relampago.pregunta(s);
       if (clave === "cuenta") {
         return `<div class="relampago-alerta"><div class="estallido"><div><strong>¡Pregunta relámpago!</strong></div></div>` +
-          `<p class="relampago-cuenta" data-vivo="cuenta"></p><p class="centro">Prepárate: <b>un solo intento</b>. El primero que acierta gana 100 puntos.</p></div>`;
+          `<p class="relampago-cuenta" data-vivo="cuenta"></p><p class="centro">Prepárate: <b>un solo intento</b>. Si aciertas ganas hasta 100 puntos: más mientras más rápido.</p></div>`;
       }
       if (clave === "fin") return `<div class="estallido azul"><div><strong>¡Se acabó el tiempo!</strong></div></div><p class="centro">Espera los resultados…</p>`;
       if (clave.startsWith("resp")) {
@@ -5371,7 +5390,10 @@ TIPOS.cuanto = {
     const real = Number(ctx.m.sub.real);
     const resp = (ctx.mj && ctx.mj.resp) || {};
     const entradas = Object.entries(resp).filter(([id]) => ctx.S.agentes[id]).map(([id, r]) => ({ id, v: Math.abs(Number(r.n) - real), v2: Number(r.t) || 0, n: Number(r.n) }));
-    ctx.premiar(rankear(entradas, true, 1).map((e) => ({ id: e.id, pos: e.pos, pts: e.pts, txt: `dijo ${fmt(e.n)} (a ${fmt(e.v)})` })));
+    const l = rankear(entradas, true, 1);
+    const best = l.length ? l[0].v : 0, escala = Math.max(1, Math.abs(real) * 0.5);
+    l.forEach((e) => { e.pts = Math.round(10 + 90 * Math.max(0, 1 - (e.v - best) / escala)); });
+    ctx.premiar(l.map((e) => ({ id: e.id, pos: e.pos, pts: e.pts, txt: `dijo ${fmt(e.n)} (a ${fmt(e.v)})` })));
   },
   host: {
     clave(ctx) { return ctx.m.sub.estado; },
@@ -5457,7 +5479,7 @@ TIPOS.foto = {
   },
   cerrar(ctx) {
     const validas = this.ordenadas(ctx).filter((l) => l.estado !== "rechazada");
-    const filas = rankear(validas.map((l) => ({ id: l.id, v: l.t })), true, 1);
+    const filas = ptsProporcion(rankear(validas.map((l) => ({ id: l.id, v: l.t })), true, 1), true, (e) => e.v - (ctx.m.abierta || 0));
     ctx.premiar(filas.map((e) => ({ id: e.id, pos: e.pos, pts: e.pts, txt: `llegó a los ${marcaTiempo(ctx, e.v)}` })));
   },
   host: {
@@ -5709,7 +5731,10 @@ TIPOS.carrera = {
   },
   cerrar(ctx) {
     const entradas = this.progreso(ctx).map((c) => ({ id: c.id, v: c.llegada ? c.llegada : 1e9 - c.pasos, llegada: c.llegada, pasos: c.pasos }));
-    ctx.premiar(rankear(entradas, true, 1).map((e) => ({ id: e.id, pos: e.pos, pts: e.pts, txt: e.llegada ? `${(e.llegada / 1000).toFixed(1).replace(".", ",")} s` : `${e.pasos} de ${PASOS_META} pasos` })));
+    const l = rankear(entradas, true, 1);
+    const mejor = Math.min(...l.filter((e) => e.llegada).map((e) => e.llegada), Infinity);
+    l.forEach((e) => { e.pts = e.llegada ? Math.round(10 + 90 * mejor / e.llegada) : Math.round(10 + 40 * e.pasos / PASOS_META); });
+    ctx.premiar(l.map((e) => ({ id: e.id, pos: e.pos, pts: e.pts, txt: e.llegada ? `${(e.llegada / 1000).toFixed(1).replace(".", ",")} s` : `${e.pasos} de ${PASOS_META} pasos` })));
   },
   host: {
     clave() { return "carrera"; },
@@ -5788,7 +5813,7 @@ TIPOS.charadas = {
     const gan = (ctx.mj && ctx.mj.ganadores) || {};
     const t = {};
     for (const g of Object.values(gan)) { if (!g || !ctx.S.agentes[g.id]) continue; const e = t[g.id] || (t[g.id] = { n: 0, ms: 0 }); e.n++; e.ms += Number(g.ms) || 0; }
-    const filas = rankear(Object.entries(t).map(([id, e]) => ({ id, v: e.n, v2: e.ms })), false, 1);
+    const filas = ptsProporcion(rankear(Object.entries(t).map(([id, e]) => ({ id, v: e.n, v2: e.ms })), false, 1), false, (e) => e.v);
     ctx.premiar(filas.map((e) => ({ id: e.id, pos: e.pos, pts: e.pts, txt: plural(e.v, "palabra", "palabras") })));
   },
   host: {
@@ -6004,9 +6029,18 @@ TIPOS.infiltrado = {
 };
 
 /* ---------- La bomba de la Liga: papa caliente con preguntas ---------- */
-function preguntaBomba(evitar) {
-  const posibles = PREGUNTAS.map((_, i) => i).filter((i) => (PREGUNTAS[i].d || 2) <= 2 && i !== evitar);
-  return posibles[Math.floor(Math.random() * posibles.length)];
+// Lista de preguntas de la bomba: solo las que no salieron en la fiesta; se recorre en orden y no se repite.
+function listaBomba(S) {
+  const usadas = preguntasUsadas(S);
+  const libres = PREGUNTAS.map((_, i) => i).filter((i) => !usadas.has(i));
+  let l = libres.filter((i) => (PREGUNTAS[i].d || 2) <= 2);
+  if (l.length < 40) l = l.concat(libres.filter((i) => (PREGUNTAS[i].d || 2) > 2));
+  if (!l.length) l = PREGUNTAS.map((_, i) => i);
+  return barajar(l).slice(0, 150);
+}
+function siguienteBomba(lista, b) {
+  const n = b && b.n !== undefined ? Number(b.n) + 1 : 0;
+  return { n, q: (lista && lista.length) ? lista[n % lista.length] : 0, o: barajar([0, 1, 2, 3]) };
 }
 function destinoBomba(jugadores, S, yo, de) {
   const otros = jugadores.filter((id) => id !== yo && S.agentes[id]);
@@ -6024,23 +6058,27 @@ TIPOS.bomba = {
   resumen: "Papa caliente con preguntas: respóndela bien para que la bomba salte a otro. A quien le explota, pierde puntos.",
   ayuda: `Si te cae la bomba, tu celular suena y te sale una pregunta. Respóndela bien y la bomba salta a otro agente al azar; si fallas, te toca otra pregunta. Explota en un momento al azar que nadie conoce. Son 3 bombas: a quien le explote en las manos se le restan ${PUNTOS_BOMBA} puntos.`,
   campos: [],
-  nuevaBomba(ctx, k, jugadores, evitar) {
+  nuevaBomba(ctx, k, jugadores, evitar, lista, previa) {
     const posibles = jugadores.filter((id) => id !== evitar && ctx.S.agentes[id]);
     const holder = posibles[Math.floor(Math.random() * posibles.length)] || jugadores[0];
     const inicio = ctx.ahora() + 2500;
-    ctx.T.escribir(`mj/${ctx.m.id}/bomba`, { k, holder, de: "", t: inicio, q: preguntaBomba(-1), o: barajar([0, 1, 2, 3]) });
+    ctx.T.escribir(`mj/${ctx.m.id}/bomba`, Object.assign({ k, holder, de: "", t: inicio }, siguienteBomba(lista, previa)));
     return { k, inicio, explota: inicio + azar(30000, 90000) };
   },
   empezar(ctx) {
     const jugadores = listosDe(ctx);
     if (jugadores.length < 2) { avisar("Se necesitan al menos 2 agentes listos."); return false; }
-    const b = this.nuevaBomba(ctx, 1, jugadores, "");
-    ctx.T.actualizar("mision", { fase: "juego", sub: { estado: "bomba", jugadores, k: 1, inicio: b.inicio, explota: b.explota, victimas: {} } });
+    const lista = listaBomba(ctx.S);
+    const b = this.nuevaBomba(ctx, 1, jugadores, "", lista, null);
+    ctx.T.actualizar("mision", { fase: "juego", sub: { estado: "bomba", jugadores, k: 1, inicio: b.inicio, explota: b.explota, victimas: {}, lista } });
     return true;
   },
   cerrar(ctx) {
     const s = ctx.m.sub, vict = Object.values(s.victimas || {});
     const mult = ctx.m.doble ? 2 : 1;
+    // Las preguntas que salieron quedan marcadas para no repetirse en la fiesta.
+    const ultima = Number(((ctx.mj && ctx.mj.bomba) || {}).n) || 0;
+    (s.lista || []).slice(0, ultima + 1).forEach((q) => ctx.T.escribir(`trivia/usadas/q${q}`, true));
     const filas = s.jugadores.filter((id) => ctx.S.agentes[id]).map((id) => {
       const quemado = vict.filter((v) => v === id).length;
       // Se restan 50 por explosión, sin bajar de cero (premiar multiplica por 2 si vale doble).
@@ -6087,7 +6125,7 @@ TIPOS.bomba = {
       if (s.estado === "pausa" && ahora > s.hasta && ctx.local.siguiente !== s.k) {
         ctx.local.siguiente = s.k;
         if (s.k >= 3) { ctx.cerrarMision(); return; }
-        const nb = TIPOS.bomba.nuevaBomba(ctx, s.k + 1, s.jugadores, s.victimas["b" + s.k]);
+        const nb = TIPOS.bomba.nuevaBomba(ctx, s.k + 1, s.jugadores, s.victimas["b" + s.k], s.lista, b);
         ctx.T.actualizar("mision", { "sub/estado": "bomba", "sub/k": nb.k, "sub/inicio": nb.inicio, "sub/explota": nb.explota });
       }
     },
@@ -6140,7 +6178,7 @@ TIPOS.bomba = {
       if (Number(el.dataset.o) === correcta) {
         const destino = destinoBomba(s.jugadores, ctx.S, ctx.yo, b.de);
         if (!destino) return;
-        ctx.T.escribir(`mj/${ctx.m.id}/bomba`, { k: s.k, holder: destino, de: ctx.yo, t: ctx.ahora(), q: preguntaBomba(b.q), o: barajar([0, 1, 2, 3]) });
+        ctx.T.escribir(`mj/${ctx.m.id}/bomba`, Object.assign({ k: s.k, holder: destino, de: ctx.yo, t: ctx.ahora() }, siguienteBomba(s.lista, b)));
         Sonido.tocar("exito");
         vibrar(30);
         avisar(`¡Bien! La bomba saltó a ${nombreDe(ctx.S, destino)}`, ctx.capaAvisos());
@@ -6154,7 +6192,7 @@ TIPOS.bomba = {
       const id = ctx.m.id, k = s.k, q = b.q;
       setTimeout(() => {
         const f = ctx.fresco(), bb = (f.mj && f.mj.bomba) || {};
-        if (f.m && f.m.id === id && bb.holder === f.yo && bb.k === k && bb.q === q) f.T.actualizar(`mj/${id}/bomba`, { q: preguntaBomba(q), o: barajar([0, 1, 2, 3]) });
+        if (f.m && f.m.id === id && bb.holder === f.yo && bb.k === k && bb.q === q) f.T.actualizar(`mj/${id}/bomba`, siguienteBomba(f.m.sub.lista, bb));
         else f.pintar();
       }, 2000);
     },
@@ -6204,7 +6242,7 @@ TIPOS.agente = {
     return Object.entries((ctx.mj && ctx.mj.cumple) || {}).filter(([id, c]) => c && c.estado === "si" && ctx.S.agentes[id]).map(([id, c]) => ({ id, t: c.tc || c.t })).sort((a, b) => a.t - b.t);
   },
   cerrar(ctx) {
-    const filas = rankear(this.cumplidas(ctx).map((c) => ({ id: c.id, v: c.t })), true, 1);
+    const filas = ptsProporcion(rankear(this.cumplidas(ctx).map((c) => ({ id: c.id, v: c.t })), true, 1), true, (e) => e.v - (ctx.m.abierta || 0));
     ctx.premiar(filas.map((e) => ({ id: e.id, pos: e.pos, pts: e.pts, txt: `cumplió a los ${marcaTiempo(ctx, e.v)}` })));
   },
   host: {
@@ -6305,9 +6343,11 @@ TIPOS.duo = {
   cerrar(ctx) {
     const comp = this.completados(ctx);
     const filas = [];
+    const t0 = ctx.m.abierta || 0, mejor = comp.length ? Math.max(1, comp[0].t - t0) : 1;
     comp.forEach((c, k) => {
       const g = ctx.m.sub.grupos[c.g];
-      (g.miembros || []).forEach((id) => { if (ctx.S.agentes[id]) filas.push({ id, pos: k + 1, pts: puntosPorPuesto(k + 1, ctx.m.sub.grupos.length), txt: `${this.personajeDe(g, id)} · a los ${marcaTiempo(ctx, c.t)}` }); });
+      const pts = Math.round(10 + 90 * mejor / Math.max(1, c.t - t0));
+      (g.miembros || []).forEach((id) => { if (ctx.S.agentes[id]) filas.push({ id, pos: k + 1, pts, txt: `${this.personajeDe(g, id)} · a los ${marcaTiempo(ctx, c.t)}` }); });
     });
     ctx.premiar(filas);
   },
@@ -6388,19 +6428,43 @@ function estadoBingo(marcas) {
   const n = Object.keys(marcas || {}).length;
   return { linea, lleno: n >= 8, n };
 }
+// Cada cartón se llena en una «cantada» distinta: así nunca hay dos bingos con el mismo superhéroe.
+// El orden de los cantados se sortea al lanzar; cada jugador reserva un turno de llenado (k)
+// y su cartón lleva el superhéroe que sale en ese turno y 7 que salen antes.
+async function pedirCartonBingo(T, mid, sub, id) {
+  const sec = sub.secuencia || barajar(HEROES_BINGO.map((_, i) => i));
+  const turnos = barajar(Array.from({ length: sec.length - (sub.desde || 12) }, (_, i) => i + (sub.desde || 12)));
+  for (const k of turnos) {
+    let r;
+    try { r = await T.transaccion(`mj/${mid}/turnos/k${k}`, (a) => (a ? undefined : id)); } catch (e) { r = null; }
+    if (r && r.hecho && r.valor === id) {
+      const antes = barajar(sec.slice(0, k)).slice(0, 7);
+      return T.escribir(`mj/${mid}/carton/${id}`, barajar(antes.concat([sec[k]])));
+    }
+  }
+  // Sin turnos libres (muchísimos jugadores): cartón al azar.
+  return T.escribir(`mj/${mid}/carton/${id}`, barajar(sec.slice()).slice(0, 8));
+}
 TIPOS.bingo = {
   id: "bingo", nombre: "Bingo de la Liga", icono: "bingo", cat: "fiesta",
   resumen: "Tú cantas superhéroes y ellos los marcan en su cartón. El centro es Salvador.",
-  ayuda: "El anfitrión canta superhéroes. Si el que cantan está en tu cartón, tócalo para marcarlo. El centro es Salvador y ya viene marcado. Gana quien llene su cartón primero.",
+  ayuda: "El anfitrión canta superhéroes. Si el que cantan está en tu cartón, tócalo para marcarlo. El centro es Salvador y ya viene marcado. Gana quien llene su cartón primero: nunca se llenan dos cartones con el mismo superhéroe.",
   campos: [{ id: "modo", tipo: "opciones", etiqueta: "¿Quién canta?", opciones: [["manual", "Yo, con un botón"], ["auto", "Solo, cada 10 s"]], defecto: "manual" }],
-  lanzar(cfg) { return { mision: { fase: "juego", sub: { cantadas: [], modo: cfg.modo === "auto" ? "auto" : "manual", cada: 10000 } } }; },
+  lanzar(cfg, ctx) {
+    const secuencia = barajar(HEROES_BINGO.map((_, i) => i));
+    // Cuantos más jugadores, antes empieza a poder haber bingo (siempre con turnos distintos).
+    const gente = agentesValidos(ctx.S.agentes).length;
+    const desde = clamp(HEROES_BINGO.length - (gente + 8), 10, 24);
+    return { mision: { fase: "juego", sub: { cantadas: [], secuencia, desde, modo: cfg.modo === "auto" ? "auto" : "manual", cada: 10000 } } };
+  },
   cantar(ctx) {
     const s = ctx.m.sub, ya = s.cantadas || [];
     if (ya.length >= HEROES_BINGO.length) return;
     if (ctx.local.cantando && Date.now() - ctx.local.cantando < 900) return;
     ctx.local.cantando = Date.now();
-    const libres = HEROES_BINGO.map((_, i) => i).filter((i) => !ya.includes(i));
-    const i = libres[Math.floor(Math.random() * libres.length)];
+    const sec = s.secuencia || HEROES_BINGO.map((_, i) => i);
+    const i = sec.find((h) => !ya.includes(h));
+    if (i === undefined) return;
     ctx.T.actualizar("mision", { "sub/cantadas": ya.concat([i]), "sub/ultimo": i, "sub/tUltimo": ctx.ahora() });
     Sonido.tocar("toque");
   },
@@ -6449,7 +6513,7 @@ TIPOS.bingo = {
   jugador: {
     entrar(ctx) {
       if (((ctx.mj && ctx.mj.carton) || {})[ctx.yo]) return;
-      ctx.T.escribir(`mj/${ctx.m.id}/carton/${ctx.yo}`, barajar(HEROES_BINGO.map((_, i) => i)).slice(0, 8));
+      pedirCartonBingo(ctx.T, ctx.m.id, ctx.m.sub, ctx.yo);
     },
     clave(ctx) {
       const carton = (((ctx.mj && ctx.mj.carton) || {})[ctx.yo]);
@@ -6508,7 +6572,7 @@ TIPOS.bingo = {
 
 /* ---------- Cómo se juega: pasos cortos que se ven antes de cada misión ---------- */
 const PASOS = {
-  trivia: ["Lee la pregunta: tienes unos segundos antes de poder responder.", "Toca la respuesta correcta.", "Acertar rápido suma más puntos."],
+  trivia: ["Lee la pregunta: tienes unos segundos antes de poder responder.", "Toca la respuesta correcta.", "Cada acierto vale de 10 a 20 puntos: más mientras más rápido respondas."],
   reflejos: ["Espera con el dedo listo: la pantalla está oscura.", "Cuando se ponga AMARILLA y aparezca Salvador, toca lo más rápido que puedas.", "Son 3 intentos. Si tocas antes de tiempo, ese intento vale 1 segundo."],
   supervelocidad: ["Espera la cuenta regresiva: 3, 2, 1.", "Toca ¡VUELA! sin parar durante 10 segundos: cada toque sube a Salvador 10 metros.", "Gana quien lo haga volar más alto."],
   cuanto: ["Lee la pregunta.", "Escribe tu número y envíalo. Puedes cambiarlo hasta que se cierre.", "Gana quien quede más cerca del número real."],
@@ -6529,7 +6593,7 @@ const PASOS = {
   infiltrado: ["Mantén presionado para ver tu secreto: el nombre de un villano o «Eres el infiltrado».", "Den pistas sobre ese villano sin decir su nombre. El infiltrado no sabe cuál es: tiene que disimular.", "Voten quién es el infiltrado. Si no lo descubren, gana él."],
   bomba: ["Si te cae la bomba, tu celular suena y te sale una pregunta.", "Respóndela bien y la bomba salta a otro agente al azar. Si fallas, te toca otra pregunta.", "Explota en un momento al azar: a quien la tenga en las manos se le restan 50 puntos."],
 };
-PASOS.relampago = ["Cuando el anfitrión la lanza, tu celular suena y en unos segundos sale la pregunta.", "Tienes un solo intento: toca la respuesta correcta lo más rápido que puedas.", "El primero que acierta gana 100 puntos; el segundo, 50, y el tercero, 25."];
+PASOS.relampago = ["Cuando el anfitrión la lanza, tu celular suena y en unos segundos sale la pregunta.", "Tienes un solo intento: toca la respuesta correcta lo más rápido que puedas.", "Si aciertas ganas de 20 a 100 puntos: más mientras más rápido."];
 const PRACTICA_DE = { trivia: "pregunta", ultimo: "reflejos", carrera: "carrera", bomba: "pregunta:bomba", duo: "codigo:duo", infiltrado: "secreto", agente: "secreto" };
 for (const [id, pasos] of Object.entries(PASOS)) if (TIPOS[id]) TIPOS[id].pasos = pasos;
 for (const [id, p] of Object.entries(PRACTICA_DE)) if (TIPOS[id]) TIPOS[id].practica = p;
@@ -6729,7 +6793,7 @@ function ventanaInfo(html, raiz) {
 function reglasHTML() {
   return `<span class="cap">Cómo se juega</span><h2 class="titulo chico">Las reglas de la Liga</h2>` +
     `<p><b>Misiones.</b> Durante la fiesta el anfitrión lanza misiones: unas se juegan en el celular y otras en la fiesta. Te avisamos con sonido si tienes esta página abierta.</p>` +
-    `<p><b>Puntos de Liga.</b> En cada misión, el 1.º gana 100, el 2.º 85, el 3.º 75 y el resto va de 65 a 25. Algunas misiones valen doble.</p>` +
+    `<p><b>Puntos de Liga.</b> Se ganan según tu marca: en cada misión el mejor se lleva 100 y los demás, en proporción a lo que hicieron (mínimo 10 por participar). En la trivia, cada acierto vale de 10 a 20 según qué tan rápido respondas. Algunas misiones valen doble.</p>` +
     `<p><b>Robo de puntos.</b> Puedes retar a cualquier agente a un duelo de reflejos. Si acepta, el más rápido le roba hasta ${fmt(CONFIG.puntosDuelo)} puntos al otro. Si rechaza, no podrás retarlo por ${CONFIG.esperaTrasRechazoMin} minutos.</p>` +
     `<p><b>Tu código.</b> Tus 3 cifras de agente están en tu tarjeta y arriba en cada misión. En «Encuentra a tu dúo», tu pareja las escribe para encontrarte.</p>` +
     `<p><b>El premio.</b> Al final se revela el podio. Quien quede 1.º gana el premio, para sí o para el pequeño héroe que elija.</p>`;
@@ -7133,8 +7197,8 @@ function crearBots(T, S, opc) {
         if (toca(clave, ahora, () => Math.max(desde, ahora) + azar(2500, 7000) + (acierta ? 0 : 2000))) {
           if (acierta) {
             const destino = destinoBomba(sub.jugadores || [], S, bomba.holder, bomba.de);
-            if (destino) T.escribir(`mj/${m.id}/bomba`, { k: sub.k, holder: destino, de: bomba.holder, t: T.ahora(), q: preguntaBomba(bomba.q), o: barajar([0, 1, 2, 3]) });
-          } else T.actualizar(`mj/${m.id}/bomba`, { q: preguntaBomba(bomba.q), o: barajar([0, 1, 2, 3]) });
+            if (destino) T.escribir(`mj/${m.id}/bomba`, Object.assign({ k: sub.k, holder: destino, de: bomba.holder, t: T.ahora() }, siguienteBomba(sub.lista, bomba)));
+          } else T.actualizar(`mj/${m.id}/bomba`, siguienteBomba(sub.lista, bomba));
         }
         return;
       }
@@ -7175,7 +7239,7 @@ function crearBots(T, S, opc) {
           const carton = cartones[b.id];
           if (!carton) {
             if (toca(`bi0:${m.id}:${b.id}`, ahora, () => (Math.random() < 0.92 ? ahora + azar(800, 5000) : null))) {
-              T.escribir(`mj/${m.id}/carton/${b.id}`, barajar(HEROES_BINGO.map((_, i) => i)).slice(0, 8));
+              pedirCartonBingo(T, m.id, sub, b.id);
             }
             continue;
           }
