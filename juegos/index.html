@@ -35,6 +35,8 @@ const CONFIG = {
     papel: "img/paper.jpg",
     cara: "img/salva-cara.webp",            // foto de Salvador riéndose (bingo y minijuegos)
     caraComic: "img/salva-comic-cara.webp", // su cara en dibujo de cómic
+    caraPoder: "img/salva-poder.webp",      // viñetas del cómic (memoria)
+    caraZas: "img/salva-zas.webp",
   },
   // Dónde está el escudo en la imagen de Salvador volando (0 a 1, de izquierda a derecha y de arriba abajo).
   escudoSalvador: { x: 0.52, y: 0.46 },
@@ -207,6 +209,93 @@ const PREGUNTAS = [
   { pregunta: "¿Qué día de la semana es la misión de Salvador?", opciones: ["Sábado", "Domingo", "Viernes", "Lunes"], correcta: 1, dato: "Domingo 11 de octubre, a las 3:00 pm.", d: 1, tema: "salvador" },
   { pregunta: "¿Quiénes firman la portada del cómic?", opciones: ["Los abuelos", "Papá, Mamá y Salvador", "La Liga de la Justicia", "Stan Lee"], correcta: 1, dato: "", d: 2, tema: "salvador" },
   { pregunta: "¿Qué número tiene la edición del cómic de la invitación?", opciones: ["Núm. 1", "Núm. 10", "Núm. 100", "Núm. 7"], correcta: 0, dato: "", d: 1, tema: "salvador" },
+  { pregunta: "¿Cómo se llama el auto de Batman?", opciones: ["El Batimóvil", "El Quinjet", "El Milano", "El Halcón Milenario"], correcta: 0, dato: "Sale de la Baticueva, escondida debajo de la mansión Wayne.", d: 1, tema: "heroes" },
+  { pregunta: "¿De qué color es el traje del Chapulín Colorado?", opciones: ["Verde", "Rojo", "Amarillo", "Azul"], correcta: 1, dato: "En el pecho lleva un corazón amarillo con las letras «CH».", d: 1, tema: "heroes" },
+  { pregunta: "En Los Increíbles, ¿cuál es el superpoder de Dash?", opciones: ["La invisibilidad", "La superfuerza", "La supervelocidad", "Volar"], correcta: 2, dato: "Su nombre en inglés, Dash, significa «correr a toda velocidad».", d: 1, tema: "heroes" },
+  { pregunta: "En Miraculous, ¿quién es el compañero de Ladybug?", opciones: ["Hawk Moth", "Rena Rouge", "Carapace", "Cat Noir"], correcta: 3, dato: "Ninguno de los dos sabe quién es el otro sin máscara.", d: 1, tema: "heroes" },
+  { pregunta: "En Paw Patrol, ¿cómo se llama el niño que lidera a los cachorros?", opciones: ["Ryder", "Chase", "Marshall", "Rubble"], correcta: 0, dato: "Chase es el cachorro policía y Marshall, el bombero.", d: 1, tema: "heroes" },
+  { pregunta: "En Héroes en Pijamas, ¿cómo se llama la heroína que es como un búho?", opciones: ["Gatuna", "Buhíta", "Lunática", "Ninjalina"], correcta: 1, dato: "El tercer héroe del equipo se llama Gekko y es verde.", d: 1, tema: "heroes" },
+  { pregunta: "¿Qué juguete de Toy Story es un sheriff?", opciones: ["Buzz Lightyear", "Rex", "Woody", "Señor Cara de Papa"], correcta: 2, dato: "En inglés, su voz es la del actor Tom Hanks.", d: 1, tema: "heroes" },
+  { pregunta: "¿Qué superhéroe grita «¡Hulk aplasta!»?", opciones: ["La Cosa", "Thor", "Groot", "Hulk"], correcta: 3, dato: "Cuando se calma, vuelve a ser Bruce Banner, un científico muy tranquilo.", d: 1, tema: "heroes" },
+  { pregunta: "¿De qué color es el traje de Flash?", opciones: ["Rojo", "Azul", "Verde", "Negro"], correcta: 0, dato: "En el pecho lleva un rayo amarillo.", d: 1, tema: "heroes" },
+  { pregunta: "¿Cuántos integrantes tienen los 4 Fantásticos?", opciones: ["3", "4", "5", "6"], correcta: 1, dato: "Son Mr. Fantástico, la Mujer Invisible, la Antorcha Humana y la Cosa.", d: 1, tema: "heroes" },
+  { pregunta: "¿Qué le pasó a Peter Parker para tener sus poderes?", opciones: ["Cayó en un químico", "Le cayó un rayo", "Lo picó una araña", "Viene de otro planeta"], correcta: 2, dato: "En El sorprendente Hombre Araña, de 2012, la araña escapa de un laboratorio de Oscorp.", d: 1, tema: "heroes" },
+  { pregunta: "¿Qué villano de Spider-Man está hecho de arena?", opciones: ["El Hombre de Hielo", "El Hombre Lagarto", "El Hombre Absorbente", "El Hombre de Arena"], correcta: 3, dato: "Apareció en la película Spider-Man 3, de 2007.", d: 1, tema: "heroes" },
+  { pregunta: "¿Quién es el dios de las travesuras, hermano adoptivo de Thor?", opciones: ["Loki", "Odín", "Heimdall", "Hela"], correcta: 0, dato: "En la serie Loki aparece una versión cocodrilo de él.", d: 1, tema: "heroes" },
+  { pregunta: "¿Qué se grita en Pantera Negra con los brazos cruzados sobre el pecho?", opciones: ["¡Vengadores, unidos!", "¡Wakanda por siempre!", "¡Shazam!", "¡Excelsior!"], correcta: 1, dato: "Los brazos se cruzan en forma de X.", d: 1, tema: "heroes" },
+  { pregunta: "¿Cómo se llama el mono villano de Las Chicas Superpoderosas?", opciones: ["Él", "Princesa", "Mojo Jojo", "La Banda Gangrena"], correcta: 2, dato: "Antes de volverse villano era el ayudante de laboratorio del Profesor Utonio.", d: 1, tema: "heroes" },
+  { pregunta: "¿Cuál es la comida favorita de las Tortugas Ninja?", opciones: ["Las hamburguesas", "Los tacos", "El sushi", "La pizza"], correcta: 3, dato: "Su maestro es una rata llamada Splinter.", d: 1, tema: "heroes" },
+  { pregunta: "En la película Megamente, ¿de qué color es Megamente?", opciones: ["Azul", "Verde", "Morado", "Rojo"], correcta: 0, dato: "Era el villano de Metro City, hasta que decidió ser el héroe.", d: 1, tema: "heroes" },
+  { pregunta: "En Mi villano favorito, ¿cómo se llaman los ayudantes amarillos de Gru?", opciones: ["Los Pitufos", "Los Minions", "Los Gremlins", "Los Oompa Loompas"], correcta: 1, dato: "Hablan un idioma inventado que mezcla palabras de muchos idiomas, también del español.", d: 1, tema: "heroes" },
+  { pregunta: "¿Qué letra llevan Los Increíbles en el pecho de su traje?", opciones: ["La S", "La F", "La i", "La X"], correcta: 2, dato: "Los trajes los diseñó Edna Moda, sin capas.", d: 1, tema: "heroes" },
+  { pregunta: "En Encanto, ¿cuál es el don de Luisa Madrigal?", opciones: ["Hacer crecer flores", "Oír todo", "Cambiar de forma", "La superfuerza"], correcta: 3, dato: "La familia Madrigal vive en una casa mágica en Colombia.", d: 1, tema: "heroes" },
+  { pregunta: "¿Cuál es el nombre de superheroína de Carol Danvers?", opciones: ["Capitana Marvel", "Viuda Negra", "She-Hulk", "Tormenta"], correcta: 0, dato: "En el cine la interpretó Brie Larson.", d: 2, tema: "heroes" },
+  { pregunta: "En Miraculous, ¿cómo se llama el kwami (la criaturita mágica) de Ladybug?", opciones: ["Plagg", "Tikki", "Wayzz", "Nooroo"], correcta: 1, dato: "El kwami de Cat Noir se llama Plagg y le encanta el queso camembert.", d: 2, tema: "heroes" },
+  { pregunta: "¿Qué villano de Spider-Man vuela en un planeador y lanza bombas de calabaza?", opciones: ["Electro", "El Buitre", "El Duende Verde", "Mysterio"], correcta: 2, dato: "Es Norman Osborn, el papá de Harry, el mejor amigo de Peter.", d: 2, tema: "heroes" },
+  { pregunta: "¿Qué superheroína es la prima de Hulk?", opciones: ["Gamora", "Bruja Escarlata", "Mística", "She-Hulk"], correcta: 3, dato: "Se llama Jennifer Walters y es abogada.", d: 2, tema: "heroes" },
+  { pregunta: "¿Qué superhéroe dice «Puedo hacer esto todo el día»?", opciones: ["Capitán América", "Thor", "Iron Man", "Hulk"], correcta: 0, dato: "Lo dice de flaquito, antes del suero, en Capitán América: El primer vengador.", d: 2, tema: "heroes" },
+  { pregunta: "¿Cómo consiguió Flash su supervelocidad?", opciones: ["Lo picó un insecto", "Le cayó un rayo y lo bañaron químicos", "Tomó un suero", "Es de otro planeta"], correcta: 1, dato: "En la serie de televisión, el rayo vino de la explosión de un acelerador de partículas.", d: 2, tema: "heroes" },
+  { pregunta: "¿Qué villano de Batman usa un traje helado y un arma que congela?", opciones: ["El Pingüino", "Bane", "El Señor Frío", "El Sombrerero Loco"], correcta: 2, dato: "Solo puede vivir a temperaturas bajo cero; por eso nunca se quita el traje.", d: 2, tema: "heroes" },
+  { pregunta: "¿Qué villana de Batman controla las plantas?", opciones: ["Gatúbela", "Harley Quinn", "Talia al Ghul", "Hiedra Venenosa"], correcta: 3, dato: "En inglés se llama Poison Ivy.", d: 2, tema: "heroes" },
+  { pregunta: "¿Cómo se llama la isla de las amazonas donde nació la Mujer Maravilla?", opciones: ["Themyscira", "Atlántida", "Asgard", "Wakanda"], correcta: 0, dato: "En la película de 2017, el primer hombre que llega a la isla es el piloto Steve Trevor.", d: 2, tema: "heroes" },
+  { pregunta: "¿Cuál es el nombre real de Hulk?", opciones: ["Bruce Wayne", "Bruce Banner", "Bruce Lee", "Bruce Willis"], correcta: 1, dato: "Bruce Wayne es Batman: los dos se llaman Bruce.", d: 2, tema: "heroes" },
+  { pregunta: "¿Cómo se llama el arquero de traje verde de DC?", opciones: ["Ojo de Halcón", "Robin Hood", "Flecha Verde", "Linterna Verde"], correcta: 2, dato: "Se llama Oliver Queen y es millonario, como Bruce Wayne.", d: 2, tema: "heroes" },
+  { pregunta: "¿Qué miembro de la Liga de la Justicia es mitad humano y mitad máquina?", opciones: ["Visión", "Ultrón", "Robocop", "Cyborg"], correcta: 3, dato: "Su nombre real es Victor Stone.", d: 2, tema: "heroes" },
+  { pregunta: "¿Cómo se llama el director de S.H.I.E.L.D. que usa un parche en el ojo?", opciones: ["Nick Fury", "Phil Coulson", "Thaddeus Ross", "Happy Hogan"], correcta: 0, dato: "En las películas lo interpreta Samuel L. Jackson.", d: 2, tema: "heroes" },
+  { pregunta: "¿Qué villano de Spider-Man controla la electricidad?", opciones: ["Mysterio", "Electro", "Rino", "El Buitre"], correcta: 1, dato: "En El sorprendente Hombre Araña 2 lo interpretó Jamie Foxx.", d: 2, tema: "heroes" },
+  { pregunta: "¿Qué villano de Spider-Man crea ilusiones y lleva una pecera en la cabeza?", opciones: ["Kraven", "Electro", "Mysterio", "Escorpión"], correcta: 2, dato: "En Spider-Man: Lejos de casa lo interpretó Jake Gyllenhaal.", d: 2, tema: "heroes" },
+  { pregunta: "¿Cuál es el nombre real de la Bruja Escarlata?", opciones: ["Natasha Romanoff", "Jean Grey", "Carol Danvers", "Wanda Maximoff"], correcta: 3, dato: "Su hermano gemelo, Pietro, corre a supervelocidad.", d: 2, tema: "heroes" },
+  { pregunta: "¿En qué serie Wanda y Visión viven dentro de una comedia de televisión?", opciones: ["WandaVision", "Loki", "Moon Knight", "Ojo de Halcón"], correcta: 0, dato: "Cada capítulo imita la televisión de una década distinta.", d: 2, tema: "heroes" },
+  { pregunta: "¿Quién es el líder de los Guardianes de la Galaxia?", opciones: ["Drax", "Star-Lord", "Rocket", "Yondu"], correcta: 1, dato: "Se llama Peter Quill y siempre lleva su walkman con canciones de los setenta y ochenta.", d: 2, tema: "heroes" },
+  { pregunta: "¿Qué superhéroe vuela con alas mecánicas y después recibe el escudo del Capitán América?", opciones: ["Máquina de Guerra", "Ojo de Halcón", "Falcon", "El Soldado del Invierno"], correcta: 2, dato: "Pasa en la serie Falcon y el Soldado del Invierno.", d: 2, tema: "heroes" },
+  { pregunta: "¿Cómo se llama la amiga de Miles Morales que también es una heroína araña?", opciones: ["Mary Jane", "Felicia Hardy", "Betty Brant", "Gwen Stacy"], correcta: 3, dato: "En Spider-Man: Un nuevo universo le dicen Spider-Gwen.", d: 2, tema: "heroes" },
+  { pregunta: "En Spider-Man: Sin camino a casa, ¿cuántos Spider-Man aparecen juntos?", opciones: ["3", "2", "4", "5"], correcta: 0, dato: "Se juntaron Tom Holland, Tobey Maguire y Andrew Garfield.", d: 2, tema: "heroes" },
+  { pregunta: "¿Qué actor es Spider-Man en Spider-Man: De regreso a casa?", opciones: ["Andrew Garfield", "Tom Holland", "Tobey Maguire", "Tom Hardy"], correcta: 1, dato: "Tom Hardy, en cambio, es Venom.", d: 2, tema: "heroes" },
+  { pregunta: "¿Qué actor interpreta a Deadpool?", opciones: ["Hugh Jackman", "Chris Pratt", "Ryan Reynolds", "Paul Rudd"], correcta: 2, dato: "En 2024 se juntó con Hugh Jackman en Deadpool & Wolverine.", d: 2, tema: "heroes" },
+  { pregunta: "¿En qué ciudad viven Las Chicas Superpoderosas?", opciones: ["Springfield", "Gotham", "Metrópolis", "Saltadilla"], correcta: 3, dato: "Las creó el Profesor Utonio con azúcar, flores, muchos colores… y sustancia X por accidente.", d: 2, tema: "heroes" },
+  { pregunta: "¿Qué Tortuga Ninja usa el antifaz azul?", opciones: ["Leonardo", "Rafael", "Donatello", "Miguel Ángel"], correcta: 0, dato: "Rafael usa rojo, Donatello morado y Miguel Ángel naranja.", d: 2, tema: "heroes" },
+  { pregunta: "¿Cuál de estos héroes NO tiene superpoderes?", opciones: ["Superman", "Batman", "Flash", "Mujer Maravilla"], correcta: 1, dato: "Batman usa su inteligencia, su entrenamiento y sus inventos.", d: 2, tema: "heroes" },
+  { pregunta: "¿Cuál de estos superhéroes es de DC y no de Marvel?", opciones: ["Thor", "Wolverine", "Aquaman", "Hulk"], correcta: 2, dato: "Marvel y DC son las dos editoriales de cómics de superhéroes más grandes.", d: 2, tema: "heroes" },
+  { pregunta: "¿Cuál de estos superhéroes es de Marvel y no de DC?", opciones: ["Batman", "Flash", "Linterna Verde", "Iron Man"], correcta: 3, dato: "Marvel nació en 1939 con el nombre de Timely Comics.", d: 2, tema: "heroes" },
+  { pregunta: "¿Qué héroe japonés gigante pelea contra monstruos y tiene una luz en el pecho?", opciones: ["Ultraman", "Mazinger Z", "Godzilla", "Astroboy"], correcta: 0, dato: "La luz de su pecho parpadea cuando se le acaba la energía.", d: 2, tema: "heroes" },
+  { pregunta: "¿Cómo se llamaba el luchador mexicano de máscara plateada que peleaba contra monstruos en el cine?", opciones: ["Blue Demon", "El Santo", "Rey Mysterio", "Místico"], correcta: 1, dato: "Lo llamaban «el Enmascarado de Plata».", d: 2, tema: "heroes" },
+  { pregunta: "¿Qué miembro de los 4 Fantásticos estira su cuerpo como si fuera de goma?", opciones: ["La Cosa", "La Antorcha Humana", "Mr. Fantástico", "La Mujer Invisible"], correcta: 2, dato: "Se llama Reed Richards y es un científico genio.", d: 2, tema: "heroes" },
+  { pregunta: "¿Qué villana de los X-Men tiene la piel azul y cambia de forma?", opciones: ["Tormenta", "Pícara", "Fénix", "Mística"], correcta: 3, dato: "En las películas más recientes la interpretó Jennifer Lawrence.", d: 2, tema: "heroes" },
+  { pregunta: "¿Qué villano de Superman es un general de Krypton?", opciones: ["El General Zod", "Brainiac", "Doomsday", "Darkseid"], correcta: 0, dato: "Su frase más famosa es «¡Arrodíllate ante Zod!».", d: 2, tema: "heroes" },
+  { pregunta: "¿En qué pueblo creció Clark Kent?", opciones: ["Metrópolis", "Smallville", "Gotham", "Riverdale"], correcta: 1, dato: "Smallville también fue una serie de televisión sobre Clark Kent joven.", d: 2, tema: "heroes" },
+  { pregunta: "¿Qué robot creado por Tony Stark se volvió villano en la segunda película de los Vengadores?", opciones: ["Visión", "J.A.R.V.I.S.", "Ultrón", "Viernes"], correcta: 2, dato: "La película se llamó Avengers: Era de Ultrón, de 2015.", d: 2, tema: "heroes" },
+  { pregunta: "En Bob Esponja, ¿cómo se llama el superhéroe favorito de Bob, compañero de Chico Percebe?", opciones: ["Aquaman", "Capitán Garfio", "Patricio Estrella", "Sirenoman"], correcta: 3, dato: "Los dos superhéroes ya son ancianos y viven en un asilo.", d: 2, tema: "heroes" },
+  { pregunta: "En Los Jóvenes Titanes, ¿cómo se llama el chico verde que se transforma en animales?", opciones: ["Chico Bestia", "Cyborg", "Robin", "Raven"], correcta: 0, dato: "El equipo lo lidera Robin.", d: 2, tema: "heroes" },
+  { pregunta: "¿Qué villano le rompió la espalda a Batman en los cómics de 1993?", opciones: ["Killer Croc", "Bane", "Dos Caras", "El Espantapájaros"], correcta: 1, dato: "Pasó en la historia «La caída del murciélago».", d: 3, tema: "heroes" },
+  { pregunta: "¿Cuál es el nombre real de Aquaman?", opciones: ["Oliver Queen", "Hal Jordan", "Arthur Curry", "Victor Stone"], correcta: 2, dato: "En el cine lo interpretó Jason Momoa.", d: 3, tema: "heroes" },
+  { pregunta: "¿Cuál es el nombre real del Linterna Verde más famoso?", opciones: ["Barry Allen", "Dick Grayson", "Billy Batson", "Hal Jordan"], correcta: 3, dato: "Hay miles de Linternas Verdes: forman una policía del universo.", d: 3, tema: "heroes" },
+  { pregunta: "¿Cuántos Vengadores formaron el equipo en la película de 2012?", opciones: ["6", "4", "5", "7"], correcta: 0, dato: "Eran Iron Man, Capitán América, Thor, Hulk, Viuda Negra y Ojo de Halcón.", d: 3, tema: "heroes" },
+  { pregunta: "¿De dónde viene Thanos?", opciones: ["De Xandar", "De Titán", "De Sakaar", "De Krypton"], correcta: 1, dato: "En los cómics, Titán es una luna de Saturno.", d: 3, tema: "heroes" },
+  { pregunta: "¿Cómo se llama la diosa de la muerte, hermana de Thor, en Thor: Ragnarok?", opciones: ["Gamora", "Nebula", "Hela", "Valquiria"], correcta: 2, dato: "La interpretó Cate Blanchett.", d: 3, tema: "heroes" },
+  { pregunta: "¿Quién es la hermana de Gamora, de piel azul y partes de metal?", opciones: ["Mantis", "Valquiria", "Shuri", "Nebula"], correcta: 3, dato: "Thanos crió a Gamora y a Nebula como hijas adoptivas.", d: 3, tema: "heroes" },
+  { pregunta: "¿Cuál es el nombre real del Ant-Man de las películas?", opciones: ["Scott Lang", "Hank Pym", "Peter Quill", "Clint Barton"], correcta: 0, dato: "Hank Pym fue el primer Ant-Man y le pasó el traje a Scott.", d: 3, tema: "heroes" },
+  { pregunta: "¿Cuál es el nombre real de Ojo de Halcón?", opciones: ["Sam Wilson", "Clint Barton", "James Rhodes", "Steve Rogers"], correcta: 1, dato: "Antes de los Vengadores era agente de S.H.I.E.L.D.", d: 3, tema: "heroes" },
+  { pregunta: "¿Cómo se llama el mejor amigo de Tony Stark que usa la armadura Máquina de Guerra?", opciones: ["Happy Hogan", "Sam Wilson", "James Rhodes", "Bucky Barnes"], correcta: 2, dato: "Tony le dice «Rhodey».", d: 3, tema: "heroes" },
+  { pregunta: "¿Cómo se llama el chofer y guardaespaldas de Tony Stark?", opciones: ["Phil Coulson", "Stan Lee", "James Rhodes", "Happy Hogan"], correcta: 3, dato: "Lo interpreta Jon Favreau, que dirigió la primera película de Iron Man.", d: 3, tema: "heroes" },
+  { pregunta: "¿Qué superhéroe de la Liga de la Justicia viene de Marte?", opciones: ["El Detective Marciano", "Linterna Verde", "Cyborg", "Hawkman"], correcta: 0, dato: "Puede cambiar de forma y leer mentes.", d: 3, tema: "heroes" },
+  { pregunta: "¿Cómo se llama la capa con vida propia del Doctor Strange?", opciones: ["El Manto Rojo", "La Capa de Levitación", "La Capa de Asgard", "El Ojo de Agamotto"], correcta: 1, dato: "El Ojo de Agamotto es su amuleto: adentro guardaba la Gema del Tiempo.", d: 3, tema: "heroes" },
+  { pregunta: "¿Cómo se llama el hechicero amigo del Doctor Strange que cuida la biblioteca?", opciones: ["Mordo", "Kaecilius", "Wong", "Dormammu"], correcta: 2, dato: "En las películas llega a ser el Hechicero Supremo.", d: 3, tema: "heroes" },
+  { pregunta: "¿Qué actor ganó el Óscar por interpretar al Guasón en 2019?", opciones: ["Heath Ledger", "Jared Leto", "Jack Nicholson", "Joaquin Phoenix"], correcta: 3, dato: "Heath Ledger también ganó un Óscar como el Guasón, por Batman: El caballero de la noche.", d: 3, tema: "heroes" },
+  { pregunta: "¿Qué actor fue Batman en la película The Batman, de 2022?", opciones: ["Robert Pattinson", "Ben Affleck", "Christian Bale", "Michael Keaton"], correcta: 0, dato: "Antes fue el vampiro Edward en Crepúsculo.", d: 3, tema: "heroes" },
+  { pregunta: "¿Qué actor fue Superman en El hombre de acero, de 2013?", opciones: ["Christopher Reeve", "Henry Cavill", "Brandon Routh", "David Corenswet"], correcta: 1, dato: "En 2025 se estrenó otro Superman, con David Corenswet.", d: 3, tema: "heroes" },
+  { pregunta: "¿Qué actor interpreta a Star-Lord?", opciones: ["Chris Evans", "Chris Hemsworth", "Chris Pratt", "Chris Pine"], correcta: 2, dato: "Chris Pine, en cambio, fue Steve Trevor en Mujer Maravilla.", d: 3, tema: "heroes" },
+  { pregunta: "¿Qué actor interpreta a Ant-Man?", opciones: ["Mark Ruffalo", "Jeremy Renner", "Tom Holland", "Paul Rudd"], correcta: 3, dato: "Mark Ruffalo es Hulk y Jeremy Renner es Ojo de Halcón.", d: 3, tema: "heroes" },
+  { pregunta: "¿Cómo se llama el villano de Pantera Negra (2018) que quería quedarse con el trono?", opciones: ["Killmonger", "Ulysses Klaue", "M'Baku", "Ultrón"], correcta: 0, dato: "Es primo de T'Challa.", d: 3, tema: "heroes" },
+  { pregunta: "¿Cómo se llama el robot gigante de anime que piloteaba Koji Kabuto?", opciones: ["Voltron", "Mazinger Z", "Gundam", "Evangelion"], correcta: 1, dato: "Lo creó Go Nagai en Japón, en 1972.", d: 3, tema: "heroes" },
+  { pregunta: "¿Qué héroe de la radionovela decía «Serenidad y paciencia, Solín»?", opciones: ["El Santo", "El Chapulín Colorado", "Kalimán", "Superman"], correcta: 2, dato: "Solín era el niño que lo acompañaba en sus aventuras.", d: 3, tema: "heroes" },
+  { pregunta: "¿Qué heroína de los X-Men le quita los poderes a quien toca?", opciones: ["Tormenta", "Kitty Pryde", "Jean Grey", "Pícara"], correcta: 3, dato: "Por eso casi siempre usa guantes.", d: 3, tema: "heroes" },
+  { pregunta: "¿Cómo se llama la escuela del Profesor X?", opciones: ["La Escuela Xavier", "La Academia Stark", "Hogwarts", "La Academia Umbrella"], correcta: 0, dato: "Está en una mansión en Westchester, Nueva York.", d: 3, tema: "heroes" },
+  { pregunta: "¿Qué gigante cósmico de Marvel se alimenta de planetas?", opciones: ["Thanos", "Galactus", "Ego", "Darkseid"], correcta: 1, dato: "Su mensajero es Silver Surfer, que viaja por el espacio en una tabla de surf.", d: 3, tema: "heroes" },
+  { pregunta: "En las películas de Marvel, ¿de qué color es la Gema del Tiempo?", opciones: ["Roja", "Azul", "Verde", "Morada"], correcta: 2, dato: "La Gema del Poder es morada y la del Espacio, azul.", d: 3, tema: "heroes" },
+  { pregunta: "¿Qué villano «mató» a Superman en los cómics de 1992?", opciones: ["Lex Luthor", "Darkseid", "Brainiac", "Doomsday"], correcta: 3, dato: "La historia se llamó «La muerte de Superman».", d: 3, tema: "heroes" },
+  { pregunta: "¿Cómo se llama el fotógrafo amigo de Clark Kent en el Daily Planet?", opciones: ["Jimmy Olsen", "Perry White", "Peter Parker", "Lex Luthor"], correcta: 0, dato: "Perry White es el jefe del periódico.", d: 3, tema: "heroes" },
+  { pregunta: "¿Cómo se llama el jefe de Peter Parker en el Daily Bugle?", opciones: ["Perry White", "J. Jonah Jameson", "Nick Fury", "Norman Osborn"], correcta: 1, dato: "Odia a Spider-Man y siempre dice que es una amenaza.", d: 3, tema: "heroes" },
+  { pregunta: "¿Cómo se llama la inteligencia artificial que reemplazó a J.A.R.V.I.S. en las armaduras de Tony Stark?", opciones: ["Karen", "Edith", "Viernes", "Ultrón"], correcta: 2, dato: "Karen, en cambio, es la inteligencia artificial del traje de Spider-Man.", d: 3, tema: "heroes" },
 ];
 
 /* ¿Cuánto crees?: preguntas sugeridas (también puedes escribir la tuya al lanzarla). */
@@ -223,18 +312,42 @@ const SUGERENCIAS_FOTO = [
   "Foto con el cumpleañero haciendo la pose de héroe",
   "Foto con alguien que lleve algo rojo",
   "Foto en tu mejor pose de superhéroe junto a la piñata",
+  "Foto imitando a Salvador volando, con el puño adelante",
 ];
 
 /* Charadas: ideas de palabras (en la fiesta escribes la que quieras). */
 const SUGERENCIAS_CHARADAS = [
   "Spider-Man", "Hulk", "Superman", "Batman", "Mujer Maravilla", "Thor", "Capitán América",
   "Flash", "Iron Man", "Aquaman", "Pantera Negra", "Cambiar un pañal", "Soplar las velas", "Romper la piñata",
+  "Salvador gateando", "Salvador volando",
 ];
 
-/* El villano infiltrado: palabras secretas posibles. */
+/* El villano infiltrado: el villano secreto que todos conocen menos el infiltrado. */
 const PALABRAS_VILLANO = [
-  "Piñata", "Torta", "Globo", "Capa", "Antifaz", "Velas", "Regalo", "Confeti", "Payaso", "Caramelo", "Sorpresa", "Mago",
+  "Thanos", "El Guasón", "Lex Luthor", "El Duende Verde", "Loki", "Magneto", "Doctor Octopus", "El Pingüino",
+  "Venom", "Ultrón", "Bane", "Hiedra Venenosa", "El Acertijo", "Dos Caras", "Mística", "Cráneo Rojo",
+  "Galactus", "Doctor Doom", "Darkseid", "Electro", "Darth Vader", "Voldemort", "Maléfica", "Freezer",
 ];
+// Otros nombres que también valen cuando el infiltrado trata de adivinar.
+const ALIAS_VILLANO = {
+  "El Guasón": ["Guasón", "Joker", "El Joker"], "Lex Luthor": ["Luthor", "Lex"], "El Duende Verde": ["Duende Verde", "Green Goblin"],
+  "Doctor Octopus": ["Dr. Octopus", "Doc Ock", "Octopus", "Doctor Pulpo"], "El Pingüino": ["Pingüino", "Penguin"], "Ultrón": ["Ultron"],
+  "Hiedra Venenosa": ["Poison Ivy"], "El Acertijo": ["Acertijo", "Riddler"], "Dos Caras": ["Two-Face", "Two Face"], "Mística": ["Mystique"],
+  "Cráneo Rojo": ["Red Skull"], "Doctor Doom": ["Dr. Doom", "Doctor Muerte", "Doom"], "Darth Vader": ["Vader"], "Maléfica": ["Malefica"],
+  "Freezer": ["Freeza", "Frieza", "Frezzer"],
+};
+
+/* Encuentra a tu dúo: parejas famosas (si son impares, un grupo es el trío del final). */
+const PAREJAS_DUO = [
+  ["Batman", "Robin"], ["Superman", "Lois Lane"], ["Spider-Man", "Mary Jane"], ["Mr. Increíble", "Elastigirl"],
+  ["Ladybug", "Cat Noir"], ["Ant-Man", "la Avispa"], ["Rocket", "Groot"], ["Thor", "Loki"],
+  ["Iron Man", "Pepper Potts"], ["Wolverine", "Deadpool"], ["Harley Quinn", "el Guasón"], ["Capitán América", "Bucky"],
+  ["Hulk", "Bruce Banner"], ["Aquaman", "Mera"], ["Pantera Negra", "Shuri"], ["Profesor X", "Magneto"],
+  ["Star-Lord", "Gamora"], ["Doctor Strange", "Wong"], ["Mujer Maravilla", "Steve Trevor"], ["Venom", "Eddie Brock"],
+  ["El Chapulín Colorado", "el Chipote Chillón"], ["Goku", "Vegeta"], ["Capitana Marvel", "Goose, la gata"], ["Cíclope", "Jean Grey"],
+  ["Woody", "Buzz Lightyear"], ["Mario", "Luigi"], ["Optimus Prime", "Bumblebee"], ["Shrek", "Burro"],
+];
+const TRIO_DUO = ["Bombón", "Burbuja", "Bellota"]; // Las Chicas Superpoderosas
 
 /* Agente secreto: lo que el agente tiene que lograr y la pregunta que confirma el otro. */
 const ACCIONES_AGENTE = [
@@ -250,6 +363,9 @@ const ACCIONES_AGENTE = [
   { agente: "Haz que {o} te diga su comida favorita.", objetivo: "¿{a} logró que le dijeras tu comida favorita?" },
   { agente: "Consigue que {o} se ría de algo que le digas.", objetivo: "¿{a} logró hacerte reír?" },
   { agente: "Logra que {o} te enseñe una foto de su celular.", objetivo: "¿{a} logró que le enseñaras una foto de tu celular?" },
+  { agente: "Haz que {o} te diga qué superpoder le daría a Salvador.", objetivo: "¿{a} logró que le dijeras qué superpoder le darías a Salvador?" },
+  { agente: "Logra que {o} imite la risa de Salvador.", objetivo: "¿{a} logró que imitaras la risa de Salvador?" },
+  { agente: "Haz que {o} te diga a quién se parece más Salvador: a papá o a mamá.", objetivo: "¿{a} logró que le dijeras a quién se parece más Salvador?" },
 ];
 
 /* Bingo de la Liga: los superhéroes que canta el anfitrión. Cada cartón toma 8 al azar
@@ -1098,6 +1214,59 @@ button.agente-fila:disabled { opacity: 0.5; cursor: default; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* Dúo: tu personaje y a quién buscas */
+.personaje-duo { text-align: center; align-items: center; gap: 6px; }
+.etiqueta-duo { font-family: var(--f-etiqueta); font-size: 20px; letter-spacing: 1px; color: var(--cafe); margin: 0; }
+.pagina .nombre-personaje { font-family: var(--f-titulo); font-size: clamp(36px, 11vw, 54px); line-height: 1; color: var(--amarillo); -webkit-text-stroke: 2px var(--tinta); paint-order: stroke fill; text-shadow: 3px 3px 0 var(--tinta); overflow-wrap: anywhere; margin-bottom: 6px; }
+.pagina .nombre-buscado { font-family: var(--f-titulo); font-size: clamp(30px, 9vw, 44px); line-height: 1.05; color: var(--rojo); -webkit-text-stroke: 1.5px var(--tinta); paint-order: stroke fill; text-shadow: 2px 2px 0 var(--tinta); overflow-wrap: anywhere; margin-bottom: 6px; }
+.tabla li.resta .val { color: var(--rojo); }
+
+/* Contador de preguntas sin usar (centro de mando) */
+.contador-preguntas { display: flex; align-items: center; gap: 12px; padding: 8px 12px 6px; background: var(--blanco); border: var(--borde); box-shadow: var(--sombra); }
+.contador-preguntas b { font-family: var(--f-titulo); font-weight: 400; font-size: 44px; line-height: 1; color: var(--azul); }
+.contador-preguntas span { font-size: 19px; line-height: 1.1; }
+.contador-preguntas small { display: block; font-size: 16px; color: var(--cafe); }
+
+/* Pregunta relámpago */
+.relampago-alerta { display: grid; justify-items: center; gap: 6px; padding-top: 10px; }
+.relampago-cuenta { font-family: var(--f-titulo); font-size: clamp(90px, 34vw, 150px); line-height: 1; color: var(--amarillo); -webkit-text-stroke: 3px var(--tinta); paint-order: stroke fill; text-shadow: 6px 6px 0 var(--tinta); animation: latido 0.5s ease-in-out infinite alternate; }
+.pagina .relampago-estado { font-family: var(--f-etiqueta); font-size: 22px; letter-spacing: 1px; color: var(--rojo-hondo); }
+
+/* Carrera: Salvador espera en la meta */
+.meta-salva { display: flex; justify-content: flex-end; align-items: center; gap: 8px; font-family: var(--f-etiqueta); font-size: 17px; letter-spacing: 1px; color: var(--blanco); text-shadow: 1px 1px 0 var(--tinta); }
+.cara-meta { width: 42px; height: 42px; border-radius: 50%; border: 3px solid var(--tinta); object-fit: cover; background: var(--amarillo); flex: none; }
+.cara-meta.sin-foto { display: grid; place-items: center; font-family: var(--f-titulo); color: var(--rojo); }
+
+/* Memoria con caras de Salvador */
+.pad.con-foto img { height: 74%; width: auto; max-width: 84%; aspect-ratio: 1; object-fit: cover; border-radius: 50%; border: 4px solid var(--tinta); background: var(--blanco); pointer-events: none; }
+
+/* Los globos de Salvador */
+.arena.globos-fondo { background: linear-gradient(180deg, #8cd3ff 0%, #c9ecff 70%, #fff3d2 100%); }
+.numeros.globos { gap: 10px 12px; }
+.numeros.globos .num { position: relative; border-radius: 50% 50% 46% 46% / 55% 55% 45% 45%; border: 3px solid var(--tinta); box-shadow: inset -6px -8px 0 rgba(0, 0, 0, 0.12), 2px 2px 0 var(--tinta); color: var(--blanco); -webkit-text-stroke: 1.5px var(--tinta); paint-order: stroke fill; transition: transform 0.12s ease-out, opacity 0.12s ease-out; }
+.numeros.globos .num::after { content: ""; position: absolute; left: 50%; bottom: -9px; width: 8px; height: 8px; margin-left: -4px; background: inherit; border: 2px solid var(--tinta); border-radius: 2px; transform: rotate(45deg); z-index: -1; }
+.numeros.globos .globo-0 { background-color: var(--rojo); }
+.numeros.globos .globo-1 { background-color: var(--azul); }
+.numeros.globos .globo-2 { background-color: var(--amarillo); }
+.numeros.globos .globo-3 { background-color: #27a35a; }
+.numeros.globos .globo-4 { background-color: #8e44ad; }
+.numeros.globos .globo-5 { background-color: #ff7a1a; }
+.numeros.globos .num.salvado { transform: scale(0.15); opacity: 0; box-shadow: none; }
+.numeros.globos .num.error { background-color: var(--tinta); }
+
+/* Sopla la vela de Salvador */
+.vela-crono { top: 7%; font-size: clamp(56px, 18vw, 86px); }
+.torta { position: absolute; left: 50%; top: 31%; width: min(52%, 210px); transform: translateX(-50%); pointer-events: none; }
+.torta svg { display: block; width: 100%; height: auto; }
+.torta .llama { transform-origin: 80px 36px; animation: llama 0.35s ease-in-out infinite alternate; }
+.torta .humo { opacity: 0; }
+.torta.soplada .llama { display: none; }
+.torta.soplada .humo { opacity: 1; animation: humo 1.2s ease-out forwards; }
+@keyframes llama { from { transform: scale(1, 1) rotate(-3deg); } to { transform: scale(0.92, 1.08) rotate(3deg); } }
+@keyframes humo { from { transform: translateY(0); opacity: 1; } to { transform: translateY(-18px); opacity: 0; } }
+.arena-texto.vela-pie { inset: auto 0 104px 0; padding: 0 16px; font-size: 26px; }
+.arena.mini .salva-ya { width: 34%; max-width: 80px; margin-bottom: 2px; }
 
 </style>
 </head>
@@ -4023,6 +4192,9 @@ function imgSalva(clave, clase) {
   img.src = src;
   return img;
 }
+// «¡YA!» con la cara de Salvador (se precarga para que aparezca al instante).
+const PRECARGA_SALVA = (() => { const src = imagenSalva("cara"); if (!src) return null; const i = new Image(); i.src = src; return i; })();
+function yaHTML() { const src = imagenSalva("cara"); return src ? `<img class="salva-ya" src="${esc(src)}" alt="">¡YA!` : "¡YA!"; }
 function svgPersona(tipo) {
   if (tipo === "villano") {
     return `<svg viewBox="0 0 40 40"><circle cx="20" cy="21" r="16" fill="#7d1016" stroke="#16130f" stroke-width="2.5"/><path d="${"M6 18c0-2.4 3-3.9 7-3.9 3.2 0 4.3 1.6 7 1.6s3.8-1.6 7-1.6c4 0 7 1.5 7 3.9 0 5.2-3.3 9.4-7.3 9.4-2.7 0-3.9-2.2-6.7-2.2s-4 2.2-6.7 2.2C9.3 27.4 6 23.2 6 18z"}" fill="#16130f"/><circle cx="14" cy="20" r="2.4" fill="#ffd21f"/><circle cx="26" cy="20" r="2.4" fill="#ffd21f"/><path d="M14 31q6-3 12 0" stroke="#16130f" stroke-width="2.5" fill="none"/></svg>`;
@@ -4057,6 +4229,7 @@ const MINIJUEGOS = {
           texto.innerHTML = "";
           if (cara) texto.append(cara);
           texto.append("¡YA!");
+          void PRECARGA_SALVA;
           t0 = performance.now();
           requestAnimationFrame((t) => { if (estado === "ya") t0 = Math.max(t0, t); });
         }, azar(1400, 3600));
@@ -4207,27 +4380,27 @@ const MINIJUEGOS = {
   },
 
   reloj: {
-    nombre: "Detén el reloj", icono: "reloj",
-    resumen: "Gana quien lo detenga más cerca de los 10 segundos.",
-    ayuda: "El cronómetro arranca y se esconde a los 3 segundos. Toca ¡ALTO! cuando creas que van exactamente 10 segundos. Solo hay un intento.",
+    nombre: "Sopla la vela de Salvador", icono: "reloj",
+    resumen: "Cuenta 10 segundos en tu mente y sopla la vela justo a tiempo.",
+    ayuda: "El reloj arranca y se esconde a los 3 segundos. Sigue contando en tu mente y toca ¡SOPLA! cuando creas que van exactamente 10 segundos. Solo hay un intento.",
     menorEsMejor: true,
     formato: (v) => `${(v / 1000).toFixed(2).replace(".", ",")} s de diferencia`,
     jugar(arena, terminar) {
-      arena.className = "arena";
+      arena.className = "arena noche";
       let t0 = 0, raf = 0, vivo = false, hecho = false, limite = 0;
       const crono = document.createElement("div");
-      crono.className = "cronometro";
+      crono.className = "cronometro vela-crono";
       crono.textContent = "0,00";
       arena.appendChild(crono);
+      const torta = document.createElement("div");
+      torta.className = "torta";
+      torta.innerHTML = tortaSVG();
+      arena.appendChild(torta);
       const pie = textoArena(arena, "");
-      pie.style.top = "auto";
-      pie.style.bottom = "16px";
-      pie.style.fontSize = "26px";
+      pie.classList.add("vela-pie");
       const b = document.createElement("button");
-      b.className = "boton-gigante";
-      b.style.top = "64%";
-      b.style.width = "min(46%, 180px)";
-      b.textContent = "¡ALTO!";
+      b.className = "boton-gigante abajo";
+      b.textContent = "¡SOPLA!";
       b.disabled = true;
       arena.appendChild(b);
       function paso(t) {
@@ -4245,6 +4418,7 @@ const MINIJUEGOS = {
         const s = (t - t0) / 1000;
         const dif = Math.abs(s - 10);
         crono.textContent = s.toFixed(2).replace(".", ",");
+        torta.classList.add("soplada");
         pie.innerHTML = `<small>${dif < 0.1 ? "¡PERFECTO!" : s < 10 ? "Te adelantaste" : "Te pasaste"}</small>`;
         vibrar(40);
         setTimeout(() => terminar(Math.round(dif * 1000)), 1500);
@@ -4254,7 +4428,7 @@ const MINIJUEGOS = {
         b.disabled = false;
         vivo = true;
         t0 = performance.now();
-        pie.innerHTML = "<small>Detenlo en 10,00</small>";
+        pie.innerHTML = "<small>Sopla a los 10,00</small>";
         raf = requestAnimationFrame(paso);
       });
       return () => { vivo = false; quitar(); cancelAnimationFrame(raf); clearTimeout(limite); };
@@ -4262,9 +4436,9 @@ const MINIJUEGOS = {
   },
 
   memoria: {
-    nombre: "Memoria de héroe", icono: "memoria",
-    resumen: "Repite la secuencia, que cada vez es más larga.",
-    ayuda: "Mira el orden en que se encienden los botones y repítelo. Cada ronda suma uno más. Un error y se acaba.",
+    nombre: "La memoria de Salvador", icono: "memoria",
+    resumen: "Repite el orden en que se encienden las caras de Salvador; cada vez es más largo.",
+    ayuda: "Mira el orden en que se encienden las caras de Salvador y repítelo tocándolas. Cada ronda suma una más. Un error y se acaba.",
     menorEsMejor: false,
     formato: (v) => `nivel ${fmt(v)}`,
     jugar(arena, terminar) {
@@ -4276,7 +4450,9 @@ const MINIJUEGOS = {
       aviso.style.fontSize = "22px";
       const pads = document.createElement("div");
       pads.className = "pads bloqueado";
-      pads.innerHTML = iconos.map((ic, i) => `<button class="pad" data-i="${i}" aria-label="${ic}">${icono(ic)}</button>`).join("");
+      const fotos = ["caraPoder", "caraZas", "cara", "caraComic"].map(imagenSalva);
+      const conFotos = fotos.every(Boolean);
+      pads.innerHTML = iconos.map((ic, i) => `<button class="pad${conFotos ? " con-foto" : ""}" data-i="${i}" aria-label="Botón ${i + 1}">${conFotos ? `<img src="${esc(fotos[i])}" alt="" draggable="false">` : icono(ic)}</button>`).join("");
       arena.appendChild(pads);
       const botones = $$(".pad", pads);
       let secuencia = [], paso = 0, nivel = 0, vivo = true, t0 = performance.now();
@@ -4337,17 +4513,17 @@ const MINIJUEGOS = {
   },
 
   rescate: {
-    nombre: "Rescate en orden", icono: "numeros",
-    resumen: "Toca del 1 al 20 en orden, lo más rápido posible.",
-    ayuda: "Rescata a los 20 ciudadanos tocando los números del 1 al 20 en orden. Cada error suma 1 segundo.",
+    nombre: "Los globos de Salvador", icono: "numeros",
+    resumen: "Revienta en orden, del 1 al 20, los globos del cumple de Salvador.",
+    ayuda: "Revienta los 20 globos del cumpleaños de Salvador tocando los números del 1 al 20 en orden, lo más rápido que puedas. Cada globo equivocado suma 1 segundo.",
     menorEsMejor: true,
     formato: (v) => `${(v / 1000).toFixed(1).replace(".", ",")} s`,
     jugar(arena, terminar) {
-      arena.className = "arena papel";
+      arena.className = "arena globos-fondo";
       const m = marcadorArena(arena, "Busca el 1");
       const caja = document.createElement("div");
-      caja.className = "numeros";
-      caja.innerHTML = barajar(Array.from({ length: 20 }, (_, i) => i + 1)).map((n) => `<button class="num" data-n="${n}">${n}</button>`).join("");
+      caja.className = "numeros globos";
+      caja.innerHTML = barajar(Array.from({ length: 20 }, (_, i) => i + 1)).map((n) => `<button class="num globo-${n % 6}" data-n="${n}">${n}</button>`).join("");
       caja.style.visibility = "hidden";
       arena.appendChild(caja);
       let siguiente = 1, castigo = 0, t0 = 0, vivo = false;
@@ -4360,7 +4536,8 @@ const MINIJUEGOS = {
           b.classList.add("salvado");
           siguiente++;
           vibrar(15);
-          if (siguiente > 20) { vivo = false; m.textContent = "¡Todos a salvo!"; terminar(Math.round(performance.now() - t0 + castigo)); return; }
+          Sonido.tocar("toque");
+          if (siguiente > 20) { vivo = false; m.textContent = "¡Feliz cumple, Salva!"; terminar(Math.round(performance.now() - t0 + castigo)); return; }
           m.textContent = `Busca el ${siguiente}`;
         } else if (!b.classList.contains("salvado")) {
           castigo += 1000;
@@ -4585,6 +4762,19 @@ const MINIJUEGOS = {
   },
 };
 
+// La torta de cumpleaños con la vela del 1 (dibujo propio).
+function tortaSVG() {
+  return `<svg viewBox="0 0 160 150" aria-hidden="true">` +
+    `<g class="llama"><path d="M80 6c7 10 11 17 11 24a11 11 0 0 1-22 0c0-7 4-14 11-24z" fill="#ff9f1c" stroke="#16130f" stroke-width="2.5"/><path d="M80 18c3 5 5 9 5 12a5 5 0 0 1-10 0c0-3 2-7 5-12z" fill="#ffe66b"/></g>` +
+    `<g class="humo"><path d="M80 34c-6-6 6-10 0-16s6-10 0-16" fill="none" stroke="#e8e2d0" stroke-width="4" stroke-linecap="round"/></g>` +
+    `<path d="M72 46l10-6h4v40h-9V53l-5 3z" fill="#2a5fd0" stroke="#16130f" stroke-width="2.5" stroke-linejoin="round"/>` +
+    `<rect x="14" y="80" width="132" height="30" rx="6" fill="#ff8fb3" stroke="#16130f" stroke-width="3"/>` +
+    `<path d="M14 92c11 8 22 8 33 0s22-8 33 0 22 8 33 0 22-8 33 0" fill="none" stroke="#fff3d2" stroke-width="5"/>` +
+    `<rect x="6" y="108" width="148" height="34" rx="6" fill="#ffd21f" stroke="#16130f" stroke-width="3"/>` +
+    `<circle cx="34" cy="125" r="4" fill="#d62b1f"/><circle cx="62" cy="125" r="4" fill="#2a5fd0"/><circle cx="98" cy="125" r="4" fill="#d62b1f"/><circle cx="126" cy="125" r="4" fill="#2a5fd0"/>` +
+    `<path d="M80 116l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z" fill="#d62b1f" stroke="#16130f" stroke-width="1.5"/></svg>`;
+}
+
 // Edificios de Barranco al pie de la arena de vuelo.
 function ciudadSVG() {
   const edificios = [[0, 58, 46], [40, 90, 34], [70, 44, 40], [106, 76, 30], [132, 104, 44], [172, 52, 36], [204, 86, 40], [240, 62, 34], [270, 96, 46], [312, 48, 48]];
@@ -4629,9 +4819,11 @@ function introHTML(tipo, extra) {
 }
 function practicaHecha(id) { return almacenAgente.get(`liga2:practica:${id}`) === "1"; }
 function marcarPractica(id) { almacenAgente.set(`liga2:practica:${id}`, "1"); }
+// Puntos con signo: +100, −50 o 0.
+function ptsTexto(p) { p = Math.round(Number(p) || 0); return p > 0 ? `+${fmt(p)}` : p < 0 ? `−${fmt(-p)}` : "0"; }
 function filaResultado(S, r, i, yo) {
-  return `<li class="${r.id === yo ? "yo" : ""}"><span class="pos">${r.pos || i + 1}</span>${poderHTML(poderDeAgente(S, r.id))}` +
-    `<span class="nom">${esc(nombreDe(S, r.id))}</span><span class="val">+${fmt(r.pts)}<small>${esc(r.txt || "")}</small></span></li>`;
+  return `<li class="${r.id === yo ? "yo" : ""}${Number(r.pts) < 0 ? " resta" : ""}"><span class="pos">${r.pos || i + 1}</span>${poderHTML(poderDeAgente(S, r.id))}` +
+    `<span class="nom">${esc(nombreDe(S, r.id))}</span><span class="val">${ptsTexto(r.pts)}<small>${esc(r.txt || "")}</small></span></li>`;
 }
 function tablaParcial(S, filas, yo, limite) {
   const lista = limite ? filas.slice(0, limite) : filas;
@@ -4812,6 +5004,26 @@ function elegirPreguntas(n, tema, usadas) {
   } else elegidas = porDificultad(libres, n);
   return elegidas.slice(0, n).sort((a, b) => (a.q.d || 2) - (b.q.d || 2)).map((x) => x.i);
 }
+// Preguntas que ya salieron en la fiesta (trivia y relámpago): no se repiten mientras queden otras.
+function preguntasUsadas(S) { return new Set(Object.keys((S && S.triviaUsadas) || {}).map((k) => Number(String(k).replace("q", "")))); }
+function estadoPreguntas(S) {
+  const usadas = preguntasUsadas(S);
+  const r = { total: PREGUNTAS.length, libres: 0, heroes: { total: 0, libres: 0 }, salvador: { total: 0, libres: 0 } };
+  PREGUNTAS.forEach((q, i) => {
+    const t = (q.tema || "heroes") === "salvador" ? r.salvador : r.heroes;
+    t.total++;
+    if (!usadas.has(i)) { t.libres++; r.libres++; }
+  });
+  return r;
+}
+function notaPreguntas(S, tema, n) {
+  const e = estadoPreguntas(S);
+  const libres = tema === "salvador" ? e.salvador.libres : tema === "heroes" ? e.heroes.libres : e.libres;
+  return `<div class="contador-preguntas"><b>${fmt(e.libres)}</b><span>preguntas sin usar de ${fmt(e.total)}<small>${fmt(e.heroes.libres)} de superhéroes · ${fmt(e.salvador.libres)} de Salvador</small></span></div>` +
+    `<p class="suave">Cada pregunta que sale queda marcada y no se repite en la fiesta.${e.libres < e.total ? ` Ya salieron ${fmt(e.total - e.libres)}.` : ""}</p>` +
+    (n && libres < n ? `<p class="error">${libres ? `Solo quedan ${libres} sin usar de este tema: se completará con algunas que ya salieron.` : "Ya salieron todas las de este tema: se repetirán. Elige otro tema."}</p>` : "");
+}
+function segundosTexto(ms) { return `${(Math.max(0, Number(ms) || 0) / 1000).toFixed(1).replace(".", ",")} s`; }
 // Las opciones se muestran en otro orden en cada ronda: así nadie aprende «la primera siempre es».
 function ordenPregunta(sub, k) { return ((sub.orden || [])[k]) || [0, 1, 2, 3]; }
 function correctaMostrada(sub, k) { return ordenPregunta(sub, k).indexOf(PREGUNTAS[sub.indices[k]].correcta); }
@@ -4826,8 +5038,9 @@ TIPOS.trivia = {
     { id: "cantidad", tipo: "opciones", etiqueta: "Preguntas en esta ronda", opciones: [[3, "3"], [5, "5"], [8, "8"], [10, "10"]], defecto: 5 },
     { id: "segundos", tipo: "opciones", etiqueta: "Tiempo por pregunta", opciones: [[15, "15 s"], [20, "20 s"], [30, "30 s"]], defecto: 20 },
   ],
+  notaLanzar(S, cfg) { return notaPreguntas(S, cfg.tema || "mixta", Number(cfg.cantidad) || 5); },
   lanzar(cfg, ctx) {
-    const usadas = new Set(Object.keys(ctx.S.triviaUsadas || {}).map((k) => Number(String(k).replace("q", ""))));
+    const usadas = preguntasUsadas(ctx.S);
     const n = Number(cfg.cantidad) || 5;
     const indices = elegirPreguntas(n, cfg.tema || "mixta", usadas);
     const orden = indices.map(() => barajar([0, 1, 2, 3]));
@@ -4993,6 +5206,143 @@ TIPOS.trivia = {
     },
   },
 };
+/* ---------- Pregunta relámpago: una pregunta sorpresa; gana quien acierta primero ---------- */
+const PREMIOS_RELAMPAGO = [100, 50, 25];
+const CUENTA_RELAMPAGO_MS = 6000;
+function elegirRelampago(tema, usadas) {
+  const delTema = PREGUNTAS.map((q, i) => ({ q, i })).filter((x) => tema === "mixta" || (x.q.tema || "heroes") === tema);
+  const libres = delTema.filter((x) => !usadas.has(x.i));
+  const lista = libres.length ? libres : delTema;
+  const rapidas = lista.filter((x) => (x.q.d || 2) <= 2); // fáciles o medias: hay que responder rápido
+  const de = rapidas.length ? rapidas : lista;
+  return de[Math.floor(Math.random() * de.length)].i;
+}
+TIPOS.relampago = {
+  id: "relampago", nombre: "Pregunta relámpago", icono: "rayo", cat: "celular", entraSolo: true,
+  resumen: "Una pregunta sorpresa salta en todos los celulares a la vez: el primero que acierta gana.",
+  ayuda: "Salta una pregunta en todos los celulares a la vez. Tienes un solo intento: el primero que acierta gana 100 puntos; el segundo, 50, y el tercero, 25.",
+  campos: [
+    { id: "tema", tipo: "opciones", etiqueta: "Pregunta sobre", opciones: [["mixta", "Mixta"], ["heroes", "Superhéroes"], ["salvador", "Salvador"]], defecto: "mixta" },
+    { id: "segundos", tipo: "opciones", etiqueta: "Tiempo para responder", opciones: [[15, "15 s"], [20, "20 s"], [30, "30 s"]], defecto: 20 },
+  ],
+  notaLanzar(S, cfg) { return notaPreguntas(S, cfg.tema || "mixta", 1); },
+  lanzar(cfg, ctx) {
+    const q = elegirRelampago(cfg.tema || "mixta", preguntasUsadas(ctx.S));
+    ctx.T.escribir(`trivia/usadas/q${q}`, true);
+    return { mision: { fase: "juego", sub: { q, orden: barajar([0, 1, 2, 3]), inicio: ctx.ahora() + CUENTA_RELAMPAGO_MS, limiteMs: (Number(cfg.segundos) || 20) * 1000 } } };
+  },
+  pregunta(sub) {
+    const q = PREGUNTAS[sub.q] || PREGUNTAS[0], orden = sub.orden || [0, 1, 2, 3];
+    return { q, opciones: orden.map((i) => q.opciones[i]), correcta: orden.indexOf(q.correcta) };
+  },
+  respuestas(ctx) {
+    const { correcta } = this.pregunta(ctx.m.sub);
+    return Object.entries((ctx.mj && ctx.mj.resp) || {}).filter(([id, r]) => ctx.S.agentes[id] && r)
+      .map(([id, r]) => ({ id, ms: Number(r.ms) || 0, ok: Number(r.o) === correcta })).sort((a, b) => (b.ok - a.ok) || (a.ms - b.ms));
+  },
+  cerrar(ctx) {
+    const filas = this.respuestas(ctx).map((r, k) => ({ id: r.id, pos: k + 1, pts: r.ok ? PREMIOS_RELAMPAGO[k] || 0 : 0, txt: r.ok ? `acertó en ${segundosTexto(r.ms)}` : "se equivocó" }));
+    ctx.premiar(filas);
+  },
+  detalleHistorial(ctx) { return this.pregunta(ctx.m.sub).q.pregunta; },
+  resultadoExtra(m) {
+    const { q, opciones, correcta } = this.pregunta(m.sub || {});
+    return `<section class="pagina"><span class="cap">La pregunta</span><p class="pregunta-texto">${esc(q.pregunta)}</p><p>Respuesta: <b>${esc(opciones[correcta])}</b></p>${q.dato ? `<div class="globo"><strong>Dato curioso:</strong> ${esc(q.dato)}</div>` : ""}</section>`;
+  },
+  host: {
+    clave(ctx) { return ctx.ahora() < ctx.m.sub.inicio ? "cuenta" : "pregunta"; },
+    html(ctx) {
+      const s = ctx.m.sub, { q, opciones, correcta } = TIPOS.relampago.pregunta(s);
+      return `<section class="pagina"><span class="cap roja">Pregunta relámpago</span><p class="relampago-estado" data-vivo="estado"></p><p class="pregunta-texto">${esc(q.pregunta)}</p>` +
+        `<div class="mecha-fila"><div class="mecha"><i></i></div><span class="segundos" data-vivo="segundos"></span></div>` +
+        `<div class="opciones mirando">${opciones.map((o, i) => `<div class="opcion ${i === correcta ? "correcta" : "apagada"}" data-o="${i}">${FORMAS_OPCION[i]}<span>${esc(o)}</span></div>`).join("")}</div>` +
+        `<p class="suave" data-vivo="respondieron"></p><div data-vivo="aciertos"></div><button class="boton blanco" data-accion="cerrar-ya">Cerrar y dar puntos</button></section>`;
+    },
+    actualizar(ctx, raiz) {
+      const s = ctx.m.sub, ahora = ctx.ahora();
+      const e = $('[data-vivo="estado"]', raiz);
+      const txt = ahora < s.inicio ? `Sale en los celulares en ${Math.ceil((s.inicio - ahora) / 1000)}…` : "¡En juego! Gana el primero que acierta.";
+      if (e && e.textContent !== txt) e.textContent = txt;
+      const queda = ahora < s.inicio ? s.limiteMs : s.inicio + s.limiteMs - ahora;
+      const i = $(".mecha i", raiz); if (i) i.style.width = clamp((queda / s.limiteMs) * 100, 0, 100) + "%";
+      const sg = $('[data-vivo="segundos"]', raiz); if (sg) sg.textContent = String(Math.max(0, Math.ceil(queda / 1000)));
+      const resp = TIPOS.relampago.respuestas(ctx);
+      const r = $('[data-vivo="respondieron"]', raiz);
+      if (r) { const t = `Respondieron ${resp.length} de ${agentesValidos(ctx.S.agentes).filter((a) => a.conectado !== false).length} conectados.`; if (r.textContent !== t) r.textContent = t; }
+      const ok = resp.filter((x) => x.ok).slice(0, 3);
+      const a = $('[data-vivo="aciertos"]', raiz);
+      if (a) {
+        const h = ok.length ? tablaParcial(ctx.S, ok.map((x, k) => ({ id: x.id, pos: k + 1, txt: `${segundosTexto(x.ms)} · +${PREMIOS_RELAMPAGO[k]}` }))) : "";
+        if (a.dataset.h !== h) { a.dataset.h = h; a.innerHTML = h; }
+      }
+    },
+    click(accion, el, ctx) { if (accion === "cerrar-ya") ctx.cerrarMision(); },
+    tic(ctx) {
+      const s = ctx.m.sub, ahora = ctx.ahora();
+      if (ahora < s.inicio) return;
+      const resp = TIPOS.relampago.respuestas(ctx);
+      const conectados = agentesValidos(ctx.S.agentes).filter((a) => a.conectado !== false);
+      const todos = conectados.length > 0 && conectados.every((a) => resp.some((r) => r.id === a.id));
+      const podio = resp.filter((r) => r.ok).length >= PREMIOS_RELAMPAGO.length;
+      if (ahora > s.inicio + s.limiteMs + GRACIA_MS) { ctx.cerrarMision(); return; }
+      if ((todos || podio) && ctx.local.cierre === undefined) ctx.local.cierre = ahora + 1500; // un respiro por si llega otra respuesta
+      if (ctx.local.cierre !== undefined && ahora > ctx.local.cierre) ctx.cerrarMision();
+    },
+  },
+  jugador: {
+    clave(ctx) {
+      const s = ctx.m.sub, ahora = ctx.ahora();
+      if (ahora < s.inicio) return "cuenta";
+      const r = ((ctx.mj && ctx.mj.resp) || {})[ctx.yo];
+      if (r || ctx.local.enviada) return `resp:${r ? r.o : ctx.local.elegida}`;
+      return ahora > s.inicio + s.limiteMs ? "fin" : "pregunta";
+    },
+    html(ctx) {
+      const s = ctx.m.sub, clave = this.clave(ctx), { q, opciones, correcta } = TIPOS.relampago.pregunta(s);
+      if (clave === "cuenta") {
+        return `<div class="relampago-alerta"><div class="estallido"><div><strong>¡Pregunta relámpago!</strong></div></div>` +
+          `<p class="relampago-cuenta" data-vivo="cuenta"></p><p class="centro">Prepárate: <b>un solo intento</b>. El primero que acierta gana 100 puntos.</p></div>`;
+      }
+      if (clave === "fin") return `<div class="estallido azul"><div><strong>¡Se acabó el tiempo!</strong></div></div><p class="centro">Espera los resultados…</p>`;
+      if (clave.startsWith("resp")) {
+        const r = ((ctx.mj && ctx.mj.resp) || {})[ctx.yo];
+        const o = r ? Number(r.o) : ctx.local.elegida;
+        const ok = o === correcta;
+        return `<div class="estallido ${ok ? "" : "rojo"}"><div><strong>${ok ? "¡Correcto!" : "¡Uy!"}</strong><b>${ok ? segundosTexto(r ? r.ms : ctx.local.ms) : "no era esa"}</b></div></div>` +
+          `<p class="centro">${ok ? "¡Bien! Esperando a ver quién fue el más rápido…" : "Al final verás la respuesta correcta."}</p>`;
+      }
+      return `<section class="pagina"><span class="cap roja">Pregunta relámpago</span><p class="pregunta-texto">${esc(q.pregunta)}</p></section>` +
+        `<div class="mecha-fila"><div class="mecha"><i></i></div><span class="segundos" data-vivo="segundos"></span></div>` +
+        `<div class="opciones">${opciones.map((o, i) => `<button class="opcion" data-o="${i}" data-accion="responder-rel">${FORMAS_OPCION[i]}<span>${esc(o)}</span></button>`).join("")}</div>`;
+    },
+    actualizar(ctx, raiz) {
+      const s = ctx.m.sub, ahora = ctx.ahora();
+      const c = $('[data-vivo="cuenta"]', raiz);
+      if (c) { const t = String(Math.max(1, Math.ceil((s.inicio - ahora) / 1000))); if (c.textContent !== t) { c.textContent = t; Sonido.tocar("tic"); } }
+      const queda = s.inicio + s.limiteMs - ahora;
+      const i = $(".mecha i", raiz); if (i) i.style.width = clamp((queda / s.limiteMs) * 100, 0, 100) + "%";
+      const sg = $('[data-vivo="segundos"]', raiz); if (sg) sg.textContent = String(Math.max(0, Math.ceil(queda / 1000)));
+    },
+    click(accion, el, ctx) {
+      if (accion !== "responder-rel" || ctx.local.enviada) return;
+      const s = ctx.m.sub, ms = Math.round(ctx.ahora() - s.inicio);
+      if (ms < -300 || ms > s.limiteMs + 250) return;
+      ctx.local.enviada = true;
+      ctx.local.elegida = Number(el.dataset.o);
+      ctx.local.ms = clamp(ms, 0, s.limiteMs);
+      ctx.T.escribir(`mj/${ctx.m.id}/resp/${ctx.yo}`, { o: ctx.local.elegida, ms: ctx.local.ms });
+      const ok = ctx.local.elegida === TIPOS.relampago.pregunta(s).correcta;
+      Sonido.tocar(ok ? "exito" : "error");
+      vibrar(ok ? [40, 50, 40] : 160);
+      ctx.pintar();
+    },
+    efectos(ctx, clave) {
+      if (clave === "cuenta" && !ctx.local.avisado) { ctx.local.avisado = true; Sonido.tocar("alerta"); vibrar([300, 120, 300]); }
+      if (clave === "pregunta" && !ctx.local.salio) { ctx.local.salio = true; Sonido.tocar("inicio"); vibrar(60); }
+    },
+  },
+};
+
 function pintarMechaPregunta(raiz, s, ahora) {
   const t = ahora - s.inicio;
   let f;
@@ -5321,7 +5671,7 @@ TIPOS.ultimo = {
       }
       if (!L.t0 && !L.hecho && ctx.ahora() >= s.go) {
         arena.className = "arena amarilla";
-        $('[data-vivo="aviso"]', arena).innerHTML = "¡YA!";
+        $('[data-vivo="aviso"]', arena).innerHTML = yaHTML();
         L.t0 = performance.now();
         requestAnimationFrame((t) => { L.t0 = Math.max(L.t0, t); });
       }
@@ -5354,7 +5704,7 @@ TIPOS.carrera = {
     let mostrar = lista.slice(0, 6);
     if (yo && !mostrar.find((c) => c.id === yo)) { const mio = lista.find((c) => c.id === yo); if (mio) mostrar = mostrar.slice(0, 5).concat([mio]); }
     const resto = lista.length - mostrar.length;
-    return `<div class="pista">${mostrar.map((c) => `<div class="carril ${c.id === yo ? "yo" : ""}"><span class="meta"></span><div class="corredor" style="left:calc(${(c.pasos / PASOS_META) * 100}% - ${(c.pasos / PASOS_META) * 96}px)">${poderHTML(poderDeAgente(ctx.S, c.id))}<span>${esc(nombreDe(ctx.S, c.id))}</span></div></div>`).join("")}</div>` +
+    return `<div class="pista"><div class="meta-salva"><span>¡Salvador te espera en la meta!</span>${caraSalvadorHTML("cara-meta")}</div>${mostrar.map((c) => `<div class="carril ${c.id === yo ? "yo" : ""}"><span class="meta"></span><div class="corredor" style="left:calc(${(c.pasos / PASOS_META) * 100}% - ${(c.pasos / PASOS_META) * 96}px)">${poderHTML(poderDeAgente(ctx.S, c.id))}<span>${esc(nombreDe(ctx.S, c.id))}</span></div></div>`).join("")}</div>` +
       (resto > 0 ? `<p class="nota centro">y ${plural(resto, "corredor más", "corredores más")}</p>` : "");
   },
   cerrar(ctx) {
@@ -5526,11 +5876,11 @@ TIPOS.charadas = {
 /* ---------- El villano infiltrado ---------- */
 TIPOS.infiltrado = {
   id: "infiltrado", nombre: "El villano infiltrado", icono: "antifaz", cat: "fiesta", usaSala: true,
-  resumen: "Todos tienen una palabra secreta menos el villano. Conversen y voten.",
-  ayuda: "Todos reciben una palabra secreta, menos el villano. Conversen haciéndose preguntas sin decir la palabra. Al final, voten quién es el villano.",
+  resumen: "Todos saben qué villano anda suelto, menos el infiltrado. Den pistas sin decir su nombre y voten.",
+  ayuda: "Todos reciben en secreto el nombre de un villano (por ejemplo, Thanos), menos el infiltrado. Den pistas sobre ese villano sin decir su nombre: el infiltrado no sabe cuál es y tiene que disimular. Al final voten quién es el infiltrado.",
   campos: [
     { id: "minutos", tipo: "opciones", etiqueta: "Tiempo para conversar", opciones: [[2, "2 min"], [3, "3 min"], [5, "5 min"]], defecto: 3 },
-    { id: "palabra", tipo: "texto", etiqueta: "Palabra secreta (opcional)", sugerencias: PALABRAS_VILLANO, defecto: "" },
+    { id: "palabra", tipo: "texto", etiqueta: "Villano secreto (opcional: si lo dejas vacío, sale uno al azar)", sugerencias: PALABRAS_VILLANO, defecto: "" },
   ],
   empezar(ctx) {
     const jugadores = barajar(listosDe(ctx));
@@ -5553,7 +5903,8 @@ TIPOS.infiltrado = {
     const atrapados = villanos.filter((id) => max > 0 && (cuenta[id] || 0) === max);
     const palabra = revelar(s.palabra);
     const acerto = {};
-    villanos.forEach((id) => { acerto[id] = compararRespuesta(adiv[id] || "", palabra) === "exacta"; });
+    const nombres = [palabra].concat(ALIAS_VILLANO[palabra] || []);
+    villanos.forEach((id) => { acerto[id] = nombres.some((n) => compararRespuesta(adiv[id] || "", n) === "exacta"); });
     return { cuenta, villanos, atrapados, palabra, acerto, votos };
   },
   cerrar(ctx) {
@@ -5561,9 +5912,9 @@ TIPOS.infiltrado = {
     const filas = ctx.m.sub.jugadores.filter((id) => ctx.S.agentes[id]).map((id) => {
       let pts = 0, txt = "";
       if (r.villanos.includes(id)) {
-        if (!r.atrapados.includes(id)) { pts += 150; txt = "villano que escapó"; } else txt = "villano atrapado";
-        if (r.acerto[id]) { pts += 100; txt += " y adivinó la palabra"; }
-      } else if (r.villanos.includes(r.votos[id])) { pts = 100; txt = "descubrió al villano"; }
+        if (!r.atrapados.includes(id)) { pts += 150; txt = "infiltrado que escapó"; } else txt = "infiltrado atrapado";
+        if (r.acerto[id]) { pts += 100; txt += " y adivinó el villano"; }
+      } else if (r.villanos.includes(r.votos[id])) { pts = 100; txt = "descubrió al infiltrado"; }
       else txt = r.votos[id] ? "votó mal" : "no votó";
       return { id, pts, txt };
     }).sort((a, b) => b.pts - a.pts);
@@ -5573,12 +5924,12 @@ TIPOS.infiltrado = {
     clave(ctx) { return ctx.m.sub.estado; },
     html(ctx) {
       const s = ctx.m.sub;
-      if (s.estado === "roles") return `<section class="pagina"><span class="cap">Roles repartidos</span><p>${plural(s.jugadores.length, "agente", "agentes")}, ${plural(s.nv, "villano", "villanos")}. Pídeles que miren su secreto sin mostrarlo.</p><p>Palabra: <b>${esc(revelar(s.palabra))}</b></p><button class="boton rojo" data-accion="charla">Empezar a conversar</button></section>`;
-      if (s.estado === "charla") return `<section class="pagina"><span class="cap">Conversación</span><p>Que se hagan preguntas sobre la palabra sin decirla.</p><div class="mecha-fila"><div class="mecha"><i></i></div><span class="segundos" data-vivo="tiempo"></span></div><button class="boton rojo" data-accion="votar">Pasar a la votación</button></section>`;
+      if (s.estado === "roles") return `<section class="pagina"><span class="cap">Roles repartidos</span><p>${plural(s.jugadores.length, "agente", "agentes")}, ${plural(s.nv, "infiltrado", "infiltrados")}. Pídeles que miren su secreto sin mostrarlo.</p><p>Villano secreto: <b>${esc(revelar(s.palabra))}</b></p><button class="boton rojo" data-accion="charla">Empezar a conversar</button></section>`;
+      if (s.estado === "charla") return `<section class="pagina"><span class="cap">Conversación</span><p>Que den pistas sobre el villano sin decir su nombre. El infiltrado tiene que disimular.</p><div class="mecha-fila"><div class="mecha"><i></i></div><span class="segundos" data-vivo="tiempo"></span></div><button class="boton rojo" data-accion="votar">Pasar a la votación</button></section>`;
       if (s.estado === "votacion") return `<section class="pagina"><span class="cap">Votación</span><p data-vivo="votos"></p><div class="mecha-fila"><div class="mecha"><i></i></div><span class="segundos" data-vivo="tiempo"></span></div><button class="boton rojo" data-accion="revelar">Revelar al villano</button></section>`;
       const r = TIPOS.infiltrado.resumen_(ctx);
-      return `<section class="pagina"><span class="cap">Revelación</span><h2 class="titulo chico">${r.villanos.length > 1 ? "Los villanos eran" : "El villano era"}</h2><ul class="chips">${r.villanos.map((id) => chipAgente(ctx.S, id, r.atrapados.includes(id) ? "fuera" : "yo")).join("")}</ul>` +
-        `<p>La palabra era <b>${esc(r.palabra)}</b>.</p><button class="boton rojo" data-accion="cerrar-ya">Dar puntos</button></section>`;
+      return `<section class="pagina"><span class="cap">Revelación</span><h2 class="titulo chico">${r.villanos.length > 1 ? "Los infiltrados eran" : "El infiltrado era"}</h2><ul class="chips">${r.villanos.map((id) => chipAgente(ctx.S, id, r.atrapados.includes(id) ? "fuera" : "yo")).join("")}</ul>` +
+        `<p>El villano secreto era <b>${esc(r.palabra)}</b>.</p><button class="boton rojo" data-accion="cerrar-ya">Dar puntos</button></section>`;
     },
     actualizar(ctx, raiz) {
       const s = ctx.m.sub;
@@ -5617,23 +5968,23 @@ TIPOS.infiltrado = {
       if (!s.jugadores.includes(ctx.yo)) return `<section class="pagina"><span class="cap">En curso</span><p>Esta misión empezó sin ti. Espera la siguiente.</p></section><button class="boton bloque" data-accion="cuartel">Volver al cuartel</button>`;
       const rol = ((ctx.mj && ctx.mj.roles) || {})[ctx.yo];
       const secreto = rol === "v"
-        ? botonSecreto(`<p class="palabra">¡Eres el villano!</p><p>No sabes la palabra. Escucha, disimula y trata de descubrirla.</p>`)
-        : botonSecreto(`<p>Eres de la Liga. La palabra es:</p><p class="palabra">${esc(revelar(s.palabra))}</p>`);
+        ? botonSecreto(`<p class="palabra">¡Eres el infiltrado!</p><p>No sabes qué villano anda suelto. Escucha las pistas, disimula y trata de adivinarlo.</p>`)
+        : botonSecreto(`<p>Eres de la Liga. El villano que anda suelto es:</p><p class="palabra">${esc(revelar(s.palabra))}</p><p>Da pistas sin decir su nombre.</p>`);
       if (s.estado === "roles") return `<section class="pagina"><span class="cap">Tu secreto</span><p>Míralo sin que nadie vea tu pantalla.</p>${secreto}</section><p class="centro nota">Espera a que el anfitrión diga que empiecen a conversar.</p>`;
-      if (s.estado === "charla") return `<section class="pagina"><span class="cap">A conversar</span><p>Hazles preguntas a los demás sobre la palabra, sin decirla. El villano tratará de disimular.</p><div class="mecha-fila"><div class="mecha"><i></i></div><span class="segundos" data-vivo="tiempo"></span></div></section><section class="pagina"><span class="cap">Tu secreto</span>${secreto}</section>`;
+      if (s.estado === "charla") return `<section class="pagina"><span class="cap">A conversar</span><p>Den pistas y háganse preguntas sobre el villano, sin decir su nombre. El infiltrado tratará de disimular.</p><div class="mecha-fila"><div class="mecha"><i></i></div><span class="segundos" data-vivo="tiempo"></span></div></section><section class="pagina"><span class="cap">Tu secreto</span>${secreto}</section>`;
       if (s.estado === "votacion") {
         const voto = ((ctx.mj && ctx.mj.votos) || {})[ctx.yo];
         if (voto) return `<section class="pagina"><span class="cap">Votaste</span><p>Votaste por <b>${esc(nombreDe(ctx.S, voto))}</b>. Esperando a los demás…</p></section>`;
         const otros = s.jugadores.filter((id) => id !== ctx.yo && ctx.S.agentes[id]);
-        return `<section class="pagina"><span class="cap">¿Quién es el villano?</span><div class="mecha-fila"><div class="mecha"><i></i></div><span class="segundos" data-vivo="tiempo"></span></div>` +
-          (rol === "v" ? `<div class="campo-grupo"><label class="etiqueta" for="adivina">¿Cuál crees que es la palabra?</label><input class="campo" id="adivina" autocomplete="off"></div>` : "") +
+        return `<section class="pagina"><span class="cap">¿Quién es el infiltrado?</span><div class="mecha-fila"><div class="mecha"><i></i></div><span class="segundos" data-vivo="tiempo"></span></div>` +
+          (rol === "v" ? `<div class="campo-grupo"><label class="etiqueta" for="adivina">¿Qué villano crees que era? Si aciertas, ganas 100 más</label><input class="campo" id="adivina" autocomplete="off"></div>` : "") +
           `<div class="lista-objetivos">${otros.map((id) => `<button class="boton blanco" data-accion="votar" data-id="${id}">${esc(nombreDe(ctx.S, id))}</button>`).join("")}</div></section>`;
       }
       const r = TIPOS.infiltrado.resumen_(ctx);
       const soyV = rol === "v";
       const gane = soyV ? !r.atrapados.includes(ctx.yo) : r.villanos.includes(r.votos[ctx.yo]);
       return `<div class="estallido ${gane ? "" : "rojo"}"><div><strong>${gane ? "¡Bien hecho!" : "¡Fallaste!"}</strong></div></div>` +
-        `<section class="pagina"><span class="cap">Revelación</span><p>${r.villanos.length > 1 ? "Los villanos eran" : "El villano era"}: <b>${r.villanos.map((id) => esc(nombreDe(ctx.S, id))).join(" y ")}</b>.</p><p>La palabra era <b>${esc(r.palabra)}</b>.</p></section>`;
+        `<section class="pagina"><span class="cap">Revelación</span><p>${r.villanos.length > 1 ? "Los infiltrados eran" : "El infiltrado era"}: <b>${r.villanos.map((id) => esc(nombreDe(ctx.S, id))).join(" y ")}</b>.</p><p>El villano secreto era <b>${esc(r.palabra)}</b>.</p></section>`;
     },
     actualizar(ctx, raiz) {
       const s = ctx.m.sub;
@@ -5667,10 +6018,11 @@ function opcionesBomba(b) {
   const orden = b.o || [0, 1, 2, 3];
   return { q, opciones: orden.map((i) => q.opciones[i]), correcta: orden.indexOf(q.correcta) };
 }
+const PUNTOS_BOMBA = 50;
 TIPOS.bomba = {
   id: "bomba", nombre: "La bomba de la Liga", icono: "bomba", cat: "fiesta", usaSala: true,
-  resumen: "Papa caliente con preguntas: respóndela bien para que la bomba salte a otro.",
-  ayuda: "Si te cae la bomba, tu celular suena y te sale una pregunta. Respóndela bien y la bomba salta a otro agente al azar; si fallas, te toca otra pregunta. Explota en un momento al azar que nadie conoce. Son 3 bombas: en cada explosión, quien la tiene no suma y los demás sí.",
+  resumen: "Papa caliente con preguntas: respóndela bien para que la bomba salte a otro. A quien le explota, pierde puntos.",
+  ayuda: `Si te cae la bomba, tu celular suena y te sale una pregunta. Respóndela bien y la bomba salta a otro agente al azar; si fallas, te toca otra pregunta. Explota en un momento al azar que nadie conoce. Son 3 bombas: a quien le explote en las manos se le restan ${PUNTOS_BOMBA} puntos.`,
   campos: [],
   nuevaBomba(ctx, k, jugadores, evitar) {
     const posibles = jugadores.filter((id) => id !== evitar && ctx.S.agentes[id]);
@@ -5688,18 +6040,27 @@ TIPOS.bomba = {
   },
   cerrar(ctx) {
     const s = ctx.m.sub, vict = Object.values(s.victimas || {});
+    const mult = ctx.m.doble ? 2 : 1;
     const filas = s.jugadores.filter((id) => ctx.S.agentes[id]).map((id) => {
       const quemado = vict.filter((v) => v === id).length;
-      const pts = (vict.length - quemado) * 50;
-      return { id, pts, txt: quemado ? `le explotó ${quemado === 1 ? "una vez" : quemado + " veces"}` : "¡nunca le explotó!" };
+      // Se restan 50 por explosión, sin bajar de cero (premiar multiplica por 2 si vale doble).
+      const tiene = Math.max(0, totalDe(ctx.S, id));
+      const resta = Math.min(quemado * PUNTOS_BOMBA * mult, tiene);
+      const pts = -Math.floor(resta / mult);
+      const txt = !quemado ? "¡se salvó!" : `le explotó ${quemado === 1 ? "una vez" : quemado + " veces"}${resta < quemado * PUNTOS_BOMBA * mult ? (tiene ? " (perdió lo que tenía)" : " (no tenía puntos)") : ""}`;
+      return { id, pts, txt };
     }).sort((a, b) => b.pts - a.pts);
     ctx.premiar(filas, true);
+  },
+  detalleHistorial(ctx) {
+    const v = Array.from(new Set(Object.values((ctx.m.sub && ctx.m.sub.victimas) || {})));
+    return v.length ? `Explotó a ${v.map((id) => nombreDe(ctx.S, id)).join(", ")}` : "";
   },
   host: {
     clave(ctx) { const s = ctx.m.sub; return `${s.k}:${s.estado}`; },
     html(ctx) {
       const s = ctx.m.sub;
-      if (s.estado === "pausa") return `<section class="pagina"><span class="cap">¡BOOM!</span><h2 class="titulo chico">Le explotó a ${esc(nombreDe(ctx.S, s.victimas["b" + s.k]))}</h2><p>${s.k < 3 ? "La siguiente bomba sale en unos segundos." : "Fue la última bomba."}</p></section>`;
+      if (s.estado === "pausa") return `<section class="pagina"><span class="cap">¡BOOM!</span><h2 class="titulo chico">Le explotó a ${esc(nombreDe(ctx.S, s.victimas["b" + s.k]))}</h2><p>Pierde ${PUNTOS_BOMBA} puntos. ${s.k < 3 ? "La siguiente bomba sale en unos segundos." : "Fue la última bomba."}</p></section>`;
       return `<section class="pagina"><span class="cap">Bomba ${s.k} de 3</span><p data-vivo="quien"></p><p class="suave">Explota sola en un momento al azar. Puedes leer la pregunta en voz alta para darle suspenso.</p><div data-vivo="pregunta"></div>` +
         `<button class="boton blanco" data-accion="cerrar-ya">Terminar y dar puntos</button></section>`;
     },
@@ -5747,7 +6108,7 @@ TIPOS.bomba = {
         const victima = s.estado === "pausa" ? s.victimas["b" + s.k] : b.holder;
         const yo = victima === ctx.yo;
         return `<div class="estallido rojo"><div><strong>¡BOOM!</strong><b>${yo ? "¡A ti!" : esc(nombreDe(ctx.S, victima))}</b></div></div>` +
-          `<p class="centro">${yo ? "Te explotó en las manos. No sumas esta vez." : `Le explotó a ${esc(nombreDe(ctx.S, victima))}. ¡Tú sumas 50!`}</p>` +
+          `<p class="centro">${yo ? `Te explotó en las manos: pierdes ${PUNTOS_BOMBA} puntos.` : `Le explotó a ${esc(nombreDe(ctx.S, victima))}: pierde ${PUNTOS_BOMBA} puntos. ¡Tú te salvaste!`}</p>` +
           `<p class="centro nota">${s.k < 3 ? "Atento: viene otra bomba." : "Esa fue la última bomba."}</p>`;
       }
       if (b.q === undefined) return `<p class="centro latido">Encendiendo la mecha…</p>`;
@@ -5908,31 +6269,37 @@ TIPOS.agente = {
   },
 };
 
-/* ---------- Encuentra a tu dúo ---------- */
-const COLORES_DUO = ["#d62b1f", "#2a5fd0", "#ffd21f", "#27a35a", "#8e44ad", "#ff7a1a", "#00a6b4", "#e84393", "#6d4c41", "#16130f"];
+/* ---------- Encuentra a tu dúo: cada uno es un personaje y busca a su pareja ---------- */
 TIPOS.duo = {
   id: "duo", nombre: "Encuentra a tu dúo", icono: "dos", cat: "fiesta", usaSala: true,
-  resumen: "Cada celular muestra medio emblema; busca la otra mitad.",
-  ayuda: "Tu celular muestra un pedazo de emblema. Busca a la persona que tiene el resto, comparen pantallas y escribe su código de agente.",
+  resumen: "Cada uno es un personaje y busca a su pareja: Batman busca a Robin.",
+  ayuda: "Tu celular te dice qué personaje eres y a quién buscar: si eres Batman, buscas a Robin. Pregunta en voz alta hasta encontrarlo y escribe su código de agente. Los primeros en encontrarse ganan más.",
   campos: [{ id: "minutos", tipo: "opciones", etiqueta: "Tiempo", opciones: [[3, "3 min"], [5, "5 min"], [10, "10 min"]], defecto: 5 }],
   empezar(ctx) {
     const lista = barajar(listosDe(ctx));
     if (lista.length < 2) { avisar("Se necesitan al menos 2 agentes listos."); return false; }
     const grupos = [];
     for (let i = 0; i < lista.length; i += 2) grupos.push(lista.slice(i, i + 2));
+    // Si sobra uno, el último grupo es un trío.
     if (grupos.length > 1 && grupos[grupos.length - 1].length === 1) grupos[grupos.length - 2].push(grupos.pop()[0]);
-    const iconos = barajar(PODERES.map((p) => p.id));
-    const g = grupos.map((miembros, i) => ({ miembros, icono: iconos[i % iconos.length], color: COLORES_DUO[Math.floor(i / iconos.length) % COLORES_DUO.length === 0 ? i % COLORES_DUO.length : (i + 3) % COLORES_DUO.length] }));
+    const parejas = barajar(PAREJAS_DUO.slice());
+    let k = 0;
+    const g = grupos.map((miembros) => {
+      if (miembros.length === 3) return { miembros, personajes: TRIO_DUO.slice() };
+      const p = parejas[k % parejas.length];
+      const vuelta = Math.floor(k / parejas.length); // solo si hay más de 56 jugadores
+      k++;
+      const personajes = barajar(p.slice()).map((n) => (vuelta ? `${n} ${vuelta + 1}` : n));
+      return { miembros, personajes };
+    });
     ctx.T.actualizar("mision", { fase: "juego", cierra: ctx.ahora() + (Number((ctx.m.cfg || {}).minutos) || 5) * 60000, sub: { grupos: g } });
     return true;
   },
   miGrupo(ctx, id) { const gs = (ctx.m.sub && ctx.m.sub.grupos) || []; const i = gs.findIndex((g) => (g.miembros || []).includes(id)); return i < 0 ? null : Object.assign({ i }, gs[i]); },
-  emblema(g, parte) {
-    const n = g.miembros.length;
-    const ancho = 100 / n;
-    return `<svg class="medio-emblema" viewBox="0 0 100 100" aria-label="Pedazo de emblema"><defs><clipPath id="corte"><rect x="${parte * ancho}" y="0" width="${ancho}" height="100"/></clipPath></defs>` +
-      `<g clip-path="url(#corte)"><circle cx="50" cy="50" r="46" fill="${g.color}" stroke="#16130f" stroke-width="5"/><g transform="translate(18 18) scale(2.67)"><path d="${ICONOS[g.icono] || ICONOS.estrella}" fill="#fffdf4" stroke="#16130f" stroke-width="0.9" fill-rule="evenodd"/></g></g>` +
-      `<rect x="${parte * ancho}" y="0" width="${ancho}" height="100" fill="none" stroke="#16130f" stroke-width="2" stroke-dasharray="4 4"/></svg>`;
+  personajeDe(g, id) { const k = (g.miembros || []).indexOf(id); return ((g.personajes || [])[k]) || "Héroe"; },
+  nombreGrupo(g) {
+    const p = g.personajes || [];
+    return p.length === 3 ? "Las Chicas Superpoderosas" : `${p[0] || ""} y ${p[1] || ""}`;
   },
   completados(ctx) { return Object.entries((ctx.mj && ctx.mj.completo) || {}).map(([g, c]) => ({ g: Number(g.slice(1)), t: c.t })).sort((a, b) => a.t - b.t); },
   cerrar(ctx) {
@@ -5940,16 +6307,16 @@ TIPOS.duo = {
     const filas = [];
     comp.forEach((c, k) => {
       const g = ctx.m.sub.grupos[c.g];
-      (g.miembros || []).forEach((id) => { if (ctx.S.agentes[id]) filas.push({ id, pos: k + 1, pts: puntosPorPuesto(k + 1, ctx.m.sub.grupos.length), txt: `dúo a los ${marcaTiempo(ctx, c.t)}` }); });
+      (g.miembros || []).forEach((id) => { if (ctx.S.agentes[id]) filas.push({ id, pos: k + 1, pts: puntosPorPuesto(k + 1, ctx.m.sub.grupos.length), txt: `${this.personajeDe(g, id)} · a los ${marcaTiempo(ctx, c.t)}` }); });
     });
     ctx.premiar(filas);
   },
   host: {
     clave() { return "duo"; },
     html(ctx) {
-      return `<section class="pagina"><span class="cap">${plural(ctx.m.sub.grupos.length, "grupo", "grupos")}</span><p>Los agentes buscan a quien tiene la otra parte de su emblema.</p>` +
+      return `<section class="pagina"><span class="cap">${plural(ctx.m.sub.grupos.length, "pareja", "parejas")}</span><p>Cada agente es un personaje y busca a su pareja: Batman busca a Robin.</p>` +
         `<div class="mecha-fila"><div class="mecha"><i></i></div><span class="segundos" data-vivo="tiempo"></span></div>` +
-        `<button class="boton rojo" data-accion="cerrar-ya">Cerrar y dar puntos</button></section><section class="pagina"><span class="cap">Completados</span><div data-vivo="lista"></div></section>`;
+        `<button class="boton rojo" data-accion="cerrar-ya">Cerrar y dar puntos</button></section><section class="pagina"><span class="cap">Se encontraron</span><div data-vivo="lista"></div></section>`;
     },
     actualizar(ctx, raiz) {
       const queda = ctx.m.cierra - ctx.ahora(), total = ctx.m.cierra - ctx.m.abierta;
@@ -5958,7 +6325,10 @@ TIPOS.duo = {
       const l = $('[data-vivo="lista"]', raiz);
       if (l) {
         const comp = TIPOS.duo.completados(ctx);
-        const h = comp.length ? `<ol class="tabla">${comp.map((c, k) => `<li><span class="pos">${k + 1}</span><span></span><span class="nom">${ctx.m.sub.grupos[c.g].miembros.map((id) => esc(nombreDe(ctx.S, id))).join(" y ")}</span><span class="val">${marcaTiempo(ctx, c.t)}</span></li>`).join("")}</ol>` : `<p class="suave">Ningún grupo completo todavía.</p>`;
+        const h = comp.length ? `<ol class="tabla">${comp.map((c, k) => {
+          const g = ctx.m.sub.grupos[c.g];
+          return `<li><span class="pos">${k + 1}</span><span></span><span class="nom">${esc(TIPOS.duo.nombreGrupo(g))}<small>${g.miembros.map((id) => esc(nombreDe(ctx.S, id))).join(" y ")}</small></span><span class="val">${marcaTiempo(ctx, c.t)}</span></li>`;
+        }).join("")}</ol>` : `<p class="suave">Ninguna pareja se encontró todavía.</p>`;
         if (l.dataset.h !== h) { l.dataset.h = h; l.innerHTML = h; }
       }
       if (TIPOS.duo.completados(ctx).length >= ctx.m.sub.grupos.length && ctx.local.todos !== true) { ctx.local.todos = true; setTimeout(() => ctx.cerrarMision(), 2500); }
@@ -5971,14 +6341,20 @@ TIPOS.duo = {
     html(ctx) {
       const g = TIPOS.duo.miGrupo(ctx, ctx.yo);
       if (!g) return `<section class="pagina"><span class="cap">En curso</span><p>Esta misión empezó sin ti.</p></section><button class="boton bloque" data-accion="cuartel">Volver al cuartel</button>`;
-      const parte = g.miembros.indexOf(ctx.yo);
-      const faltan = g.miembros.length - 1;
+      const yo = TIPOS.duo.personajeDe(g, ctx.yo);
+      const otros = g.miembros.filter((id) => id !== ctx.yo);
+      const buscados = otros.map((id) => TIPOS.duo.personajeDe(g, id));
+      const codigo = (ctx.S.agentes[ctx.yo] || {}).codigo || "–";
       if (((ctx.mj && ctx.mj.completo) || {})["g" + g.i]) {
-        return `<div class="estallido"><div><strong>¡Dúo completo!</strong></div></div><p class="centro">Tu grupo: <b>${g.miembros.map((id) => esc(nombreDe(ctx.S, id))).join(", ")}</b>.</p><button class="boton bloque" data-accion="cuartel">Volver al cuartel</button>`;
+        return `<div class="estallido"><div><strong>¡Se encontraron!</strong></div></div>` +
+          `<section class="pagina personaje-duo"><span class="cap">${g.miembros.length > 2 ? "Trío completo" : "Dúo completo"}</span><p class="nombre-buscado">${esc(TIPOS.duo.nombreGrupo(g))}</p>` +
+          `<p>${g.miembros.map((id) => `<b>${esc(TIPOS.duo.personajeDe(g, id))}</b>: ${esc(nombreDe(ctx.S, id))}`).join("<br>")}</p></section><button class="boton bloque" data-accion="cuartel">Volver al cuartel</button>`;
       }
-      return `<section class="pagina"><span class="cap">Tu pedazo de emblema</span>${TIPOS.duo.emblema(g, parte)}` +
-        `<p>Busca ${faltan === 1 ? "a la persona que tiene la otra mitad" : "a las 2 personas que tienen el resto (tu emblema tiene 3 partes)"}. Cuando ${faltan === 1 ? "la encuentres, escribe su código" : "las encuentres, escribe sus códigos"} de agente.</p>` +
-        `<form data-form="duo" class="columna">${Array.from({ length: faltan }, (_, k) => `<div class="campo-grupo"><label class="etiqueta" for="cod${k}">Código de agente</label><input class="campo" id="cod${k}" inputmode="numeric" maxlength="3" autocomplete="off"></div>`).join("")}` +
+      return `<section class="pagina personaje-duo"><span class="cap">Tu personaje</span><p class="etiqueta-duo">Tú eres</p><p class="nombre-personaje">${esc(yo)}</p>` +
+        `<p class="etiqueta-duo">${buscados.length > 1 ? "Busca a tus hermanas" : "Busca a"}</p><p class="nombre-buscado">${buscados.map(esc).join(" y ")}</p>` +
+        `<p>Pregunta en voz alta: «¿Quién es ${esc(buscados[0])}?». Cuando lo encuentres, escribe su código de agente: está en su pantalla.</p></section>` +
+        `<div class="mi-codigo"><span>Tu código de agente</span><b>${esc(codigo)}</b><small>Muéstraselo a tu pareja</small></div>` +
+        `<section class="pagina"><form data-form="duo" class="columna">${otros.map((id, k) => `<div class="campo-grupo"><label class="etiqueta" for="cod${k}">Código de ${esc(TIPOS.duo.personajeDe(g, id))}</label><input class="campo codigo-grande" id="cod${k}" inputmode="numeric" pattern="[0-9]*" maxlength="3" autocomplete="off"></div>`).join("")}` +
         `<p class="error" data-vivo="error"></p><button class="boton rojo bloque" type="submit">¡Lo encontré!</button></form><p class="suave" data-vivo="queda"></p></section>`;
     },
     actualizar(ctx, raiz) { const q = $('[data-vivo="queda"]', raiz); if (q) q.textContent = `Se cierra en ${reloj(ctx.m.cierra - ctx.ahora())}.`; },
@@ -5988,9 +6364,10 @@ TIPOS.duo = {
       const codigos = $$("input", form).map((i) => i.value.trim());
       const ids = codigos.map((c) => Object.keys(ctx.S.agentes).find((id) => ctx.S.agentes[id].codigo === c));
       const otros = g.miembros.filter((id) => id !== ctx.yo);
-      if (codigos.some((c) => !c)) { err.textContent = codigos.length > 1 ? "Escribe los dos códigos: tu emblema tiene 3 partes." : "Escribe el código de tu compañero."; vibrar(80); return; }
-      if (ids.some((id) => !id)) { err.textContent = "Ese código no existe. Revísalo en la pantalla de tu compañero."; vibrar(80); return; }
-      if (!otros.every((id) => ids.includes(id))) { err.textContent = "¡No es tu dúo! Sigue buscando."; vibrar(120); return; }
+      if (codigos.some((c) => !c)) { err.textContent = codigos.length > 1 ? "Escribe los dos códigos: son tres personajes." : "Escribe el código de tu pareja."; vibrar(80); return; }
+      if (ids.some((id) => !id)) { err.textContent = "Ese código no existe. Revísalo en la pantalla de tu pareja."; vibrar(80); return; }
+      if (ids.includes(ctx.yo)) { err.textContent = "Ese es tu propio código: escribe el de tu pareja."; vibrar(80); return; }
+      if (!otros.every((id) => ids.includes(id))) { err.textContent = `¡Ese no es ${TIPOS.duo.personajeDe(g, otros[0])}! Sigue buscando.`; vibrar(120); return; }
       ctx.T.transaccion(`mj/${ctx.m.id}/completo/g${g.i}`, (a) => (a ? undefined : { t: ctx.ahora(), por: ctx.yo }));
       vibrar([40, 50, 40]);
       Sonido.tocar("exito");
@@ -6136,28 +6513,29 @@ const PASOS = {
   supervelocidad: ["Espera la cuenta regresiva: 3, 2, 1.", "Toca ¡VUELA! sin parar durante 10 segundos: cada toque sube a Salvador 10 metros.", "Gana quien lo haga volar más alto."],
   cuanto: ["Lee la pregunta.", "Escribe tu número y envíalo. Puedes cambiarlo hasta que se cierre.", "Gana quien quede más cerca del número real."],
   villano: ["Se asoman personajes por las ventanas durante 20 segundos.", "Toca a los villanos (antifaz negro): suman 1.", "¡A Salvador no! Si tocas su carita, resta 1."],
-  reloj: ["El cronómetro arranca y se esconde a los 3 segundos.", "Sigue contando en tu cabeza.", "Toca ¡ALTO! cuando creas que van 10 segundos exactos."],
-  memoria: ["Mira el orden en que se encienden los botones.", "Repítelo tocando en el mismo orden.", "Cada ronda suma uno más. Un error y se acaba."],
-  rescate: ["Busca el 1 y tócalo, luego el 2, el 3…", "Llega hasta el 20 lo más rápido que puedas.", "Cada número equivocado suma 1 segundo."],
+  reloj: ["El reloj arranca y se esconde a los 3 segundos.", "Sigue contando en tu cabeza.", "Toca ¡SOPLA! cuando creas que van 10 segundos exactos: gana quien sopla más justo."],
+  memoria: ["Mira el orden en que se encienden las caras de Salvador.", "Repítelo tocándolas en el mismo orden.", "Cada ronda suma una más. Un error y se acaba."],
+  rescate: ["Revienta el globo 1, luego el 2, el 3…", "Llega hasta el 20 lo más rápido que puedas.", "Cada globo equivocado suma 1 segundo."],
   capa: ["Salvador aparece unos segundos y desaparece.", "Fíjate dónde está el escudo de su pecho.", "Toca donde estaba. Son 3 intentos."],
   impostor: ["Todas las caras de Salvador son iguales menos una.", "Encuéntrala y tócala: una foto entre dibujos, un dibujo entre fotos, una cara al revés…", "Son 5 niveles. Cada error suma 2 segundos."],
   estrellas: ["Arrastra el dedo para mover a Salvador.", "Atrapa las estrellas: suman 1.", "Esquiva las bombas: restan 3. Dura 25 segundos."],
-  ultimo: ["Espera con el dedo listo: la pantalla está oscura.", "Cuando se ponga AMARILLA, toca.", "Los más lentos de cada ronda quedan fuera. Si tocas antes de tiempo, te avisamos una vez; la segunda, quedas fuera."],
-  carrera: ["Cuando arranque, toca IZQUIERDO y DERECHO, alternando.", "Cada toque alternado es un paso.", "Gana quien llega primero a la meta: 150 pasos. ¡Aguanta hasta el final!"],
+  ultimo: ["Espera con el dedo listo: la pantalla está oscura.", "Cuando se ponga AMARILLA y aparezca Salvador, toca.", "Los más lentos de cada ronda quedan fuera. Si tocas antes de tiempo, te avisamos una vez; la segunda, quedas fuera."],
+  carrera: ["Cuando arranque, toca IZQUIERDO y DERECHO, alternando.", "Cada toque alternado es un paso.", "Salvador te espera en la meta, a 150 pasos. ¡Gana quien llega primero!"],
   foto: ["Lee el reto de foto.", "Ve al lugar, toca Tomar foto y luego Enviar.", "El primero en llegar gana más puntos."],
   charadas: ["Mira la mímica del anfitrión.", "Escribe la palabra en tu celular y envíala, sin decirla en voz alta.", "El primero en escribirla bien gana la ronda."],
   agente: ["Mantén presionado para ver tu misión secreta: nadie más debe verla.", "Cúmplela sin que se note.", "Toca ¡Misión cumplida!: tu objetivo lo confirma en su celular."],
-  duo: ["Tu pantalla muestra un pedazo de emblema.", "Busca a quien tiene la otra parte: comparen pantallas.", "Escribe su código de agente, que está en su pantalla."],
+  duo: ["Tu celular te dice qué personaje eres y a quién buscar: si eres Batman, buscas a Robin.", "Pregunta en voz alta hasta encontrar a tu pareja.", "Escribe su código de agente, que está en su pantalla. Los primeros en encontrarse ganan más."],
   bingo: ["El anfitrión canta superhéroes en voz alta y salen en tu pantalla.", "Si el que cantan está en tu cartón, tócalo para marcarlo. El centro es Salvador: ya viene marcado.", "Gana quien llene su cartón primero. ¡Atento, que no se marca solo!"],
-  infiltrado: ["Mantén presionado para ver tu secreto: la palabra o «Eres el villano».", "Conversen haciendo preguntas sin decir la palabra.", "Voten quién es el villano. El villano gana si no lo descubren."],
-  bomba: ["Si te cae la bomba, tu celular suena y te sale una pregunta.", "Respóndela bien y la bomba salta a otro agente al azar. Si fallas, te toca otra pregunta.", "Explota en un momento al azar. Quien la tenga no suma; los demás, sí."],
+  infiltrado: ["Mantén presionado para ver tu secreto: el nombre de un villano o «Eres el infiltrado».", "Den pistas sobre ese villano sin decir su nombre. El infiltrado no sabe cuál es: tiene que disimular.", "Voten quién es el infiltrado. Si no lo descubren, gana él."],
+  bomba: ["Si te cae la bomba, tu celular suena y te sale una pregunta.", "Respóndela bien y la bomba salta a otro agente al azar. Si fallas, te toca otra pregunta.", "Explota en un momento al azar: a quien la tenga en las manos se le restan 50 puntos."],
 };
+PASOS.relampago = ["Cuando el anfitrión la lanza, tu celular suena y en unos segundos sale la pregunta.", "Tienes un solo intento: toca la respuesta correcta lo más rápido que puedas.", "El primero que acierta gana 100 puntos; el segundo, 50, y el tercero, 25."];
 const PRACTICA_DE = { trivia: "pregunta", ultimo: "reflejos", carrera: "carrera", bomba: "pregunta:bomba", duo: "codigo:duo", infiltrado: "secreto", agente: "secreto" };
 for (const [id, pasos] of Object.entries(PASOS)) if (TIPOS[id]) TIPOS[id].pasos = pasos;
 for (const [id, p] of Object.entries(PRACTICA_DE)) if (TIPOS[id]) TIPOS[id].practica = p;
 
 const CATEGORIAS = [
-  { id: "celular", titulo: "En el celular", tipos: ["trivia", "reflejos", "supervelocidad", "cuanto", "villano", "reloj", "memoria", "rescate", "capa", "impostor", "estrellas", "ultimo", "carrera"] },
+  { id: "celular", titulo: "En el celular", tipos: ["trivia", "relampago", "reflejos", "supervelocidad", "cuanto", "villano", "reloj", "memoria", "rescate", "capa", "impostor", "estrellas", "ultimo", "carrera"] },
   { id: "fiesta", titulo: "En la fiesta", tipos: ["foto", "charadas", "agente", "duo", "bingo", "infiltrado", "bomba"] },
 ];
 
@@ -6371,7 +6749,7 @@ const PRACTICAS = {
       poner("noche", "Espera…<small>Todavía no toques</small>");
       espera = setTimeout(() => {
         estado = "ya";
-        poner("amarilla", "¡YA!");
+        poner("amarilla", yaHTML());
         t0 = performance.now();
         requestAnimationFrame((t) => { if (estado === "ya") t0 = Math.max(t0, t); });
       }, azar(1300, 3200));
@@ -6652,6 +7030,19 @@ function crearBots(T, S, opc) {
             const buena = correctaMostrada(sub, sub.k);
             const o = acierta ? buena : alAzar([0, 1, 2, 3].filter((x) => x !== buena));
             T.escribir(`mj/${m.id}/resp/q${sub.k}/${b.id}`, { o, ms: clamp(Math.round(T.ahora() - ini), 0, sub.limiteMs) });
+          }
+        }
+        return;
+      }
+      case "relampago": {
+        if (ahora < sub.inicio) return;
+        const resp = mj.resp || {};
+        const { correcta } = TIPOS.relampago.pregunta(sub);
+        for (const b of lista) {
+          if (resp[b.id]) continue;
+          if (toca(`rl:${m.id}:${b.id}`, ahora, () => (Math.random() < 0.85 ? sub.inicio + azar(2200, Math.max(3000, sub.limiteMs * (0.9 - 0.5 * b.bot))) : null))) {
+            const o = Math.random() < 0.35 + 0.5 * b.bot ? correcta : alAzar([0, 1, 2, 3].filter((x) => x !== correcta));
+            T.escribir(`mj/${m.id}/resp/${b.id}`, { o, ms: clamp(Math.round(T.ahora() - sub.inicio), 0, sub.limiteMs) });
           }
         }
         return;
@@ -7116,7 +7507,7 @@ function crearJugador(raiz, T, opc) {
     if (m.fase === "resultados") {
       const mia = (m.resultados || []).find((f) => f.id === L.yo);
       return `<section class="pagina alerta-mision"><span class="cap">Terminó</span><h2 class="titulo chico">${esc(m.nombre)}</h2>` +
-        `<p>${mia ? (mia.pts > 0 ? `Sumaste <b>+${fmt(mia.pts)}</b> puntos (${ordinal(mia.pos)} lugar).` : "Esta vez no sumaste puntos.") : "No participaste en esta misión."}</p>` +
+        `<p>${mia ? (mia.pts > 0 ? `Sumaste <b>+${fmt(mia.pts)}</b> puntos (${ordinal(mia.pos)} lugar).` : mia.pts < 0 ? `Perdiste <b>${fmt(-mia.pts)}</b> puntos.` : "Esta vez no sumaste puntos.") : "No participaste en esta misión."}</p>` +
         `<button class="boton bloque" data-accion="entrar">Ver resultados</button></section>`;
     }
     return `<section class="pagina alerta-mision"><span class="cap roja">¡Misión en curso!</span>` +
@@ -7283,7 +7674,7 @@ function crearJugador(raiz, T, opc) {
         if (!a || D.hecho || D.t0) return;
         a.className = "arena amarilla";
         const av = $('[data-vivo="aviso-duelo"]', a);
-        if (av) av.innerHTML = "¡YA!";
+        if (av) av.innerHTML = yaHTML();
         D.t0 = performance.now();
         requestAnimationFrame((t) => { if (!D.hecho) D.t0 = Math.max(D.t0, t); });
       };
@@ -7325,12 +7716,15 @@ function crearJugador(raiz, T, opc) {
   function htmlResultados(m) {
     const filas = m.resultados || [];
     const mia = filas.find((f) => f.id === L.yo);
+    const bomba = m.tipo === "bomba";
     const cabeza = mia && mia.pts > 0
       ? `<div class="estallido"><div><strong>${mia.pos === 1 ? "¡Ganaste!" : `¡${ordinal(mia.pos)} lugar!`}</strong><b>+${fmt(mia.pts)}</b></div></div>`
-      : mia ? `<div class="estallido azul"><div><strong>¡A la próxima!</strong><b>+0</b></div></div>` : "";
+      : mia && mia.pts < 0 ? `<div class="estallido rojo"><div><strong>${bomba ? "¡BOOM!" : "¡Ay!"}</strong><b>${ptsTexto(mia.pts)}</b></div></div>`
+        : mia ? `<div class="estallido azul"><div><strong>${bomba ? "¡Te salvaste!" : "¡A la próxima!"}</strong><b>${bomba ? "0" : "+0"}</b></div></div>` : "";
+    const tipo = tipoDe(m);
     return cabeza + `<section class="pagina"><span class="cap">Resultados</span><h2 class="titulo chico">${esc(m.nombre)}</h2>${m.doble ? `<p class="doble">¡Valía doble!</p>` : ""}` +
       (filas.length ? `<ol class="tabla">${filas.map((r, i) => filaResultado(S, r, i, L.yo)).join("")}</ol>` : `<p>Nadie sumó puntos en esta misión.</p>`) +
-      `</section><button class="boton bloque" data-accion="cuartel">Volver al cuartel</button>`;
+      `</section>${tipo && tipo.resultadoExtra ? tipo.resultadoExtra(m) : ""}<button class="boton bloque" data-accion="cuartel">Volver al cuartel</button>`;
   }
   function trasPintarMision(m, ctx, clave) {
     const tipo = tipoDe(m);
@@ -7554,9 +7948,12 @@ function crearJugador(raiz, T, opc) {
       if (!id) aviso("La misión terminó.");
     }
     if (m && L.dentro === m.id && m.fase === "resultados" && L.faseAntes !== "resultados") { /* los resultados se muestran solos */ }
+    // La pregunta relámpago salta sola en la pantalla: no espera a que toquen «¡Vamos!».
+    const tm = m && TIPOS[m.tipo];
+    if (m && tm && tm.entraSolo && m.fase === "juego" && !L.vistas.has(m.id) && L.dentro !== m.id) { marcarVista(m.id); L.dentro = m.id; L.sub = null; }
     if (m && m.fase === "resultados" && L.faseAntes && L.faseAntes !== "resultados" && L.dentro !== m.id && L.misionAntes === id) {
       const mia = (m.resultados || []).find((f) => f.id === L.yo);
-      if (mia && mia.pts > 0) { aviso(`«${m.nombre}» terminó: +${fmt(mia.pts)} puntos`); vibrar(60); }
+      if (mia && mia.pts) { aviso(`«${m.nombre}» terminó: ${ptsTexto(mia.pts)} puntos`); vibrar(60); }
     }
     if (m && m.fase === "resultados" && !L.vistas.has(m.id) && L.dentro !== m.id && L.faseAntes === null) marcarVista(m.id);
     L.misionAntes = id;
@@ -7837,7 +8234,9 @@ function crearComando(raiz, T, opc) {
     const cambios = {};
     lista.forEach((f) => { if (f.pts) cambios[`${f.id}/m_${m.id}`] = { p: f.pts, m: m.nombre, t }; });
     if (Object.keys(cambios).length) T.actualizar("puntos", cambios);
-    const detalle = m.sub && (m.sub.reto || m.sub.pregunta) ? String(m.sub.reto || m.sub.pregunta) : "";
+    const tipo = TIPOS[m.tipo];
+    let detalle = m.sub && (m.sub.reto || m.sub.pregunta) ? String(m.sub.reto || m.sub.pregunta) : "";
+    try { if (tipo && tipo.detalleHistorial) detalle = tipo.detalleHistorial(ctxHost()) || detalle; } catch (e) { /* sin detalle */ }
     T.escribir(`historial/${m.id}`, { tipo: m.tipo, nombre: m.nombre, t, doble: !!m.doble, n: lista.length, detalle, top: lista.slice(0, 3).map((f) => ({ id: f.id, pts: f.pts })) });
     T.actualizar("mision", { fase: "resultados", resultados: lista, cerrada: t });
     Sonido.tocar("fanfarria");
@@ -8042,7 +8441,7 @@ function crearComando(raiz, T, opc) {
     });
   }
   async function reiniciarTodo() {
-    const ok = await confirmar({ titulo: "¿Borrar todo?", texto: "Se borran agentes, puntos, misiones, fotos y duelos. Los invitados tendrán que registrarse de nuevo.", si: "Sí, borrar todo" }, raiz);
+    const ok = await confirmar({ titulo: "¿Borrar todo?", texto: "Se borran agentes, puntos, misiones, fotos y duelos, y las preguntas de la trivia vuelven a estar todas sin usar. Los invitados tendrán que registrarse de nuevo.", si: "Sí, borrar todo" }, raiz);
     if (!ok) return;
     for (const p of ["final", "mision", "mj", "puntos", "historial", "duelos", "enfriamiento", "fotos", "fotosMini", "trivia", "alerta", "ajustes", "codigos", "agentes"]) await T.borrar(p);
     L.album = null;
@@ -8137,7 +8536,8 @@ function crearComando(raiz, T, opc) {
     const m = S.mision;
     if (!m) {
       return `<section class="pagina"><span class="cap">Sin misión</span><h2 class="titulo chico">¿Qué sigue?</h2><p>No hay ninguna misión en curso. Cuando quieras, lanza la siguiente: sonará en todos los celulares que tengan la página abierta.</p>` +
-        `<button class="boton rojo grande" data-accion="ir-lanzar">${icono("lanzar")} Lanzar una misión</button></section>` +
+        `<button class="boton rojo grande" data-accion="ir-lanzar">${icono("lanzar")} Lanzar una misión</button>` +
+        `<button class="boton azul grande" data-accion="relampago-ya">${icono("rayo")} Pregunta relámpago</button><p class="suave" data-vivo="quedan-preguntas"></p></section>` +
         `<section class="pagina"><span class="cap">La Liga</span><p data-vivo="resumen"></p><button class="boton blanco" data-accion="pestana" data-p="agentes">Ver agentes e invitar</button></section>` +
         `<p class="nota centro">Mantén esta pantalla encendida mientras haya una misión: desde aquí corre el tiempo de cada juego.</p>`;
     }
@@ -8156,7 +8556,9 @@ function crearComando(raiz, T, opc) {
       const filas = m.resultados || [];
       return `<section class="pagina"><span class="cap">Resultados</span><h2 class="titulo chico">${esc(m.nombre)}</h2>${m.doble ? `<p class="doble">¡Valía doble!</p>` : ""}` +
         (filas.length ? `<ol class="tabla">${filas.map((r, i) => filaResultado(S, r, i, null)).join("")}</ol>` : `<p>Nadie sumó puntos.</p>`) + `</section>` +
-        `<div class="fila"><button class="boton rojo grande" data-accion="ir-lanzar">${icono("lanzar")} Lanzar otra</button><button class="boton blanco" data-accion="archivar">Cerrar resultados</button></div>`;
+        (tipo.resultadoExtra ? tipo.resultadoExtra(m) : "") +
+        `<div class="fila"><button class="boton rojo grande" data-accion="ir-lanzar">${icono("lanzar")} Lanzar otra</button><button class="boton azul" data-accion="relampago-ya">${icono("rayo")} Relámpago</button></div>` +
+        `<button class="enlace centro" data-accion="archivar">Cerrar resultados</button>`;
     }
     if (S.mjListo !== m.id) return `<p class="centro latido">Cargando la misión…</p>`;
     return tipo.host.html(ctx) + `<button class="enlace centro" data-accion="cancelar-mision">Cancelar la misión sin dar puntos</button>`;
@@ -8166,12 +8568,19 @@ function crearComando(raiz, T, opc) {
     if (bf) { const t = textoFase(); if (bf.textContent !== t) bf.textContent = t; }
     if (L.pestana === "agentes") return actualizarAgentes();
     if (L.pestana === "marcador") return actualizarMarcador();
+    if (L.pestana === "lanzar") {
+      const t = L.elegido && TIPOS[L.elegido];
+      if (t && t.notaLanzar) { try { pintarVivo("nota-lanzar", t.notaLanzar(S, cfgDe(t.id))); } catch (e) { console.error(e); } }
+      return;
+    }
     if (L.pestana !== "mision" || S.final) return;
     const m = S.mision;
     if (!m) {
       const lista = agentesValidos(S.agentes);
       const jugadas = Object.keys(S.historial || {}).length;
       pintarVivo("resumen", `${plural(lista.length, "agente registrado", "agentes registrados")}, ${plural(conectados(), "conectado", "conectados")} ahora. ${plural(jugadas, "misión jugada", "misiones jugadas")}.`);
+      const e = estadoPreguntas(S);
+      pintarVivo("quedan-preguntas", `Trivia: ${fmt(e.libres)} preguntas sin usar de ${fmt(e.total)}. Las que salen no se repiten.`);
       return;
     }
     if (m.fase === "sala") {
@@ -8213,6 +8622,7 @@ function crearComando(raiz, T, opc) {
     }).join("");
     return `<section class="pagina"><span class="cap">${esc(cat ? cat.titulo : "Misión")}</span><div class="mision-cabeza"><span class="icono-mision">${icono(t.icono)}</span><h2 class="titulo chico">${esc(t.nombre)}</h2></div>` +
       `${t.pasos ? pasosHTML(t.pasos) : `<p>${esc(t.ayuda)}</p>`}${campos}` +
+      (t.notaLanzar ? `<div class="campo-grupo" data-vivo="nota-lanzar"></div>` : "") +
       `<div class="campo-grupo"><span class="etiqueta">Puntos</span><div class="segmentado"><button data-accion="doble" data-v="0" aria-pressed="${!L.doble}">Normales</button><button data-accion="doble" data-v="1" aria-pressed="${L.doble}">¡Vale doble!</button></div></div>` +
       (t.usaSala ? `<p class="suave">Primero se abre una sala: los agentes tocan «Estoy listo» y tú das la largada.</p>` : "") +
       `<p class="error" data-vivo="error" role="alert"></p><div class="fila"><button class="boton blanco" data-accion="volver-catalogo">Volver</button><button class="boton rojo grande" data-accion="lanzar">${icono("lanzar")} Lanzar</button></div></section>`;
@@ -8270,7 +8680,8 @@ function crearComando(raiz, T, opc) {
     pintarVivo("historial", (hist.length ? `<ol class="tabla historial">${hist.map((h, i) => {
       const g = (h.top || [])[0];
       const hora = new Date(h.t).toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" });
-      return `<li><span class="pos">${hist.length - i}</span>${g ? poderHTML(poderDeAgente(S, g.id)) : "<span></span>"}<span class="nom">${esc(h.nombre)}${h.doble ? " ×2" : ""}<small>${g ? `ganó ${esc(nombreDe(S, g.id))}` : "sin puntos"}</small></span><span class="val">${hora}</span></li>`;
+      const gano = g && Number(g.pts) > 0;
+      return `<li><span class="pos">${hist.length - i}</span>${gano ? poderHTML(poderDeAgente(S, g.id)) : "<span></span>"}<span class="nom">${esc(h.nombre)}${h.doble ? " ×2" : ""}<small>${gano ? `ganó ${esc(nombreDe(S, g.id))}` : esc(h.detalle || "sin puntos")}</small></span><span class="val">${hora}</span></li>`;
     }).join("")}</ol>` : `<p class="suave">Todavía no termina ninguna misión.</p>`) +
       (duelos.length ? `<ul class="feed">${duelos.map((d) => `<li>${icono("duelo")}<span>${textoDuelo(S, d)}</span></li>`).join("")}</ul>` : ""));
     const empatados = lista.filter((a) => a.pos === 1);
@@ -8316,6 +8727,7 @@ function crearComando(raiz, T, opc) {
       case "tomar-control": tomarControl(); return;
       case "ir-lanzar": L.pestana = "lanzar"; L.elegido = null; refrescar(); desplazarArriba(); return;
       case "elegir": L.elegido = el.dataset.tipo; L.doble = false; refrescar(); desplazarArriba(); return;
+      case "relampago-ya": L.elegido = "relampago"; L.doble = false; cfgDe("relampago"); lanzar(); return;
       case "volver-catalogo": L.elegido = null; refrescar(); return;
       case "opcion": {
         const v = el.dataset.v;
