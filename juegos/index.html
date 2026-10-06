@@ -28,6 +28,9 @@ const CONFIG = {
   // 3) Nombre interno de la partida. Puedes dejarlo así.
   sala: "fiesta",
   fechaRecuerdo: "11 OCTUBRE 2026 · BARRANCO",
+  // Cápsula del tiempo: cuándo abrirán los mensajes que los invitados le escriben a Salvador.
+  capsulaAnio: "2043",
+  capsulaAbrir: "11 de octubre de 2043",
 
   // Imágenes de la invitación (rutas dentro de la carpeta de los juegos).
   imagenes: {
@@ -1279,11 +1282,13 @@ button.agente-fila:disabled { opacity: 0.5; cursor: default; }
 <link rel="stylesheet" href="experience.css">
 <link rel="stylesheet" href="recuerdos.css">
 <link rel="stylesheet" href="cine.css">
+<link rel="stylesheet" href="operacion.css">
 </head>
 <body>
 <div id="app"></div>
 <script src="experience.js"></script>
 <script src="recuerdos.js"></script>
+<script src="operacion.js"></script>
 <script>
 /* qrcode-generator — (c) Kazuhiko Arase, licencia MIT */
 //---------------------------------------------------------------------
@@ -3915,6 +3920,27 @@ const Sonido = (function () {
     sirena: () => { for (let i = 0; i < 4; i++) tono(620, i * 0.9, 0.45, "sawtooth", 0.07, 1100), tono(1100, i * 0.9 + 0.45, 0.45, "sawtooth", 0.07, 620); },
     boom: () => { golpe(0, 0.9, 0.5, 120); golpe(0.02, 0.5, 0.3, 400); tono(90, 0, 0.6, "sawtooth", 0.08, 40); },
     redoble: () => { let t = 0, paso = 0.11; while (t < 2.25) { golpe(t, 0.07, 0.1 + t * 0.06); t += paso; paso = Math.max(0.035, paso * 0.93); } },
+    // Operación Primer Vuelo
+    estatica: () => { golpe(0, 0.5, 0.16, 2400); golpe(0.05, 0.4, 0.1, 600); },
+    glitch: () => {
+      for (let i = 0; i < 9; i++) tono(180 + Math.random() * 1800, i * 0.06, 0.05, "square", 0.05);
+      golpe(0.1, 0.3, 0.2, 1400);
+      for (let i = 0; i < 3; i++) { tono(740, 0.6 + i * 0.5, 0.22, "sawtooth", 0.07, 520); tono(520, 0.83 + i * 0.5, 0.22, "sawtooth", 0.07, 740); }
+    },
+    villano: () => { tono(55, 0, 2.4, "sawtooth", 0.07, 46); tono(82.4, 0.05, 2.2, "sawtooth", 0.045, 69); tono(110, 0.5, 1.6, "triangle", 0.04, 98); },
+    tecla: () => tono(1600 + Math.random() * 400, 0, 0.02, "square", 0.012),
+    activar: () => { tono(392, 0, 0.12, "square", 0.05); tono(587, 0.09, 0.14, "square", 0.05); tono(784, 0.18, 0.4, "triangle", 0.09); },
+    puno: () => { golpe(0, 0.09, 0.22, 320); tono(150, 0, 0.08, "square", 0.04, 70); },
+    herido: () => { tono(320, 0, 0.35, "sawtooth", 0.07, 140); golpe(0, 0.25, 0.25, 260); },
+    derrota: () => { tono(440, 0, 1.3, "sawtooth", 0.06, 70); golpe(0, 0.6, 0.3, 180); },
+    chispa: (i) => { const f = 620 + (Number(i) || 0) * 22; tono(f, 0, 0.14, "triangle", 0.09); tono(f * 2, 0, 0.09, "sine", 0.04); },
+    cuenta: (n) => tono(n === 1 ? 1175 : 880, 0, 0.18, "square", 0.08),
+    golpeFinal: () => {
+      [130.81, 196, 261.63, 329.63, 392, 523.25].forEach((f) => tono(f, 0, 2.6, "sawtooth", 0.03));
+      golpe(0, 1.4, 0.6, 90); golpe(0, 0.5, 0.35, 900); tono(65, 0, 1.6, "sine", 0.16, 32);
+    },
+    soplido: () => { golpe(0, 0.9, 0.2, 2600); golpe(0.05, 0.7, 0.12, 1200); },
+    velaMagia: () => { [784, 988, 1175, 1568, 1976].forEach((f, i) => tono(f, i * 0.13, 1, "sine", 0.06)); tono(392, 0, 2, "triangle", 0.05); },
     fanfarria: () => {
       [523, 659, 784].forEach((f) => tono(f, 0, 0.42, "sawtooth", 0.045));
       [784, 988, 1175].forEach((f) => tono(f, 0.36, 0.42, "sawtooth", 0.045));
@@ -3926,7 +3952,7 @@ const Sonido = (function () {
     get activo() { return activo; },
     set activo(v) { activo = !!v; },
     despertar() { if (activo) contexto(true); },
-    tocar(nombre) { if (activo && efectos[nombre]) { try { efectos[nombre](); } catch (e) { /* sin audio */ } } },
+    tocar(nombre, x) { if (activo && efectos[nombre]) { try { efectos[nombre](x); } catch (e) { /* sin audio */ } } },
   };
 })();
 // El primer toque en la página habilita el sonido (requisito de los navegadores).
@@ -4076,6 +4102,7 @@ function crearTransporteLocal(sala, opciones) {
     alDesconectar() { return Promise.resolve(); },
     cancelarDesconexion() { return Promise.resolve(); },
     conexion(cb) { setTimeout(() => cb(true), 0); return () => {}; },
+    afinarReloj() { return Promise.resolve(null); },
     reiniciar() { arbol = {}; notificar(""); },
   };
 }
@@ -4088,12 +4115,28 @@ async function crearTransporteFirebase(url, sala) {
   const app = initializeApp({ databaseURL: String(url).trim().replace(/\/+$/, "") });
   const db = D.getDatabase(app);
   if (window.__FB_EMULADOR__) { const [h, pto] = String(window.__FB_EMULADOR__).split(":"); D.connectDatabaseEmulator(db, h, Number(pto)); }
-  let desfase = 0;
+  let desfase = 0, fino = null;
   D.onValue(D.ref(db, ".info/serverTimeOffset"), (s) => { desfase = Number(s.val()) || 0; });
   const r = (p) => D.ref(db, "salas/" + sala + "/" + p);
   return {
     tipo: "firebase",
-    ahora: () => Date.now() + desfase,
+    // .info/serverTimeOffset no descuenta la latencia; afinarReloj la mide para que los celulares coincidan.
+    ahora: () => Date.now() + (fino === null ? desfase : fino),
+    async afinarReloj(p) {
+      const ref = r(p);
+      let mejor = null;
+      for (let i = 0; i < 5; i++) {
+        const t0 = Date.now();
+        await D.set(ref, D.serverTimestamp());
+        const t1 = Date.now();
+        const ts = Number((await D.get(ref)).val());
+        // Si el valor es la estimación local y no el del servidor, la muestra no sirve.
+        if (!ts || Math.abs(ts - (t0 + desfase)) < 2) continue;
+        if (!mejor || t1 - t0 < mejor.rtt) mejor = { rtt: t1 - t0, off: ts - (t0 + t1) / 2 };
+      }
+      if (mejor && mejor.rtt < 1500) fino = mejor.off;
+      return mejor;
+    },
     escuchar(p, cb) { return D.onValue(r(p), (s) => cb(s.val()), (err) => console.warn("No se pudo leer", p, err)); },
     leer(p) { return new Promise((ok, mal) => D.onValue(r(p), (s) => ok(s.val()), mal, { onlyOnce: true })); },
     escribir(p, v) { return D.set(r(p), limpio(v)); },
@@ -4118,7 +4161,9 @@ function crearEstado(T, alCambiar) {
   T.escuchar("agentes", (v) => { S.agentes = v || {}; alCambiar("agentes"); });
   T.escuchar("puntos", (v) => { S.puntos = v || {}; S.totales = totalesDe(S.puntos); alCambiar("puntos"); });
   T.escuchar("mision", (v) => { S.mision = v || null; seguirMision(); alCambiar("mision"); });
-  T.escuchar("final", (v) => { S.final = v || null; alCambiar("final"); });
+  // Un final sin «t» es solo un resto de escrituras tardías (golpes, reloj): no cuenta como final.
+  T.escuchar("final", (v) => { S.final = v && v.t ? v : null; alCambiar("final"); });
+  T.escuchar("capsula", (v) => { S.capsula = v || {}; alCambiar("capsula"); });
   T.escuchar("recuerdos", (v) => { S.recuerdos = v || {}; alCambiar("recuerdos"); });
   T.escuchar("duelos", (v) => { S.duelos = v || {}; alCambiar("duelos"); });
   T.escuchar("enfriamiento", (v) => { S.enfriamiento = v || {}; alCambiar("enfriamiento"); });
@@ -7128,6 +7173,7 @@ function crearBots(T, S, opc) {
       try { mision(m, S.mj || {}, lista, ahora); } catch (e) { console.error(e); }
     }
     try { duelos(lista, ahora); } catch (e) { console.error(e); }
+    try { pasoBotsOperacion(T, S, lista, ahora, toca, cuando); } catch (e) { console.error(e); }
   }
 
   function mision(m, mj, lista, ahora) {
@@ -7442,6 +7488,7 @@ function crearJugador(raiz, T, opc) {
   const zBanda = $('[data-zona="banda"]', raiz);
   const zPrincipal = $('[data-zona="principal"]', raiz);
   const zCapa = $('[data-zona="capa"]', raiz);
+  const OP = crearOperacionJugador({ T, S, raiz, zona: zPrincipal, yo: () => L.yo, aviso: (t) => aviso(t) });
 
   const intervalo = setInterval(refrescar, 200);
 
@@ -7491,6 +7538,7 @@ function crearJugador(raiz, T, opc) {
   }
   function claveDe(p, ctx) {
     if (p.id === "final") {
+      if (esFaseOperacion(S.final)) return `final:${S.final.t}:${OP.clave(S.final)}`;
       const cine = momentoFinalLiga(S.final, T.ahora());
       return `final:${S.final.t}:${S.final.fase || "podio"}:${cine.escena}:${cine.lote}:${S.final.paso || 0}:${JSON.stringify(Object.entries(S.recuerdos || {}).map(([id, r]) => [id, r.estado]))}`;
     }
@@ -7564,7 +7612,7 @@ function crearJugador(raiz, T, opc) {
     if (p.id === "cuartel") { if (L.sub === "retar") actualizarRetar(); else actualizarCuartel(); }
     else if (p.id === "mision") actualizarMision(p.m, ctx);
     else if (p.id === "duelo") actualizarDuelo(p.did, p.d);
-    else if (p.id === "final") actualizarCineLiga(zPrincipal, T, S, L.yo);
+    else if (p.id === "final") { if (esFaseOperacion(S.final)) OP.tic(S.final); else actualizarCineLiga(zPrincipal, T, S, L.yo); }
     const mp = $('[data-vivo="mini-puntos"]', zPrincipal);
     if (mp) { const t = `${fmt(totalDe(S, L.yo))} pts`; if (mp.textContent !== t) mp.textContent = t; }
   }
@@ -7632,6 +7680,7 @@ function crearJugador(raiz, T, opc) {
       `<div class="zona" data-vivo="mision"></div>` +
       `<div class="zona" data-vivo="duelo"></div>` +
       accesoRecuerdosHTML() +
+      capsulaHTML(S, L.yo, L.borradorCapsula) +
       `<details class="pagina liga-ranking"><summary>El salón de los héroes</summary><div data-vivo="ranking"></div></details>` +
       `<p class="nota centro" data-vivo="nota-sonido">Deja esta página abierta: cuando empiece una misión, tu celular suena.</p>` +
       `<div class="fila centro pie-cuartel"><button class="enlace" data-accion="sonido" data-vivo="sonido"></button><button class="enlace" data-accion="como">¿Cómo se juega?</button></div>`;
@@ -7918,6 +7967,7 @@ function crearJugador(raiz, T, opc) {
   /* ---------- gran final ---------- */
   function htmlFinal() {
     const f = S.final, paso = Number(f.paso) || 0, podio = f.podio || [];
+    if (esFaseOperacion(f)) return OP.html(f);
     if (f.fase === "energia" || f.fase === "historia") return finalCineLigaHTML(f, S, L.yo, T.ahora());
     const fila = (f.tabla || []).find((x) => x.id === L.yo);
     const completo = podio.length > 0 && paso >= podio.length;
@@ -7934,7 +7984,8 @@ function crearJugador(raiz, T, opc) {
         (fila ? `<p>Terminaste en el <b>${ordinal(fila.pos)} lugar</b> con <b>${fmt(fila.total)}</b> puntos.</p>` : "") +
         `<p>¡Gracias por jugar en La Liga de Salvador!</p></section>`;
     }
-    return cabeza + `<section class="pagina podio-pagina"><span class="cap">Podio</span>${podioHTML(podio, paso, L.yo)}</section>` + (completo ? accesoRecuerdosHTML() : "");
+    return cabeza + `<section class="pagina podio-pagina"><span class="cap">Podio</span>${podioHTML(podio, paso, L.yo)}</section>` +
+      (completo ? `<p class="nota centro">No te vayas: faltan los créditos finales.</p>${accesoRecuerdosHTML()}` : "");
   }
   function revisarFinal() {
     const f = S.final;
@@ -8153,6 +8204,16 @@ function crearJugador(raiz, T, opc) {
     if (!f) return;
     e.preventDefault();
     if (f.dataset.form === "registro") { registrar(f); return; }
+    if (f.dataset.form === "capsula") {
+      const b = $("button", f);
+      b.disabled = true;
+      guardarCapsula(T, S, L.yo, f).then((r) => {
+        L.borradorCapsula = undefined;
+        aviso(r === "ok" ? "Tu mensaje quedó guardado para 2043." : "Mensaje borrado.");
+        pintarVivo("capsula-estado", r === "ok" ? "Tu mensaje está guardado. Puedes cambiarlo cuando quieras." : "No hay mensaje guardado.");
+      }).catch(() => aviso("No se pudo guardar. Revisa tu conexión.")).finally(() => { b.disabled = false; });
+      return;
+    }
     const m = S.mision, tipo = tipoDe(m);
     if (m && m.fase === "juego" && L.dentro === m.id && tipo && tipo.jugador.enviar) tipo.jugador.enviar(f, ctxMision());
   });
@@ -8164,6 +8225,7 @@ function crearJugador(raiz, T, opc) {
       if (i.form.requestSubmit) i.form.requestSubmit(); else i.form.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
     }
   });
+  raiz.addEventListener("input", (e) => { if (e.target.id === "capsula-texto" && !e.target.closest(".capa-modal")) L.borradorCapsula = e.target.value; });
   raiz.addEventListener("change", (e) => {
     if (e.target.name === "poder") $$(".opcion-poder", raiz).forEach((o) => o.classList.toggle("activa", !!$("input", o).checked));
   });
@@ -8180,6 +8242,7 @@ function crearJugador(raiz, T, opc) {
     const m = S.mision;
     switch (a) {
       case "estudio-liga": abrirEstudioLiga({ T, S, yo: L.yo, raiz }); return;
+      case "op-activar": case "op-sensor": case "op-ficha": case "op-capsula": case "op-saltar-creditos": OP.accion(a, el); return;
       case "final-energia": {
         if (!S.final || S.final.fase !== "energia" || (S.final.energia || {})[L.yo]) return;
         el.disabled = true;
@@ -8255,7 +8318,7 @@ function crearJugador(raiz, T, opc) {
   return {
     S, T,
     get yo() { return L.yo; },
-    destruir() { clearInterval(intervalo); salirMision(); },
+    destruir() { clearInterval(intervalo); salirMision(); OP.destruir(); },
   };
 }
 
@@ -8514,14 +8577,14 @@ function crearComando(raiz, T, opc) {
     const m = S.mision;
     const lista = clasificacion(S);
     if (!lista.length) { aviso("Todavía no hay agentes."); return; }
-    const texto = (m && m.fase !== "resultados" ? `La misión «${m.nombre}» se cancelará sin dar puntos. ` : "") + "Todos verán la última misión, los recuerdos y el podio en sus celulares. Tú decides cuándo avanzar; no necesitas una TV.";
-    const ok = await confirmar({ titulo: "¿Comenzar el gran final?", texto, si: "¡A la gran final!" }, raiz);
+    const texto = (m && m.fase !== "resultados" ? `La misión «${m.nombre}» se cancelará sin dar puntos. ` : "") + "El Doctor Siesta tomará todos los celulares. Luego vienen la batalla, el golpe final, las velas, la película, el podio y los créditos. Tú decides cuándo avanzar; no necesitas una TV.";
+    const ok = await confirmar({ titulo: "¿Comenzar la Operación Primer Vuelo?", texto, si: "¡A la gran final!" }, raiz);
     if (!ok) return;
     const fresca = clasificacion(S);
     const podio = fresca.slice(0, 3).map((a) => ({ id: a.id, nombre: a.nombre, poder: a.poder, total: a.total, pos: a.pos }));
     const tabla = fresca.map((a) => ({ id: a.id, total: a.total, pos: a.pos }));
     if (S.mision) await T.borrar("mision");
-    await T.escribir("final", { fase: "energia", paso: 0, t: T.ahora(), podio, tabla });
+    await T.escribir("final", { fase: "hackeo", paso: 0, t: T.ahora(), podio, tabla });
     L.pestana = "mision";
     desplazarArriba();
     refrescar();
@@ -8596,7 +8659,7 @@ function crearComando(raiz, T, opc) {
   async function reiniciarTodo() {
     const ok = await confirmar({ titulo: "¿Borrar todo?", texto: "Se borran agentes, puntos, misiones, fotos y duelos, y las preguntas de la trivia vuelven a estar todas sin usar. Los invitados tendrán que registrarse de nuevo.", si: "Sí, borrar todo" }, raiz);
     if (!ok) return;
-    for (const p of ["final", "mision", "mj", "puntos", "historial", "duelos", "enfriamiento", "fotos", "fotosMini", "recuerdos", "trivia", "alerta", "ajustes", "codigos", "agentes"]) await T.borrar(p);
+    for (const p of ["final", "mision", "mj", "puntos", "historial", "duelos", "enfriamiento", "fotos", "fotosMini", "recuerdos", "capsula", "trivia", "alerta", "ajustes", "codigos", "agentes"]) await T.borrar(p);
     L.album = null;
     aviso("Listo: la Liga quedó vacía.");
   }
@@ -8616,6 +8679,11 @@ function crearComando(raiz, T, opc) {
       const energia = $("[data-final-conteo]", zContenido);
       if (energia) energia.textContent = Object.keys((S.final && S.final.energia) || {}).filter(id => S.agentes[id]).length;
       if (S.final?.fase === "historia") actualizarControlCineLiga(zContenido, S.final, T.ahora());
+      if (esFaseOperacion(S.final) && L.pestana === "mision") actualizarOperacionHost(zContenido, S.final, S, T.ahora());
+      if (L.pestana === "marcador") {
+        pintarVivo("capsula-n", fmt(mensajesCapsula(S).length));
+        pintarVivo("capsula-lista", capsulaHostListaHTML(S));
+      }
     } catch (e) { console.error(e); }
     finally { L.pintando = false; }
     if (L.pendiente) { L.pendiente = false; setTimeout(refrescar, 0); }
@@ -8663,7 +8731,7 @@ function crearComando(raiz, T, opc) {
       case "marcador": return `marcador:${L.album ? "album" : ""}:${L.cargandoAlbum ? 1 : 0}:${S.ajustes && S.ajustes.ocultarRanking ? 1 : 0}`;
       default: {
         if (S.agentes === undefined || S.mision === undefined) return "cargando";
-        if (S.final) return `final:${S.final.fase || "podio"}:${S.final.paso || 0}:${L.revelando ? 1 : 0}`;
+        if (S.final) return `final:${S.final.fase || "podio"}:${S.final.paso || 0}:${L.revelando ? 1 : 0}:${claveOperacionHost(S.final)}`;
         const m = S.mision;
         if (!m) return "mision:vacia";
         const tipo = TIPOS[m.tipo];
@@ -8834,7 +8902,8 @@ function crearComando(raiz, T, opc) {
       `<section class="pagina"><span class="cap">Misiones jugadas</span><div data-vivo="historial"></div></section>` +
       `<section class="pagina"><span class="cap">Las portadas de la Liga</span><p>Aprueba las fotos que aparecerán en el álbum de los invitados y en el final de sus celulares.</p><button class="boton bloque" data-accion="album-liga">Revisar y aprobar fotos</button></section>` +
       `<details class="pagina"><summary>Fotos de las misiones (solo anfitrión)</summary>${album}</details>` +
-      `<section class="pagina"><span class="cap roja">Gran final · En cada celular</span><p>Conecta la energía de los invitados, revive las fotos de la fiesta y revela el podio. Tú avanzas cada momento desde aquí.</p>` +
+      capsulaHostHTML(S) +
+      `<section class="pagina"><span class="cap roja">Gran final · Operación Primer Vuelo</span><p>El villano toma los celulares, la Liga pelea con sus poderes, la energía salta por la sala, las velas se apagan juntas, la película, el podio y los créditos. Tú avanzas cada momento desde aquí.</p>` +
       `<div data-vivo="empate"></div><button class="boton rojo grande" data-accion="final-empezar">${icono("trofeo")} Comenzar el gran final</button></section>`;
   }
   function actualizarMarcador() {
@@ -8857,10 +8926,11 @@ function crearComando(raiz, T, opc) {
   /* ---------- gran final en el centro de mando ---------- */
   function htmlFinal() {
     const f = S.final, podio = f.podio || [], paso = Number(f.paso) || 0;
+    if (esFaseOperacion(f)) return operacionHostHTML(f);
     if (f.fase === "energia" || f.fase === "historia") {
       const cine = momentoFinalLiga(f, T.ahora());
       return `<section class="pagina"><span class="cap">FINAL EN LOS CELULARES</span><h2 class="titulo">${f.fase === "energia" ? "Enciende nuestra ciudad" : "El origen de la leyenda"}</h2><p>${f.fase === "energia" ? "Pide a los invitados que toquen su escudo. Puedes avanzar cuando quieras, aunque no estén todos." : "La película se reproduce en cada celular. Cuando termine, revela el podio desde aquí."}</p>` +
-        `<div class="final-host-energia"><b data-final-conteo>0</b><span>héroes enviaron su energía</span></div>` +
+        (f.fase === "energia" ? `<div class="final-host-energia"><b data-final-conteo>0</b><span>héroes enviaron su energía</span></div>` : "") +
         (f.fase === "historia" ? `<div class="final-host-progreso"><strong data-cine-escena>${NOMBRES_CINE_LIGA[cine.escena]}</strong><p data-cine-tiempo>${cine.listo ? "Película terminada" : `Faltan ${Math.ceil(cine.restante / 1000)} segundos`}</p><div class="cine-progreso"><i data-cine-barra style="width:${Math.round(cine.transcurrido / TOTAL_CINE_LIGA * 100)}%"></i></div></div>` : "") +
         `<button class="boton bloque" data-accion="${f.fase === "energia" ? "final-historia" : "final-podio"}"${f.fase === "historia" && !cine.listo ? " disabled" : ""}>${f.fase === "energia" ? "Encender la ciudad" : "Continuar al podio"}</button>` +
         (f.fase === "historia" ? `<button class="enlace" data-accion="final-saltar">Ir al podio ahora</button>` : "") +
@@ -8870,7 +8940,8 @@ function crearComando(raiz, T, opc) {
     return `<section class="pagina"><span class="cap roja">Gran final</span><h2 class="titulo chico">El podio de la Liga</h2>${podioHTML(podio, paso)}` +
       (siguiente
         ? `<button class="boton rojo grande" data-accion="final-revelar"${L.revelando ? " disabled" : ""}>${L.revelando ? "Redoble de tambores…" : esc(siguiente)}</button>`
-        : `<div class="globo"><strong>¡Campeón: ${esc(podio[0] ? podio[0].nombre : "")}!</strong> Entrégale el premio: es para él o ella, o para el pequeño héroe que elija.</div>`) +
+        : `<div class="globo"><strong>¡Campeón: ${esc(podio[0] ? podio[0].nombre : "")}!</strong> Entrégale el premio: es para él o ella, o para el pequeño héroe que elija.</div>` +
+          `<button class="boton rojo grande bloque" data-accion="op-creditos">Pasar los créditos finales</button>`) +
       `</section><section class="pagina"><span class="cap">Tabla final</span>${tablaClasificacion((f.tabla || []).map((x) => Object.assign({ nombre: nombreDe(S, x.id), poder: poderDeAgente(S, x.id) }, x)))}</section>` +
       `<button class="enlace centro" data-accion="final-cancelar">Volver a la fiesta (quitar el podio de los celulares)</button>`;
   }
@@ -8949,6 +9020,19 @@ function crearComando(raiz, T, opc) {
         return;
       case "album-foto": verFoto(el.dataset.m, el.dataset.id); return;
       case "final-empezar": empezarFinal(); return;
+      case "op-jefe": case "op-chispa": case "op-velas": case "op-soplar": case "op-reencender": case "op-pelicula": case "op-creditos": case "op-saltar": {
+        if (a === "op-saltar" && !await confirmar({ titulo: "¿Saltar este momento?", texto: "Todos los celulares pasan al siguiente momento del final.", si: "Saltar" }, raiz)) return;
+        const cambios = cambiosOperacion(a, S.final, S, T.ahora());
+        if (cambios) await T.actualizar("final", cambios);
+        return;
+      }
+      case "capsula-expediente": abrirExpedienteCapsula(S); return;
+      case "capsula-descargar": descargarExpedienteCapsula(S); return;
+      case "capsula-ocultar": {
+        const c = (S.capsula || {})[el.dataset.id];
+        if (c) await T.escribir(`capsula/${el.dataset.id}/oculto`, c.oculto ? null : true);
+        return;
+      }
       case "final-revelar": revelarPaso(); return;
       case "final-cancelar": cancelarFinal(); return;
       case "sonido":
