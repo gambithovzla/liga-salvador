@@ -92,7 +92,7 @@ const borrarSala = () => fetch(`${DB}/salas/${SALA}.json`, { method: 'DELETE' })
       console.log(`${nombre}: offset inicial ${r.base} ms; afinado: ${r.reloj.map((x) => (x.x ? `rtt ${x.x.rtt} ms, offset ${Math.round(x.off)}` : 'sin muestra')).join(' | ')}`);
       console.log(`  destellos: ${dest.length} de ${mios.length} planeados; retraso medio ${retrasos.length ? Math.round(retrasos.reduce((s, x) => s + x, 0) / retrasos.length) : '-'} ms`);
       assert(r.reloj.some((x) => x.x), `${nombre}: the clock could not be refined`);
-      assert(soplo && Math.abs(soplo[1] - f.sopladoT) < 150, `${nombre}: candle went out out of sync`);
+      assert(soplo && Math.abs(soplo[1] - f.sopladoT) < 150, `${nombre}: candle went out out of sync (${soplo ? Math.round(soplo[1] - f.sopladoT) + " ms" : "no soplada event"}; events ${JSON.stringify(r.eventos.filter((e) => e[0] !== "destello"))}; sopladoT ${f.sopladoT})`);
       assert.equal(dest.length, mios.length, `${nombre}: missed spark flashes`);
       console.log(`  golpe final ${golpe ? Math.round(golpe[1] - (f.chispaT + plan.fin + 2400)) : '?'} ms después de lo previsto · vela apagada ${soplo ? Math.round(soplo[1] - f.sopladoT) : '?'} ms después (hora del servidor)`);
     }
