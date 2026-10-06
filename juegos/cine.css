@@ -1,0 +1,175 @@
+/* La película final vive en cada celular. La escena la determina el reloj compartido. */
+.final-cine.cine-v2 {
+  height:clamp(510px,calc(100svh - 105px),760px);
+  min-height:0;
+  padding:0;
+  margin:8px 0 0;
+  border:1px solid #d9ba7677;
+  border-radius:20px;
+  background:#050c1e;
+  box-shadow:0 18px 55px #02081666, inset 0 0 0 1px #ffffff12;
+  color:#fff2d8;
+}
+.cine-v2::before,.cine-v2::after {
+  content:""; position:absolute; left:0; right:0; height:31px; z-index:3;
+  background:#030917; pointer-events:none;
+}
+.cine-v2::before { top:0; border-bottom:1px solid #dec17a42; }
+.cine-v2::after { bottom:0; border-top:1px solid #dec17a42; }
+.cine-cielo-v2 {
+  position:absolute; inset:0; z-index:-3;
+  background:
+    radial-gradient(circle at 50% 61%,#b98b4b44 0,transparent 29%),
+    radial-gradient(ellipse at 70% 25%,#5478b45e 0,transparent 54%),
+    linear-gradient(175deg,#030916,#172849 61%,#5d4862 100%);
+}
+.cine-cielo-v2::before {
+  content:""; position:absolute; inset:5% 0 17%; opacity:.7;
+  background-image:radial-gradient(circle,#fff8de 1px,transparent 1.4px),radial-gradient(circle,#c4d9f8 1px,transparent 1.4px);
+  background-size:47px 57px,83px 91px; background-position:10px 19px,33px 43px;
+  mask-image:linear-gradient(#000,transparent 95%);
+}
+.cine-luna-v2 {
+  position:absolute; z-index:-2; width:180px; aspect-ratio:1; border-radius:50%;
+  left:calc(50% - 90px); top:18%; opacity:.8;
+  background:radial-gradient(circle at 44% 43%,#fff5d3 0,#e4c17d 36%,#a67b55 62%,#d4ab6899 68%,transparent 70%);
+  box-shadow:0 0 80px #f9d48b66,0 0 155px #fae3ae33;
+}
+.cine-ciudad-v2 { position:absolute; z-index:-1; inset:43% 0 0; overflow:hidden; }
+.cine-edificios { position:absolute; inset:9% -1% 0; display:flex; align-items:end; gap:2px; }
+.cine-edificios i {
+  position:relative; flex:1; min-width:10px; height:var(--alto);
+  background:linear-gradient(90deg,#040b1b,#142440 50%,#070e20);
+  border-top:2px solid #5972a661;
+  box-shadow:2px 0 0 #010613;
+}
+.cine-edificios i::after {
+  content:""; position:absolute; inset:8px 3px;
+  background-image:repeating-linear-gradient(0deg,transparent 0 7px,#f7ce7a 8px 11px,transparent 12px 17px);
+  mask-image:repeating-linear-gradient(90deg,#000 0 3px,transparent 3px 8px);
+  opacity:var(--potencia,0);
+  filter:drop-shadow(0 0 7px #ffd074);
+}
+.cine-etapa-energia .cine-edificios i::after { opacity:0; }
+.cine-etapa-energia .cine-edificios i.encendido::after { opacity:1; }
+.cine-ciudad-v2::before {
+  content:""; position:absolute; z-index:2; left:-30%; right:-30%; bottom:8%; height:70%;
+  background:conic-gradient(from 185deg at 50% 100%,transparent 0 24%,#ffda7d44 25% 28%,transparent 29% 46%,#ffda7d66 47% 50%,transparent 51% 70%,#ffda7d44 71% 75%,transparent 76%);
+  opacity:var(--potencia,0); filter:blur(12px);
+}
+.cine-calles { position:absolute; z-index:3; inset:auto 0 0; height:16%; background:linear-gradient(#071124,#030815); }
+.cine-calles::after { content:""; position:absolute; top:12px; left:10%; width:80%; border-top:2px dashed #ffd57988; }
+.cine-v2.cine-etapa-0 { --potencia:0 !important; }
+.cine-v2.cine-etapa-0 .cine-cielo-v2 { filter:brightness(.38); }
+.cine-v2.cine-etapa-0 .cine-luna-v2 { opacity:.2; }
+.cine-pelicula { position:absolute; inset:0; z-index:4; }
+.cine-superior,.cine-inferior {
+  position:absolute; z-index:10; left:16px; right:16px; display:flex; justify-content:space-between; align-items:center;
+  gap:12px; font:8px/1.2 "Anton",sans-serif; letter-spacing:1.4px; color:#e9d3a0;
+}
+.cine-superior { top:10px; }.cine-inferior { bottom:9px; flex-wrap:wrap; }
+.cine-inferior>span:first-child { max-width:75%; text-align:left; }
+.cine-progreso { flex-basis:100%; height:3px; background:#a2b8d144; border-radius:8px; overflow:hidden; }
+.cine-progreso i { display:block; height:100%; background:linear-gradient(90deg,#b58042,#ffe9aa); box-shadow:0 0 10px #ffe08d; transition:width .25s linear; }
+.cine-escena { position:absolute; inset:38px 12px 40px; display:grid; place-items:center; }
+.cine-bloque { position:relative; z-index:2; width:100%; text-align:center; }
+.cine-kicker { display:block; color:#f7d796; font:10px/1.4 "Anton",sans-serif; letter-spacing:2.5px; margin:0 auto 15px; }
+.cine-bloque h1 { font:clamp(49px,14vw,82px)/.93 var(--f-titulo); text-transform:uppercase; color:#fff6e5; margin:0; text-shadow:0 5px 24px #030a1caa; }
+.cine-bloque h1 em { color:#ffda81; font-style:normal; }
+.cine-bloque p { max-width:285px; margin:18px auto 0; color:#e5ebf4; font-size:14px; line-height:1.55; text-shadow:0 3px 9px #030917; }
+.cine-energia { transform:translateY(-4%); }
+.cine-energia h1 { font-size:clamp(48px,12.5vw,72px); }
+.cine-boton-energia { margin:24px auto 17px; width:150px; height:150px; }
+.cine-boton-energia span { max-width:110px; }
+.cine-energia .energia-conteo { font-size:12px; margin-top:9px; }
+.cine-energia .cine-ayuda { display:block; margin-top:14px; color:#c6d1e2; font-size:11px; }
+.cine-transmision { transform:translateY(-7%); }
+.cine-radio { display:flex; justify-content:center; align-items:center; gap:7px; height:65px; margin-bottom:16px; }
+.cine-radio i { width:3px; height:25px; background:#ffe5a5; box-shadow:0 0 14px #ffe09b; border-radius:4px; }
+.cine-radio i:nth-child(2),.cine-radio i:nth-child(4) { height:45px; }
+.cine-radio i:nth-child(3) { height:62px; }
+.cine-encendido { transform:translateY(-7%); }
+.cine-emblema { width:128px; height:128px; display:grid; place-items:center; margin:0 auto 30px; border:2px solid #ffdfa0; border-radius:50%; background:radial-gradient(circle,#f4cf85,#a17447); box-shadow:0 0 0 11px #ffe6ac19,0 0 80px #ffe2a879; }
+.cine-emblema svg { width:64px; height:64px; fill:#192947; }
+.cine-encendido h1 { font-size:clamp(53px,13vw,76px); }
+.cine-album { align-self:stretch; display:flex; flex-direction:column; justify-content:center; align-items:center; }
+.cine-album h1 { font-size:clamp(39px,10vw,56px); }
+.cine-fotogramas { width:min(100%,340px); display:flex; justify-content:center; align-items:center; gap:8px; margin:26px auto 0; min-height:210px; }
+.cine-fotograma { position:relative; width:47%; margin:0; padding:6px 6px 0; background:#f8efdc; color:#1b2941; box-shadow:0 12px 25px #020816aa; transform:rotate(-7deg); }
+.cine-fotograma:nth-child(2) { transform:rotate(6deg) translateY(18px); }
+.cine-fotogramas.uno .cine-fotograma { width:min(65%,215px); }
+.cine-foto-contenedor { aspect-ratio:4/5; background:linear-gradient(135deg,#213a60,#4b5e79); overflow:hidden; }
+.cine-fotograma img { display:block; width:100%; height:100%; object-fit:cover; }
+.cine-fotograma figcaption { font:19px/1 var(--f-titulo); padding:11px 2px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+.cine-album p { margin-top:28px; font-size:12px; }
+.cine-album .cine-nombres { margin:34px auto 0; }
+.cine-ascenso { height:100%; display:flex; flex-direction:column; align-items:center; justify-content:start; }
+.cine-rayo { position:absolute; left:8%; right:8%; top:26%; height:55%; z-index:-1; background:radial-gradient(ellipse,#ffdf9580,transparent 65%); filter:blur(18px); }
+.cine-heroe { display:block; width:min(75%,295px); height:55%; object-fit:contain; filter:drop-shadow(0 17px 30px #050917aa) drop-shadow(0 0 26px #ffe5a04d); }
+.cine-ascenso .cine-heroe { order:2; margin-top:auto; }
+.cine-ascenso .cine-kicker { order:0; margin:25px auto 12px; }
+.cine-ascenso h1 { order:1; font-size:clamp(55px,13vw,78px); }
+.cine-coronacion { height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+.cine-coronacion .cine-kicker { margin:0 0 12px; }
+.cine-coronacion h1 { font-size:clamp(73px,20vw,112px); color:#ffe09a; }
+.cine-coronacion .cine-heroe { height:45%; margin:7px auto; }
+.cine-coronacion p { margin:0 auto 8px; font-size:14px; }
+.cine-coronacion strong { font-size:13px; color:#ffdf91; }
+.cine-coronacion .cine-fin { margin-top:12px; font:16px var(--f-titulo); letter-spacing:4px; color:#d5e0f0; }
+.cine-etapa-4 .cine-luna-v2 { opacity:.95; }
+.cine-etapa-4 .cine-cielo-v2 { filter:saturate(1.35); }
+.final-host-progreso { margin:16px 0; padding:15px; background:#132848; border-radius:12px; color:#e9d5ad; }
+.final-host-progreso strong { display:block; font:27px var(--f-titulo); color:#ffe1a0; }
+.final-host-progreso p { font-size:12px; margin:7px 0 10px; }
+.final-host-progreso .cine-progreso { height:6px; }
+.final-host-progreso .enlace { color:#cfdaec; }
+.final-host-energia span { font-size:13px; }
+@media (prefers-reduced-motion:no-preference) {
+  .cine-etapa-energia .cine-edificios i::after { transition:opacity .7s ease; }
+  .cine-etapa-0 .cine-radio i { animation:cine-senal .8s ease-in-out infinite alternate; }
+  .cine-etapa-0 .cine-radio i:nth-child(2n) { animation-delay:.25s; }
+  .cine-etapa-1 .cine-edificios i::after { animation:cine-ventanas .9s ease-out both; animation-delay:var(--demora); }
+  .cine-etapa-1 .cine-ciudad-v2 { animation:cine-camara 5.5s ease-out both; }
+  .cine-etapa-2 .cine-fotograma { animation:cine-fotograma .9s cubic-bezier(.18,.85,.2,1) both; }
+  .cine-etapa-2 .cine-fotograma:nth-child(2) { animation-delay:.15s; }
+  .cine-etapa-3 .cine-heroe { animation:cine-despegue 6.4s cubic-bezier(.15,.75,.28,1) both; }
+  .cine-etapa-3 .cine-ciudad-v2 { animation:cine-camara-abajo 6.4s ease-out both; }
+  .cine-etapa-4 .cine-heroe { animation:cine-entrada-heroe 1.5s ease-out both; }
+  .cine-etapa-4 h1 { animation:cine-titulo 1.2s ease-out both; }
+  .cine-etapa-energia .cine-luna-v2 { animation:cine-respirar 4s ease-in-out infinite alternate; }
+}
+@keyframes cine-senal { to { height:12px; opacity:.6; } }
+@keyframes cine-ventanas { from { opacity:0; } to { opacity:1; } }
+@keyframes cine-camara { from { transform:scale(1.15); } to { transform:scale(1); } }
+@keyframes cine-fotograma { from { opacity:0; scale:.72; translate:0 35px; } to { opacity:1; scale:1; translate:0 0; } }
+@keyframes cine-despegue { from { opacity:0; transform:translateY(190px) scale(.7) rotate(-8deg); } to { opacity:1; transform:translateY(-18px) scale(1.08) rotate(4deg); } }
+@keyframes cine-camara-abajo { to { transform:translateY(9%) scale(1.1); } }
+@keyframes cine-entrada-heroe { from { opacity:0; transform:translateY(45px); } to { opacity:1; transform:translateY(0); } }
+@keyframes cine-titulo { from { opacity:0; letter-spacing:14px; } to { opacity:1; letter-spacing:0; } }
+@keyframes cine-respirar { to { opacity:1; scale:1.08; } }
+@media (max-width:430px) {
+  .cine-superior,.cine-inferior { left:12px; right:12px; font-size:7px; letter-spacing:1px; }
+  .cine-superior>span:last-child { max-width:105px; text-align:right; }
+  .cine-bloque p { font-size:13px; }
+  .cine-album .cine-kicker { font-size:8px; }
+}
+@media (max-width:350px),(max-height:640px) {
+  .final-cine.cine-v2 { height:calc(100svh - 55px); min-height:430px; }
+  .cine-kicker { font-size:8px; margin-bottom:9px; }
+  .cine-bloque h1 { font-size:clamp(40px,12vw,60px); }
+  .cine-bloque p { margin-top:12px; font-size:12px; }
+  .cine-radio { height:42px; margin-bottom:7px; }
+  .cine-emblema { width:100px; height:100px; margin-bottom:15px; }
+  .cine-emblema svg { width:50px; height:50px; }
+  .cine-boton-energia { width:125px; height:125px; margin:15px auto 9px; }
+  .cine-album h1 { font-size:37px; }
+  .cine-fotogramas { margin-top:15px; min-height:180px; }
+  .cine-fotograma figcaption { font-size:15px; padding:7px 2px; }
+  .cine-album p { margin-top:14px; }
+  .cine-coronacion h1 { font-size:64px; }
+  .cine-coronacion .cine-heroe { height:33%; min-height:0; margin:3px auto; }
+  .cine-coronacion .cine-kicker { margin-bottom:5px; }
+  .cine-coronacion p { font-size:11px; line-height:1.3; margin:0 auto 4px; }
+  .cine-coronacion strong { font-size:11px; }
+  .cine-coronacion .cine-fin { font-size:12px; margin-top:5px; }
+}

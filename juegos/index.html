@@ -1278,6 +1278,7 @@ button.agente-fila:disabled { opacity: 0.5; cursor: default; }
 </style>
 <link rel="stylesheet" href="experience.css">
 <link rel="stylesheet" href="recuerdos.css">
+<link rel="stylesheet" href="cine.css">
 </head>
 <body>
 <div id="app"></div>
@@ -7489,7 +7490,10 @@ function crearJugador(raiz, T, opc) {
     return { id: "cuartel" };
   }
   function claveDe(p, ctx) {
-    if (p.id === "final") return `final:${S.final.t}:${S.final.fase || "podio"}:${escenaFinalLiga(S.final, T.ahora())}:${S.final.paso || 0}:${JSON.stringify(Object.entries(S.recuerdos || {}).map(([id, r]) => [id, r.estado]))}`;
+    if (p.id === "final") {
+      const cine = momentoFinalLiga(S.final, T.ahora());
+      return `final:${S.final.t}:${S.final.fase || "podio"}:${cine.escena}:${cine.lote}:${S.final.paso || 0}:${JSON.stringify(Object.entries(S.recuerdos || {}).map(([id, r]) => [id, r.estado]))}`;
+    }
     if (p.id === "duelo") {
       const mio = ((p.d.r || {})[L.yo]);
       const prep = p.d.estado === "aceptado" && !p.d.go ? `prep${((p.d.listo || {})[L.yo]) ? "L" : ""}` : "go";
@@ -7936,8 +7940,12 @@ function crearJugador(raiz, T, opc) {
     const f = S.final;
     if (!f) { L.finalAntes = { paso: null, redoble: null }; return; }
     const antes = L.finalAntes;
-    const escena = f.fase === "historia" ? escenaFinalLiga(f, T.ahora()) : null;
-    if (escena !== null && (antes.fase !== f.fase || antes.escena !== escena)) Sonido.tocar(escena === 1 ? "campana" : "firmaLiga");
+    const cine = f.fase === "historia" ? momentoFinalLiga(f, T.ahora()) : null;
+    const escena = cine ? cine.escena : null;
+    if (escena !== null && (antes.fase !== f.fase || antes.escena !== escena)) {
+      Sonido.tocar(escena === 1 ? "campana" : escena === 2 ? "revelar" : escena === 4 ? "firmaLiga" : "inicio");
+      if (escena === 1 || escena === 3 || escena === 4) vibrar(escena === 4 ? [40, 40, 80] : 25);
+    } else if (cine && escena === 2 && antes.lote !== cine.lote) Sonido.tocar("toque");
     if (antes.redoble !== null && f.redoble && f.redoble !== antes.redoble) Sonido.tocar("redoble");
     if (antes.paso !== null && (f.paso || 0) !== antes.paso) {
       const podio = f.podio || [];
@@ -7947,7 +7955,7 @@ function crearJugador(raiz, T, opc) {
         vibrar(podio[0].id === L.yo ? [80, 60, 80, 60, 300] : [60]);
       } else Sonido.tocar("revelar");
     }
-    L.finalAntes = { paso: f.paso || 0, redoble: f.redoble || 0, fase: f.fase, escena };
+    L.finalAntes = { paso: f.paso || 0, redoble: f.redoble || 0, fase: f.fase, escena, lote: cine ? cine.lote : null };
   }
 
   /* ---------- capas: alertas, retos y confirmaciones ---------- */
@@ -8607,6 +8615,7 @@ function crearComando(raiz, T, opc) {
       pintarContenido();
       const energia = $("[data-final-conteo]", zContenido);
       if (energia) energia.textContent = Object.keys((S.final && S.final.energia) || {}).filter(id => S.agentes[id]).length;
+      if (S.final?.fase === "historia") actualizarControlCineLiga(zContenido, S.final, T.ahora());
     } catch (e) { console.error(e); }
     finally { L.pintando = false; }
     if (L.pendiente) { L.pendiente = false; setTimeout(refrescar, 0); }
@@ -8849,8 +8858,12 @@ function crearComando(raiz, T, opc) {
   function htmlFinal() {
     const f = S.final, podio = f.podio || [], paso = Number(f.paso) || 0;
     if (f.fase === "energia" || f.fase === "historia") {
-      return `<section class="pagina"><span class="cap">FINAL EN LOS CELULARES</span><h2 class="titulo">${f.fase === "energia" ? "Enciende nuestra ciudad" : "El origen de la leyenda"}</h2><p>${f.fase === "energia" ? "Pide a los invitados que toquen su escudo. Puedes avanzar cuando quieras, aunque no estén todos." : "Cada celular recorre los recuerdos y revela a Salvador en 18 segundos. Después, inicia el podio."}</p>` +
-        `<div class="final-host-energia"><b data-final-conteo>0</b><span>héroes enviaron su energía</span></div><button class="boton bloque" data-accion="${f.fase === "energia" ? "final-historia" : "final-podio"}">${f.fase === "energia" ? "Encender la ciudad" : "Continuar al podio"}</button>` +
+      const cine = momentoFinalLiga(f, T.ahora());
+      return `<section class="pagina"><span class="cap">FINAL EN LOS CELULARES</span><h2 class="titulo">${f.fase === "energia" ? "Enciende nuestra ciudad" : "El origen de la leyenda"}</h2><p>${f.fase === "energia" ? "Pide a los invitados que toquen su escudo. Puedes avanzar cuando quieras, aunque no estén todos." : "La película se reproduce en cada celular. Cuando termine, revela el podio desde aquí."}</p>` +
+        `<div class="final-host-energia"><b data-final-conteo>0</b><span>héroes enviaron su energía</span></div>` +
+        (f.fase === "historia" ? `<div class="final-host-progreso"><strong data-cine-escena>${NOMBRES_CINE_LIGA[cine.escena]}</strong><p data-cine-tiempo>${cine.listo ? "Película terminada" : `Faltan ${Math.ceil(cine.restante / 1000)} segundos`}</p><div class="cine-progreso"><i data-cine-barra style="width:${Math.round(cine.transcurrido / TOTAL_CINE_LIGA * 100)}%"></i></div></div>` : "") +
+        `<button class="boton bloque" data-accion="${f.fase === "energia" ? "final-historia" : "final-podio"}"${f.fase === "historia" && !cine.listo ? " disabled" : ""}>${f.fase === "energia" ? "Encender la ciudad" : "Continuar al podio"}</button>` +
+        (f.fase === "historia" ? `<button class="enlace" data-accion="final-saltar">Ir al podio ahora</button>` : "") +
         `<button class="enlace" data-accion="album-liga">Revisar las fotos del final</button></section><button class="enlace centro" data-accion="final-cancelar">Volver a la fiesta</button>`;
     }
     const siguiente = siguientePodio(podio, paso);
@@ -8928,7 +8941,11 @@ function crearComando(raiz, T, opc) {
         if (S.final?.fase === "energia") await T.actualizar("final", { fase: "historia", escenaT: T.ahora() });
         return;
       case "final-podio":
-        if (S.final?.fase === "historia") await T.actualizar("final", { fase: "podio" });
+        if (S.final?.fase === "historia" && momentoFinalLiga(S.final, T.ahora()).listo) await T.actualizar("final", { fase: "podio" });
+        return;
+      case "final-saltar":
+        if (S.final?.fase !== "historia") return;
+        if (await confirmar({ titulo: "¿Ir al podio ahora?", texto: "La película terminará en todos los celulares y comenzará la revelación de ganadores.", si: "Ir al podio" }, raiz)) await T.actualizar("final", { fase: "podio" });
         return;
       case "album-foto": verFoto(el.dataset.m, el.dataset.id); return;
       case "final-empezar": empezarFinal(); return;

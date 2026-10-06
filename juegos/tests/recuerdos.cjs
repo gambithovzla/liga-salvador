@@ -83,13 +83,23 @@ const { chromium } = require('playwright');
     await b(player, 'Cerrar álbum').click();
     await b(host, 'Comenzar el gran final').click();
     await b(host, '¡A la gran final!').click();
+    assert.equal(await player.locator('.cine-edificios i.encendido').count(), 0);
     await b(player, 'Enviar mi energía').click();
     await host.locator('[data-final-conteo]').filter({ hasText: '1' }).waitFor();
+    await page.waitForFunction(() => document.querySelectorAll('#raiz-jugador .cine-edificios i.encendido').length > 0);
     assert.equal(await b(player, 'Energía enviada').isDisabled(), true);
     await b(host, 'Encender la ciudad').click();
-    await player.locator('.escena-1').waitFor({ timeout: 10000 });
-    await page.waitForFunction(() => document.querySelector('#raiz-jugador .cine-recuerdo img')?.naturalWidth > 0);
-    await player.locator('.escena-2').waitFor({ timeout: 10000 });
+    await player.locator('.cine-etapa-0').waitFor();
+    assert.equal(await b(host, 'Continuar al podio').isDisabled(), true);
+    // Move shared server time through every chapter; keep the real transport/UI flow.
+    for (const [offset, stage] of [[5000, 1], [11000, 2], [14000, 2], [17000, 2], [20000, 2], [23000, 3], [29000, 4]]) {
+      await page.evaluate(async ms => __demo.T.actualizar('final', { escenaT: __demo.T.ahora() - ms }), offset);
+      await player.locator(`.cine-etapa-${stage}`).waitFor();
+      if (stage === 2) await page.waitForFunction(() => document.querySelector('#raiz-jugador .cine-fotograma img')?.naturalWidth > 0);
+    }
+    await page.evaluate(async () => __demo.T.actualizar('final', { escenaT: __demo.T.ahora() - 36000 }));
+    await b(host, 'Continuar al podio').waitFor();
+    await page.waitForFunction(() => !document.querySelector('#raiz-comando [data-accion="final-podio"]')?.disabled);
     await b(host, 'Continuar al podio').click();
     for (const name of ['Revelar el 3.er lugar', 'Revelar el 2.º lugar', 'Revelar al campeón']) {
       await b(host, name).click();
@@ -101,6 +111,10 @@ const { chromium } = require('playwright');
     await b(player, 'Crear portada').click();
     await b(player, 'Descargar portada').click();
     await b(player, 'Cerrar álbum').click();
+    await page.evaluate(async () => __demo.T.actualizar('final', { fase: 'historia', escenaT: __demo.T.ahora() }));
+    await b(host, 'Ir al podio ahora').click();
+    await b(host.locator('.capa-modal'), 'Ir al podio').click();
+    await page.waitForFunction(async () => (await __demo.T.leer('final'))?.fase === 'podio');
     console.log('PASS: approval, shared energy, photo montage, reveal and final keepsake');
 
     await host.getByRole('tab', { name: 'Marcador', exact: true }).click();
@@ -117,8 +131,11 @@ const { chromium } = require('playwright');
     await page.waitForFunction(async () => !(await __demo.T.leer('recuerdos')));
     assert.equal(await page.evaluate(async () => __demo.T.leer('fotos/recuerdos')), null);
     assert.equal(await page.evaluate(async () => __demo.T.leer('fotosMini/recuerdos')), null);
+    await b(player, 'Cerrar álbum').click();
+    await page.evaluate(async () => __demo.T.actualizar('final', { fase: 'historia', escenaT: __demo.T.ahora() - 12000 }));
+    await player.locator('.cine-nombres span').first().waitFor();
     assert.deepEqual(errors, []);
-    console.log('PASS: withdrawal, deletion including image data, no browser errors');
+    console.log('PASS: withdrawal, deletion, film without photos, no browser errors');
   } finally {
     await context.close();
     await browser.close();

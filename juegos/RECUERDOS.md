@@ -6,8 +6,8 @@ No se necesita TV. El anfitrión controla todo desde **Marcador** en su celular.
 2. Para compartirla en el álbum, marcan la casilla y pulsan **Enviar para aprobación**. Las misiones de fotos tienen una casilla equivalente, opcional; no marcarla no afecta los puntos.
 3. El anfitrión entra en **Marcador → Revisar y aprobar fotos**. Solo los recuerdos aprobados se muestran en el álbum de los invitados y en el final. Puede retirarlos después. Cada invitado también puede eliminar sus recuerdos.
 4. **Comenzar el gran final** abre la misión de energía en todos los teléfonos. Cada invitado toca su escudo una vez. El anfitrión puede avanzar sin esperar a todos.
-5. **Encender la ciudad** inicia una secuencia compartida: mensaje de apertura, cuatro fotos aprobadas recientes (o nombres si no hay fotos) y Salvador. Usa el tiempo del servidor para que un teléfono que vuelve a abrirse alcance la escena actual. No requiere audio para entenderse; hay una breve firma sonora y control de sonido.
-6. **Continuar al podio** permite revelar los puestos. Al terminar, el estudio genera portadas con los puntos y la posición final. **Volver a la fiesta** permite seguir jugando.
+5. **Encender la ciudad** inicia una película de 35 segundos en cada celular: señal de apertura, ciudad iluminada, hasta ocho fotos aprobadas en cuatro tandas (o nombres si no hay fotos), ascenso de Salvador y título final. Usa el tiempo del servidor para que un teléfono que vuelve a abrirse alcance la escena actual. No requiere audio para entenderse; incluye efectos breves, vibración y control de sonido.
+6. Al terminar se activa **Continuar al podio**. **Ir al podio ahora** permite saltar la película si hace falta. Tras revelar los puestos, el estudio genera portadas con puntos y posición final. **Volver a la fiesta** permite seguir jugando.
 
 La fecha impresa se configura en `CONFIG.fechaRecuerdo`, en `index.html`.
 

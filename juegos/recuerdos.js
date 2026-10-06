@@ -200,30 +200,103 @@ function abrirEstudioLiga({ T, S, yo, raiz, host = false }) {
   pintarAlbum();
 }
 
-function escenaFinalLiga(f, ahora) {
-  return f.fase === "historia" ? Math.min(2, Math.max(0, Math.floor((ahora - f.escenaT) / 6000))) : 0;
+const DURACIONES_CINE_LIGA = [4500, 5500, 12000, 6500, 6500];
+const TOTAL_CINE_LIGA = DURACIONES_CINE_LIGA.reduce((a, b) => a + b, 0);
+const NOMBRES_CINE_LIGA = ["La señal", "La ciudad despierta", "Los que estuvieron ahí", "El ascenso", "Nuestra leyenda"];
+const cacheFotosCineLiga = new Map();
+
+function miniCineLiga(T, r) {
+  const clave = `${r.mid}/${r.aid}/${r.t}`;
+  if (!cacheFotosCineLiga.has(clave)) {
+    cacheFotosCineLiga.set(clave, T.leer(`fotosMini/${r.mid}/${r.aid}`)
+      .then(src => fotoLigaValida(src) ? src : null)
+      .catch(() => { cacheFotosCineLiga.delete(clave); return null; }));
+  }
+  return cacheFotosCineLiga.get(clave);
+}
+
+// Every phone derives the same frame from server time. Reopening a tab joins the current scene.
+function momentoFinalLiga(f, ahora) {
+  if (f.fase !== "historia") return { escena: 0, lote: 0, transcurrido: 0, restante: TOTAL_CINE_LIGA, listo: false };
+  const transcurrido = Math.max(0, ahora - (Number(f.escenaT) || ahora));
+  let desde = 0;
+  for (let escena = 0; escena < DURACIONES_CINE_LIGA.length; escena++) {
+    const duracion = DURACIONES_CINE_LIGA[escena];
+    if (transcurrido < desde + duracion) {
+      return { escena, lote: escena === 2 ? Math.min(3, Math.floor((transcurrido - desde) / 3000)) : 0,
+        transcurrido, restante: TOTAL_CINE_LIGA - transcurrido, listo: false };
+    }
+    desde += duracion;
+  }
+  return { escena: 4, lote: 0, transcurrido: TOTAL_CINE_LIGA, restante: 0, listo: true };
+}
+function escenaFinalLiga(f, ahora) { return momentoFinalLiga(f, ahora).escena; }
+
+function ciudadCineLigaHTML() {
+  const alturas = [48, 64, 37, 82, 54, 73, 42, 92, 59, 77, 43, 85, 55, 69, 40, 75, 51, 63];
+  return `<div class="cine-ciudad-v2" aria-hidden="true"><div class="cine-edificios">${alturas.map((h, i) =>
+    `<i style="--alto:${h}%;--demora:${(i % 7) * .12}s"></i>`).join("")}</div><div class="cine-calles"></div></div>`;
 }
 
 function finalCineLigaHTML(f, S, yo, ahora) {
-  const energia = f.fase === "energia", escena = escenaFinalLiga(f, ahora);
+  const energia = f.fase === "energia", momento = momentoFinalLiga(f, ahora), escena = momento.escena;
   const aporto = !!(f.energia || {})[yo];
-  const fotos = Object.entries(S.recuerdos || {}).filter(([, r]) => r.estado === "aprobada").sort((a, b) => a[1].t - b[1].t).slice(-4);
-  const retratos = fotos.map(([id, r], i) => `<figure class="cine-recuerdo" style="--i:${i}" data-cine-foto="${esc(id)}"><img alt="${esc(r.nombre)}"><figcaption>${esc(r.nombre)}</figcaption></figure>`).join("");
-  return `<section class="final-cine escena-${energia ? "energia" : escena}"><div class="cine-aura"></div><div class="cine-ciudad" aria-hidden="true"></div><span class="eyebrow">LA LIGA DE SALVADOR · GRAN FINAL</span>` +
-    (energia ? `<div class="cine-texto"><span class="cine-numero">ÚLTIMA MISIÓN</span><h1>La ciudad<br>nos necesita.</h1><p>Cada héroe enciende una parte de esta historia. Envía tu energía desde aquí.</p></div><button class="energia-boton" data-accion="final-energia" aria-pressed="${aporto}">${icono("escudo")}<span>${aporto ? "Energía enviada" : "Enviar mi energía"}</span></button><p class="energia-conteo" aria-live="polite"><b data-energia-conteo>0</b> héroes conectaron su energía</p><p class="cine-espera">El anfitrión encenderá la ciudad. Puedes quedarte en esta pantalla.</p>` :
-      escena === 0 ? `<div class="cine-texto"><span class="cine-numero">CAPÍTULO FINAL</span><h1>Toda leyenda<br>empieza con<br><em>su gente.</em></h1><p>Hoy, esa gente eres tú.</p></div><div class="cine-linea"></div>` :
-      escena === 1 ? `<div class="cine-texto"><span class="cine-numero">LOS QUE ESTUVIERON AHÍ</span><h1>Nuestra liga.<br>Para siempre.</h1></div>${fotos.length ? `<div class="cine-mosaico${fotos.length === 1 ? " unica" : ""}">${retratos}</div>` : `<div class="cine-nombres">${Object.values(S.agentes || {}).filter(a => a.nombre).slice(0, 30).map(a => `<span>${esc(a.nombre)}</span>`).join("")}</div>`}` :
-      `<img class="cine-salvador" src="${esc(imagenSalva("salvador"))}" alt="Salvador, el héroe de esta historia"><div class="cine-texto cine-revelacion"><span class="cine-numero">EL ORIGEN DE UNA LEYENDA</span><h1>Salvador.</h1><p>Gracias por ser parte de su historia.</p></div><p class="cine-espera">A continuación: los héroes de la Liga.</p>`) +
-    `</section><div class="cine-pie"><button class="enlace" data-accion="estudio-liga">Ver álbum y crear mi portada</button><button class="enlace" data-accion="sonido">Sonido: ${Sonido.activo ? "sí" : "no"}</button></div>`;
+  const aprobadas = Object.entries(S.recuerdos || {}).filter(([, r]) => r.estado === "aprobada")
+    .sort((a, b) => a[1].t - b[1].t).slice(-8);
+  const par = aprobadas.length ? [0, 1].map(i => aprobadas[(momento.lote * 2 + i) % aprobadas.length])
+    .filter((r, i) => i === 0 || aprobadas.length > 1) : [];
+  const retratos = par.map(([id, r], i) => `<figure class="cine-fotograma" style="--foto:${i}" data-cine-foto="${esc(id)}"><div class="cine-foto-contenedor"><img alt="Foto de ${esc(r.nombre)}"></div><figcaption>${esc(r.nombre)}</figcaption></figure>`).join("");
+  const invitados = Object.values(S.agentes || {}).filter(a => a.nombre && !a.bot);
+  const nombres = (invitados.length ? invitados : Object.values(S.agentes || {}).filter(a => a.nombre))
+    .slice(momento.lote * 6, momento.lote * 6 + 6).map(a => `<span>${esc(a.nombre)}</span>`).join("");
+  const salvador = esc(imagenSalva("salvador") || "");
+  const miNombre = esc(nombreDe(S, yo));
+  const contenido = energia
+    ? `<div class="cine-bloque cine-energia"><span class="cine-kicker">TRANSMISIÓN DE EMERGENCIA</span><h1>La ciudad<br><em>nos necesita.</em></h1><p>Todos los héroes tienen una luz. Enciende la tuya.</p><button class="energia-boton cine-boton-energia" data-accion="final-energia" aria-pressed="${aporto}">${icono("escudo")}<span>${aporto ? "Energía enviada" : "Enviar mi energía"}</span></button><p class="energia-conteo" aria-live="polite"><b data-energia-conteo>0</b> héroes conectaron su energía</p><span class="cine-ayuda">Espera aquí. El anfitrión iniciará la película.</span></div>`
+    : escena === 0
+      ? `<div class="cine-bloque cine-transmision"><div class="cine-radio" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div><span class="cine-kicker">SEÑAL RECIBIDA · CAPÍTULO FINAL</span><h1>Escuchen,<br><em>héroes.</em></h1><p>Esta ciudad tiene una historia que contar.</p></div>`
+      : escena === 1
+        ? `<div class="cine-bloque cine-encendido"><div class="cine-emblema" aria-hidden="true">${icono("escudo")}</div><span class="cine-kicker">LA LIGA RESPONDIÓ</span><h1>La ciudad<br><em>despierta.</em></h1><p>Una luz se convirtió en muchas.</p></div>`
+        : escena === 2
+          ? `<div class="cine-bloque cine-album"><span class="cine-kicker">ARCHIVO DE LA LIGA · ${String(momento.lote + 1).padStart(2, "0")}/04</span><h1>Los que<br><em>estuvieron ahí.</em></h1>${retratos ? `<div class="cine-fotogramas${par.length === 1 ? " uno" : ""}">${retratos}</div>` : `<div class="cine-nombres">${nombres || `<span>${miNombre}</span>`}</div>`}<p>Ellos hicieron posible la leyenda.</p></div>`
+          : escena === 3
+            ? `<div class="cine-bloque cine-ascenso"><div class="cine-rayo" aria-hidden="true"></div><img class="cine-heroe" src="${salvador}" alt="Salvador vuela sobre la ciudad"><span class="cine-kicker">EL ORIGEN DE UNA LEYENDA</span><h1>Y entonces<br><em>voló.</em></h1></div>`
+            : `<div class="cine-bloque cine-coronacion"><span class="cine-kicker">CAPÍTULO 01 · EL ORIGEN</span><h1>Salvador.</h1><img class="cine-heroe" src="${salvador}" alt="Salvador, protagonista de esta historia"><p>Toda leyenda empieza con quienes estuvieron ahí.</p><strong>${miNombre}, tú eres parte de la Liga.</strong><span class="cine-fin">CONTINUARÁ…</span></div>`;
+  const progreso = energia ? 0 : Math.min(100, Math.round(momento.transcurrido / TOTAL_CINE_LIGA * 100));
+  return `<section class="final-cine cine-v2 cine-etapa-${energia ? "energia" : escena}" role="region" aria-label="Final cinematográfico de la Liga de Salvador" style="--potencia:${energia ? 0 : 1}">` +
+    `<div class="cine-cielo-v2" aria-hidden="true"></div><div class="cine-luna-v2" aria-hidden="true"></div>${ciudadCineLigaHTML()}` +
+    `<div class="cine-pelicula"><header class="cine-superior"><span>LA LIGA DE SALVADOR</span><span>EDICIÓN FUNDADORES · 01</span></header><div class="cine-escena" aria-live="polite">${contenido}</div>` +
+    `<footer class="cine-inferior"><span>${energia ? "TODOS LOS HÉROES · UNA MISIÓN" : NOMBRES_CINE_LIGA[escena]}</span><span>${energia ? "EN VIVO" : momento.listo ? "FIN DE LA PELÍCULA" : `${Math.ceil(momento.restante / 1000)} S`}</span><div class="cine-progreso" role="progressbar" aria-label="Progreso del final" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progreso}"><i style="width:${progreso}%"></i></div></footer></div></section>` +
+    `<div class="cine-pie"><button class="enlace" data-accion="estudio-liga">Ver álbum y crear mi portada</button><button class="enlace" data-accion="sonido">Sonido: ${Sonido.activo ? "sí" : "no"}</button></div>`;
 }
 
 function actualizarCineLiga(raiz, T, S, yo) {
   const f = S.final; if (!f) return;
+  // Start fetching the next stills during the energy screen, before the film reaches them.
+  Object.values(S.recuerdos || {}).filter(r => r.estado === "aprobada")
+    .sort((a, b) => a.t - b.t).slice(-8).forEach(r => miniCineLiga(T, r));
   const contador = raiz.querySelector("[data-energia-conteo]");
   if (contador) {
     const n = Object.keys(f.energia || {}).filter(id => S.agentes[id]).length;
     contador.textContent = n;
     contador.nextSibling.textContent = n === 1 ? " héroe conectó su energía" : " héroes conectaron su energía";
+    const total = Math.max(1, Object.keys(S.agentes || {}).filter(id => S.agentes[id]?.nombre && !S.agentes[id]?.bot).length);
+    const cine = raiz.querySelector(".cine-v2");
+    if (cine) cine.style.setProperty("--potencia", String(Math.min(1, n / total)));
+    const edificios = [...raiz.querySelectorAll(".cine-etapa-energia .cine-edificios i")];
+    const encendidos = Math.ceil(Math.min(1, n / total) * edificios.length);
+    edificios.forEach((edificio, i) => edificio.classList.toggle("encendido", i < encendidos));
+  }
+  if (f.fase === "historia") {
+    const m = momentoFinalLiga(f, T.ahora());
+    const progreso = raiz.querySelector(".cine-progreso");
+    if (progreso) {
+      const valor = Math.min(100, Math.round(m.transcurrido / TOTAL_CINE_LIGA * 100));
+      progreso.setAttribute("aria-valuenow", String(valor));
+      progreso.querySelector("i").style.width = `${valor}%`;
+    }
+    const tiempo = raiz.querySelector(".cine-inferior span:last-of-type");
+    if (tiempo) tiempo.textContent = m.listo ? "FIN DE LA PELÍCULA" : `${Math.ceil(m.restante / 1000)} S`;
   }
   const sonido = raiz.querySelector('.cine-pie [data-accion="sonido"]');
   if (sonido) sonido.textContent = `Sonido: ${Sonido.activo ? "sí" : "no"}`;
@@ -233,6 +306,21 @@ function actualizarCineLiga(raiz, T, S, yo) {
     figura.dataset.cargando = "1";
     const id = figura.dataset.cineFoto, r = (S.recuerdos || {})[id];
     if (!r || r.estado !== "aprobada") continue;
-    T.leer(`fotosMini/${r.mid}/${r.aid}`).then(src => { if (figura.isConnected && fotoLigaValida(src) && S.recuerdos[id]?.estado === "aprobada") figura.querySelector("img").src = src; }).catch(() => { figura.hidden = true; });
+    miniCineLiga(T, r).then(src => {
+      if (figura.isConnected && src && S.recuerdos[id]?.estado === "aprobada") figura.querySelector("img").src = src;
+      else if (figura.isConnected) figura.hidden = true;
+    });
   }
+}
+
+function actualizarControlCineLiga(raiz, f, ahora) {
+  const m = momentoFinalLiga(f, ahora);
+  const escena = raiz.querySelector("[data-cine-escena]");
+  if (escena) escena.textContent = NOMBRES_CINE_LIGA[m.escena];
+  const tiempo = raiz.querySelector("[data-cine-tiempo]");
+  if (tiempo) tiempo.textContent = m.listo ? "Película terminada" : `Faltan ${Math.ceil(m.restante / 1000)} segundos`;
+  const barra = raiz.querySelector("[data-cine-barra]");
+  if (barra) barra.style.width = `${Math.min(100, Math.round(m.transcurrido / TOTAL_CINE_LIGA * 100))}%`;
+  const boton = raiz.querySelector('[data-accion="final-podio"]');
+  if (boton) boton.disabled = !m.listo;
 }
