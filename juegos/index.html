@@ -27,6 +27,7 @@ const CONFIG = {
 
   // 3) Nombre interno de la partida. Puedes dejarlo así.
   sala: "fiesta",
+  fechaRecuerdo: "11 OCTUBRE 2026 · BARRANCO",
 
   // Imágenes de la invitación (rutas dentro de la carpeta de los juegos).
   imagenes: {
@@ -308,6 +309,8 @@ const SUGERENCIAS_CUANTO = [
 
 /* Foto en el lugar: retos sugeridos (también puedes escribir el tuyo). */
 const SUGERENCIAS_FOTO = [
+  "Reúne a tres héroes y hagan su mejor pose de equipo",
+  "Una foto con Salvador: el origen de nuestra Liga",
   "Tómate una foto junto a la torta",
   "Foto con el cumpleañero haciendo la pose de héroe",
   "Foto con alguien que lleve algo rojo",
@@ -1273,9 +1276,13 @@ button.agente-fila:disabled { opacity: 0.5; cursor: default; }
 .arena.mini .salva-ya { width: 34%; max-width: 80px; margin-bottom: 2px; }
 
 </style>
+<link rel="stylesheet" href="experience.css">
+<link rel="stylesheet" href="recuerdos.css">
 </head>
 <body>
 <div id="app"></div>
+<script src="experience.js"></script>
+<script src="recuerdos.js"></script>
 <script>
 /* qrcode-generator — (c) Kazuhiko Arase, licencia MIT */
 //---------------------------------------------------------------------
@@ -3583,7 +3590,7 @@ var qrcode = function() {
    ===================================================================== */
 const FIREBASE_SDK = window.__FIREBASE_SDK__ || "https://www.gstatic.com/firebasejs/10.12.2";
 const PARAMS = new URLSearchParams(location.search);
-const EN_ARTIFACT = !!window.__FORZAR_DEMO__;
+const EN_ARTIFACT = !!window.__FORZAR_DEMO__ || PARAMS.has("demo");
 const SALA = limpiarSala(PARAMS.get("sala") || CONFIG.sala);
 const MODO = EN_ARTIFACT ? "demo" : CONFIG.firebaseURL ? "firebase" : PARAMS.has("local") ? "local" : "demo";
 const ES_COMANDO = /comando/i.test(location.hash);
@@ -3900,6 +3907,10 @@ const Sonido = (function () {
     exito: () => { tono(659, 0, 0.12); tono(880, 0.1, 0.24); },
     error: () => { tono(220, 0, 0.25, "sawtooth", 0.05); },
     revelar: () => { tono(523, 0, 0.18); tono(659, 0.1, 0.18); tono(784, 0.2, 0.34); },
+    firmaLiga: () => {
+      [392, 523, 587, 784].forEach((f, i) => tono(f, i * .22, .7, "triangle", .08));
+      tono(130.81, 0, 1.4, "sine", .08);
+    },
     sirena: () => { for (let i = 0; i < 4; i++) tono(620, i * 0.9, 0.45, "sawtooth", 0.07, 1100), tono(1100, i * 0.9 + 0.45, 0.45, "sawtooth", 0.07, 620); },
     boom: () => { golpe(0, 0.9, 0.5, 120); golpe(0.02, 0.5, 0.3, 400); tono(90, 0, 0.6, "sawtooth", 0.08, 40); },
     redoble: () => { let t = 0, paso = 0.11; while (t < 2.25) { golpe(t, 0.07, 0.1 + t * 0.06); t += paso; paso = Math.max(0.035, paso * 0.93); } },
@@ -4107,6 +4118,7 @@ function crearEstado(T, alCambiar) {
   T.escuchar("puntos", (v) => { S.puntos = v || {}; S.totales = totalesDe(S.puntos); alCambiar("puntos"); });
   T.escuchar("mision", (v) => { S.mision = v || null; seguirMision(); alCambiar("mision"); });
   T.escuchar("final", (v) => { S.final = v || null; alCambiar("final"); });
+  T.escuchar("recuerdos", (v) => { S.recuerdos = v || {}; alCambiar("recuerdos"); });
   T.escuchar("duelos", (v) => { S.duelos = v || {}; alCambiar("duelos"); });
   T.escuchar("enfriamiento", (v) => { S.enfriamiento = v || {}; alCambiar("enfriamiento"); });
   T.escuchar("historial", (v) => { S.historial = v || {}; alCambiar("historial"); });
@@ -4162,6 +4174,7 @@ function relojArena(arena, ms, alTic, alFin) {
     if (!vivo) return;
     const queda = Math.max(0, fin - ahora);
     r.textContent = Math.ceil(queda / 1000);
+    r.classList.toggle("urgente", queda <= 5000);
     if (alTic) alTic(queda);
     if (queda <= 0) { vivo = false; alFin(); return; }
     raf = requestAnimationFrame(paso);
@@ -4179,6 +4192,7 @@ function marcadorArena(arena, texto) {
 // Cuenta 3, 2, 1 antes de empezar.
 function cuentaAtras(arena, alTerminar) {
   const t = textoArena(arena, "3");
+  t.classList.add("cuenta-cine");
   const pasos = ["3", "2", "1", "¡YA!"];
   let i = 0, vivo = true;
   Sonido.tocar("tic");
@@ -4277,9 +4291,18 @@ const MINIJUEGOS = {
     menorEsMejor: false,
     formato: (v) => `${fmt(v * 10)} metros`,
     jugar(arena, terminar) {
-      arena.className = "arena cielo";
+      arena.className = "arena cielo vuelo-cine";
       let toques = 0, vivo = true, parar = () => {};
+      const atmosfera = document.createElement("div");
+      atmosfera.className = "vuelo-atmosfera";
+      atmosfera.setAttribute("aria-hidden", "true");
+      atmosfera.innerHTML = `<div class="vuelo-estrellas"></div><div class="vuelo-nubes"></div><div class="vuelo-estela"></div><div class="vuelo-progreso"><i></i></div>`;
+      arena.appendChild(atmosfera);
       const m = marcadorArena(arena, "0 m");
+      const zona = document.createElement("div");
+      zona.className = "vuelo-zona";
+      zona.textContent = "01 · Despegue";
+      arena.appendChild(zona);
       const ciudad = document.createElement("div");
       ciudad.className = "vuelo-ciudad";
       ciudad.innerHTML = ciudadSVG();
@@ -4302,6 +4325,9 @@ const MINIJUEGOS = {
         const rango = Math.max(40, r.height - 108 - 48 - alto);
         heroe.style.transform = `translate(-50%, ${(-p * rango).toFixed(0)}px)`;
         arena.style.backgroundPosition = `50% ${(100 - p * 100).toFixed(1)}%`;
+        arena.style.setProperty("--altura", p.toFixed(3));
+        arena.style.setProperty("--impulso", toques ? ".8" : "0");
+        zona.textContent = p < .25 ? "01 · Despegue" : p < .5 ? "02 · Sobre Barranco" : p < .75 ? "03 · Entre las nubes" : p < 1 ? "04 · Estratósfera" : "05 · Hasta las estrellas";
         ciudad.style.transform = `translateY(${(p * 140).toFixed(0)}%)`;
       }
       subir();
@@ -4319,7 +4345,7 @@ const MINIJUEGOS = {
         setTimeout(() => b.classList.remove("golpe"), 60);
         const r = arena.getBoundingClientRect();
         const lugar = lugares.find((l) => l[0] === toques);
-        if (lugar) flotar(arena, clamp(r.width / 2 - 110, 6, r.width - 230), r.height * 0.18, lugar[1]);
+        if (lugar) { flotar(arena, clamp(r.width / 2 - 110, 6, r.width - 230), r.height * 0.25, lugar[1]); Sonido.tocar("revelar"); vibrar([15, 25, 25]); }
         else if (toques % 6 === 0) flotar(arena, 16 + Math.random() * (r.width - 110), 78 + Math.random() * (r.height * 0.32), ["¡FIUU!", "¡ZUM!", "¡ARRIBA!"][(toques / 6) % 3]);
       });
       return () => { vivo = false; quitar(); parar(); };
@@ -4711,7 +4737,11 @@ const MINIJUEGOS = {
     menorEsMejor: false,
     formato: (v) => plural(v, "estrella", "estrellas"),
     jugar(arena, terminar) {
-      arena.className = "arena noche";
+      arena.className = "arena noche cosmos-cine";
+      const ambiente = document.createElement("div");
+      ambiente.setAttribute("aria-hidden", "true");
+      ambiente.innerHTML = `<div class="cosmos-nebula"></div><div class="cosmos-planeta"></div>`;
+      arena.appendChild(ambiente);
       const lienzo = document.createElement("canvas");
       Object.assign(lienzo.style, { position: "absolute", inset: "0", width: "100%", height: "100%" });
       arena.appendChild(lienzo);
@@ -4725,6 +4755,10 @@ const MINIJUEGOS = {
       const salva = imgSalva("salvador");
       const SW = 64, SH = Math.round(64 * 473 / 330);
       let x = W / 2, puntos = 0, cosas = [], vivo = false, raf = 0, ultimo = 0, proximo = 0, t0 = 0, parar = () => {};
+      const movimientoSuave = !matchMedia("(prefers-reduced-motion: reduce)").matches;
+      let particulas = [], ultimoSonido = 0;
+      const resize = new ResizeObserver(() => { const proporcion = W ? x / W : .5; medir(); x = clamp(W * proporcion, 30, W - 30); });
+      resize.observe(arena);
       function mover(e) { const r = arena.getBoundingClientRect(); x = clamp(e.clientX - r.left, 30, W - 30); }
       arena.addEventListener("pointerdown", mover);
       arena.addEventListener("pointermove", mover);
@@ -4743,6 +4777,15 @@ const MINIJUEGOS = {
           proximo = t + Math.max(260, 620 - avance * 380);
         }
         ctx.clearRect(0, 0, W, H);
+        // A deterministic star field: decorative movement never affects collisions.
+        for (let i = 0; i < 36; i++) {
+          const sx = ((i * 83 + 17) % 359) / 359 * W;
+          const sy = (((i * 97) % 487) + (movimientoSuave ? (t - t0) * (.006 + (i % 3) * .003) : 0)) % H;
+          ctx.globalAlpha = .2 + (i % 4) * .15;
+          ctx.fillStyle = "#edf3ff";
+          ctx.fillRect(sx, sy, i % 3 === 0 ? 2 : 1, i % 3 === 0 ? 2 : 1);
+        }
+        ctx.globalAlpha = 1;
         const conFoto = !!(salva && salva.complete && salva.naturalWidth);
         const ey = conFoto ? H - SH / 2 - 4 : H - 40;
         const arriba = conFoto ? SH / 2 + 8 : 26, abajo = conFoto ? 10 : 20, ancho = conFoto ? 38 : 42;
@@ -4752,12 +4795,29 @@ const MINIJUEGOS = {
             c.fuera = true;
             if (c.bomba) { puntos -= 3; vibrar(120); flotar(arena, c.x - 10, ey - 70, "-3", true); }
             else { puntos += 1; vibrar(12); flotar(arena, c.x - 10, ey - 60, "+1"); }
+            if (t - ultimoSonido > 100) { Sonido.tocar(c.bomba ? "error" : "tic"); ultimoSonido = t; }
+            if (movimientoSuave) for (let i = 0; i < 8; i++) {
+              const angulo = i * Math.PI / 4;
+              particulas.push({ x: c.x, y: ey - 15, vx: Math.cos(angulo) * .11, vy: Math.sin(angulo) * .11, vida: 1, color: c.bomba ? "#ff886d" : "#ffe4a2" });
+            }
+            if (particulas.length > 64) particulas.splice(0, particulas.length - 64);
             m.textContent = Math.max(0, puntos);
           }
           if (!c.fuera) dibujar(c.bomba ? pBomba : pEstrella, c.x, c.y, c.tam, c.bomba ? "#3b3b3b" : "#ffd21f");
         }
         cosas = cosas.filter((c) => !c.fuera && c.y < H + 30);
-        if (conFoto) ctx.drawImage(salva, x - SW / 2, ey - SH / 2, SW, SH);
+        for (const p of particulas) {
+          p.x += p.vx * dt; p.y += p.vy * dt; p.vida -= dt / 480;
+          ctx.globalAlpha = Math.max(0, p.vida); ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 3, 3);
+        }
+        particulas = particulas.filter((p) => p.vida > 0);
+        ctx.globalAlpha = 1;
+        if (conFoto) {
+          const estela = ctx.createLinearGradient(x, ey + 10, x, H);
+          estela.addColorStop(0, "#ffdf9299"); estela.addColorStop(1, "#ffdf9200");
+          ctx.fillStyle = estela; ctx.beginPath(); ctx.moveTo(x - 9, ey + 14); ctx.lineTo(x + 9, ey + 14); ctx.lineTo(x + 20, H); ctx.lineTo(x - 20, H); ctx.fill();
+          ctx.drawImage(salva, x - SW / 2, ey - SH / 2, SW, SH);
+        }
         else dibujar(pEscudo, x, ey, 64, "#2a5fd0");
         raf = requestAnimationFrame(paso);
       }
@@ -4768,7 +4828,7 @@ const MINIJUEGOS = {
         raf = requestAnimationFrame(paso);
         parar = relojArena(arena, 25000, null, () => { vivo = false; cancelAnimationFrame(raf); terminar(Math.max(0, puntos)); });
       });
-      return () => { vivo = false; quitar(); parar(); cancelAnimationFrame(raf); };
+      return () => { vivo = false; quitar(); parar(); cancelAnimationFrame(raf); resize.disconnect(); arena.removeEventListener("pointerdown", mover); arena.removeEventListener("pointermove", mover); };
     },
   },
 };
@@ -4825,7 +4885,7 @@ function chipAgente(S, id, clase) {
 }
 function listosDe(ctx) { return Object.keys((ctx.mj && ctx.mj.listos) || {}).filter((id) => ctx.S.agentes && ctx.S.agentes[id] && ctx.S.agentes[id].nombre); }
 function introHTML(tipo, extra) {
-  return `<section class="pagina"><span class="cap">${tipo.cat === "fiesta" ? "Misión en la fiesta" : "Misión en el celular"}</span>` +
+  return `<section class="pagina juego-intro"><span class="cap">${tipo.cat === "fiesta" ? "Misión en la fiesta" : "Misión en el celular"}</span>${arteJuegoHTML(tipo.id, tipo.icono)}` +
     `<h1 class="titulo">${esc(tipo.nombre)}</h1>${tipo.pasos ? `<p class="subtitulo">Cómo se juega</p>${pasosHTML(tipo.pasos)}` : `<p>${esc(tipo.ayuda)}</p>`}${extra || ""}</section>`;
 }
 function practicaHecha(id) { return almacenAgente.get(`liga2:practica:${id}`) === "1"; }
@@ -5530,10 +5590,11 @@ TIPOS.foto = {
       const s = ctx.m.sub;
       const l = (ctx.mj.llegadas || {})[ctx.yo];
       const reto = `<section class="pagina"><span class="cap">Reto de foto</span><p class="pregunta-texto">${esc(s.reto)}</p><p class="suave" data-vivo="queda"></p></section>`;
-      const input = `<input type="file" accept="image/*" capture="environment" id="archivo-foto" hidden>`;
+      const input = `<input type="file" accept="image/*" id="archivo-foto" hidden>`;
       if (ctx.local.subiendo) return reto + `<p class="centro latido">Subiendo tu foto…</p>`;
       if (ctx.local.vista) {
         return reto + `<img class="foto-propia" src="${esc(ctx.local.vista)}" alt="Tu foto">` +
+          `<label class="permiso-album"><input type="checkbox" id="compartir-foto-liga">También quiero compartir esta foto en el álbum y el gran final, previa aprobación del anfitrión.</label>` +
           `<div class="fila"><button class="boton blanco" data-accion="otra">Tomar otra</button><button class="boton rojo" data-accion="enviar">¡Enviar foto!</button></div>${input}`;
       }
       if (l && l.estado !== "rechazada") {
@@ -5560,7 +5621,7 @@ TIPOS.foto = {
           const f = input.files && input.files[0];
           if (!f) return;
           try {
-            ctx.local.vista = await comprimirFoto(f, 960, 0.72);
+            ctx.local.vista = await comprimirFoto(f, 1600, 0.86);
             ctx.local.mini = await comprimirFoto(f, 260, 0.6);
           } catch (e) { avisar("No se pudo abrir la foto. Intenta otra vez.", ctx.capaAvisos()); return; }
           ctx.pintar();
@@ -5568,11 +5629,17 @@ TIPOS.foto = {
         input.click();
       }
       if (accion === "enviar" && ctx.local.vista) {
+        const compartir = !!$("#compartir-foto-liga", ctx.raiz)?.checked;
         ctx.local.subiendo = true;
         ctx.pintar();
         const id = ctx.m.id, yo = ctx.yo, full = ctx.local.vista, mini = ctx.local.mini || full;
         Promise.all([ctx.T.escribir(`fotos/${id}/${yo}`, full), ctx.T.escribir(`fotosMini/${id}/${yo}`, mini)])
           .then(() => ctx.T.escribir(`mj/${id}/llegadas/${yo}`, { t: ctx.ahora(), estado: "ok" }))
+          .then(async () => {
+            if (!compartir) return;
+            try { await guardarRecuerdoLiga(ctx.T, { id: `${id}_${yo}`, mid: id, aid: yo, autor: yo, nombre: nombreDe(ctx.S, yo), reto: ctx.m.sub.reto }, full, mini); }
+            catch (e) { avisar("La foto cuenta para la misión, pero no llegó al álbum. Puedes enviarla desde el estudio de portadas.", ctx.capaAvisos()); }
+          })
           .then(() => { ctx.local.subiendo = false; ctx.local.vista = null; vibrar([40, 50, 40]); Sonido.tocar("exito"); ctx.pintar(); })
           .catch(() => { ctx.local.subiendo = false; avisar("No se pudo subir. Revisa tu internet e intenta otra vez.", ctx.capaAvisos()); ctx.pintar(); });
       }
@@ -7422,7 +7489,7 @@ function crearJugador(raiz, T, opc) {
     return { id: "cuartel" };
   }
   function claveDe(p, ctx) {
-    if (p.id === "final") return `final:${S.final.paso || 0}`;
+    if (p.id === "final") return `final:${S.final.t}:${S.final.fase || "podio"}:${escenaFinalLiga(S.final, T.ahora())}:${S.final.paso || 0}:${JSON.stringify(Object.entries(S.recuerdos || {}).map(([id, r]) => [id, r.estado]))}`;
     if (p.id === "duelo") {
       const mio = ((p.d.r || {})[L.yo]);
       const prep = p.d.estado === "aceptado" && !p.d.go ? `prep${((p.d.listo || {})[L.yo]) ? "L" : ""}` : "go";
@@ -7465,6 +7532,7 @@ function crearJugador(raiz, T, opc) {
       L.clave = clave;
       desmontarPracticas(L.practicas);
       zPrincipal.innerHTML = htmlDe(p, ctx);
+      animarExperiencia(zPrincipal);
       montarPracticas(zPrincipal, { S, yo: L.yo }, L.practicas);
       const cambioGrande = antes.split(":").slice(0, 3).join(":") !== clave.split(":").slice(0, 3).join(":");
       if (cambioGrande) desplazarArriba();
@@ -7492,6 +7560,7 @@ function crearJugador(raiz, T, opc) {
     if (p.id === "cuartel") { if (L.sub === "retar") actualizarRetar(); else actualizarCuartel(); }
     else if (p.id === "mision") actualizarMision(p.m, ctx);
     else if (p.id === "duelo") actualizarDuelo(p.did, p.d);
+    else if (p.id === "final") actualizarCineLiga(zPrincipal, T, S, L.yo);
     const mp = $('[data-vivo="mini-puntos"]', zPrincipal);
     if (mp) { const t = `${fmt(totalDe(S, L.yo))} pts`; if (mp.textContent !== t) mp.textContent = t; }
   }
@@ -7504,10 +7573,10 @@ function crearJugador(raiz, T, opc) {
 
   /* ---------- registro: la tarjeta de miembro ---------- */
   function htmlRegistro() {
-    return `${logoHTML()}<section class="pagina"><span class="cap">Tarjeta de miembro</span>` +
+    return `${portadaLigaHTML(true)}<section class="pagina"><span class="cap">Crea tu identidad</span>` +
       `<h1 class="titulo">Únete a la Liga</h1>` +
       (L.perdido ? `<div class="globo"><strong>Tu tarjeta ya no está.</strong> El anfitrión la quitó de la partida. Puedes crear una nueva.</div>` : "") +
-      `<p>Cada invitado juega por su cuenta. Suma puntos de Liga en las misiones de la fiesta: quien termine 1.º gana el premio, para sí o para el pequeño héroe que elija.</p>` +
+      `<p>Elige tu nombre y tu poder. Juega las misiones, suma puntos y conquista el podio.</p>` +
       `<form data-form="registro" class="columna" novalidate>` +
       `<div class="campo-grupo"><label class="etiqueta" for="nombre-heroe">Nombre de héroe</label><input class="campo" id="nombre-heroe" maxlength="22" autocomplete="nickname" autocapitalize="words" enterkeyhint="done" placeholder="Por ejemplo: Capitán Papá"></div>` +
       `<div class="campo-grupo" role="radiogroup" aria-labelledby="et-poder"><span class="etiqueta" id="et-poder">Superpoder</span>` +
@@ -7552,21 +7621,21 @@ function crearJugador(raiz, T, opc) {
   /* ---------- cuartel ---------- */
   function htmlCuartel() {
     const a = miAgente();
-    return `${logoHTML()}<section class="pagina tarjeta-agente"><span class="cap">Tarjeta de miembro</span>` +
-      `<div class="cabeza">${poderHTML(a.poder)}<div><div class="nombre">${esc(a.nombre)}</div><div class="poder-nombre">${esc(poderDe(a.poder).nombre)}</div></div></div>` +
-      `<div class="codigo-banda"><span>Tu código<br>de agente</span><b>${esc(a.codigo || "–")}</b></div>` +
-      `<div class="datos"><div class="dato"><b class="numero" data-vivo="total">0</b><span>puntos</span></div>` +
-      `<div class="dato"><b class="numero" data-vivo="puesto">–</b><span>puesto</span></div></div></section>` +
+    return `${portadaLigaHTML(false)}<section class="perfil-liga" aria-label="Tu credencial">` +
+      `${poderHTML(a.poder)}<div class="identidad"><div class="nombre">${esc(a.nombre)}</div><div class="poder-nombre">${esc(poderDe(a.poder).nombre)}</div></div>` +
+      `<div class="codigo-mini">AGENTE<b>${esc(a.codigo || "–")}</b></div></section>` +
+      `<div class="liga-estadisticas"><div><b data-vivo="total">0</b><span>Puntos de Liga</span></div><div><b data-vivo="puesto">–</b><span>Tu posición</span></div></div>` +
       `<div class="zona" data-vivo="mision"></div>` +
       `<div class="zona" data-vivo="duelo"></div>` +
-      `<section class="pagina"><span class="cap">Clasificación</span><div data-vivo="ranking"></div></section>` +
+      accesoRecuerdosHTML() +
+      `<details class="pagina liga-ranking"><summary>El salón de los héroes</summary><div data-vivo="ranking"></div></details>` +
       `<p class="nota centro" data-vivo="nota-sonido">Deja esta página abierta: cuando empiece una misión, tu celular suena.</p>` +
       `<div class="fila centro pie-cuartel"><button class="enlace" data-accion="sonido" data-vivo="sonido"></button><button class="enlace" data-accion="como">¿Cómo se juega?</button></div>`;
   }
   function htmlBannerMision() {
     const m = S.mision, tipo = tipoDe(m);
     if (!m || !tipo) {
-      return `<section class="pagina"><span class="cap">Sin misión</span><p>Por ahora, ¡a disfrutar la fiesta! Cuando el anfitrión lance una misión, aparecerá aquí.</p></section>`;
+      return `<section class="mision-espera"><span class="espera-baliza" aria-hidden="true"></span><div><span class="eyebrow">LA LIGA ESTÁ EN LÍNEA</span><h2>La próxima aventura se acerca</h2><p>Disfruta la fiesta. Te avisamos aquí cuando el anfitrión lance una misión.</p><button class="enlace" data-accion="como">Conoce las reglas de la Liga →</button></div></section>`;
     }
     if (m.fase === "resultados") {
       const mia = (m.resultados || []).find((f) => f.id === L.yo);
@@ -7574,7 +7643,7 @@ function crearJugador(raiz, T, opc) {
         `<p>${mia ? (mia.pts > 0 ? `Sumaste <b>+${fmt(mia.pts)}</b> puntos (${ordinal(mia.pos)} lugar).` : mia.pts < 0 ? `Perdiste <b>${fmt(-mia.pts)}</b> puntos.` : "Esta vez no sumaste puntos.") : "No participaste en esta misión."}</p>` +
         `<button class="boton bloque" data-accion="entrar">Ver resultados</button></section>`;
     }
-    return `<section class="pagina alerta-mision"><span class="cap roja">¡Misión en curso!</span>` +
+    return `<section class="pagina alerta-mision mision-destacada"><span class="cap roja">¡Misión en curso!</span>${arteJuegoHTML(m.tipo, tipo.icono)}` +
       `<div class="mision-cabeza"><span class="icono-mision">${icono(tipo.icono)}</span><h2 class="titulo chico">${esc(m.nombre)}</h2></div>` +
       `<p>${esc(tipo.resumen)}</p>${m.doble ? `<p class="doble">¡Vale doble!</p>` : ""}` +
       `<button class="boton rojo grande bloque" data-accion="entrar">Entrar a la misión</button></section>`;
@@ -7593,7 +7662,7 @@ function crearJugador(raiz, T, opc) {
         `<button class="boton azul bloque" data-accion="retar"${yo.ok ? "" : " disabled"}>${icono("duelo")} Retar a un duelo</button>` +
         (yo.ok ? "" : `<p class="suave">${esc(yo.motivo)}</p>`);
     }
-    return `<section class="pagina"><span class="cap">Robo de puntos</span>${cuerpo}${feed}</section>`;
+    return `<section class="pagina"><span class="cap">Arena de duelos</span>${cuerpo}${feed}</section>`;
   }
   function actualizarCuartel() {
     const a = miAgente();
@@ -7781,10 +7850,8 @@ function crearJugador(raiz, T, opc) {
     const filas = m.resultados || [];
     const mia = filas.find((f) => f.id === L.yo);
     const bomba = m.tipo === "bomba";
-    const cabeza = mia && mia.pts > 0
-      ? `<div class="estallido"><div><strong>${mia.pos === 1 ? "¡Ganaste!" : `¡${ordinal(mia.pos)} lugar!`}</strong><b>+${fmt(mia.pts)}</b></div></div>`
-      : mia && mia.pts < 0 ? `<div class="estallido rojo"><div><strong>${bomba ? "¡BOOM!" : "¡Ay!"}</strong><b>${ptsTexto(mia.pts)}</b></div></div>`
-        : mia ? `<div class="estallido azul"><div><strong>${bomba ? "¡Te salvaste!" : "¡A la próxima!"}</strong><b>${bomba ? "0" : "+0"}</b></div></div>` : "";
+    const cabeza = mia ? resultadoLigaHTML(mia.pos, mia.pts,
+      mia.pts > 0 ? (mia.pos === 1 ? "¡Misión conquistada!" : `¡${ordinal(mia.pos)} lugar!`) : mia.pts < 0 ? (bomba ? "¡BOOM!" : "¡A levantarse!") : bomba ? "¡Te salvaste!" : "¡A la próxima!") : "";
     const tipo = tipoDe(m);
     return cabeza + `<section class="pagina"><span class="cap">Resultados</span><h2 class="titulo chico">${esc(m.nombre)}</h2>${m.doble ? `<p class="doble">¡Valía doble!</p>` : ""}` +
       (filas.length ? `<ol class="tabla">${filas.map((r, i) => filaResultado(S, r, i, L.yo)).join("")}</ol>` : `<p>Nadie sumó puntos en esta misión.</p>`) +
@@ -7847,6 +7914,7 @@ function crearJugador(raiz, T, opc) {
   /* ---------- gran final ---------- */
   function htmlFinal() {
     const f = S.final, paso = Number(f.paso) || 0, podio = f.podio || [];
+    if (f.fase === "energia" || f.fase === "historia") return finalCineLigaHTML(f, S, L.yo, T.ahora());
     const fila = (f.tabla || []).find((x) => x.id === L.yo);
     const completo = podio.length > 0 && paso >= podio.length;
     let cabeza;
@@ -7862,12 +7930,14 @@ function crearJugador(raiz, T, opc) {
         (fila ? `<p>Terminaste en el <b>${ordinal(fila.pos)} lugar</b> con <b>${fmt(fila.total)}</b> puntos.</p>` : "") +
         `<p>¡Gracias por jugar en La Liga de Salvador!</p></section>`;
     }
-    return cabeza + `<section class="pagina podio-pagina"><span class="cap">Podio</span>${podioHTML(podio, paso, L.yo)}</section>`;
+    return cabeza + `<section class="pagina podio-pagina"><span class="cap">Podio</span>${podioHTML(podio, paso, L.yo)}</section>` + (completo ? accesoRecuerdosHTML() : "");
   }
   function revisarFinal() {
     const f = S.final;
     if (!f) { L.finalAntes = { paso: null, redoble: null }; return; }
     const antes = L.finalAntes;
+    const escena = f.fase === "historia" ? escenaFinalLiga(f, T.ahora()) : null;
+    if (escena !== null && (antes.fase !== f.fase || antes.escena !== escena)) Sonido.tocar(escena === 1 ? "campana" : "firmaLiga");
     if (antes.redoble !== null && f.redoble && f.redoble !== antes.redoble) Sonido.tocar("redoble");
     if (antes.paso !== null && (f.paso || 0) !== antes.paso) {
       const podio = f.podio || [];
@@ -7877,7 +7947,7 @@ function crearJugador(raiz, T, opc) {
         vibrar(podio[0].id === L.yo ? [80, 60, 80, 60, 300] : [60]);
       } else Sonido.tocar("revelar");
     }
-    L.finalAntes = { paso: f.paso || 0, redoble: f.redoble || 0 };
+    L.finalAntes = { paso: f.paso || 0, redoble: f.redoble || 0, fase: f.fase, escena };
   }
 
   /* ---------- capas: alertas, retos y confirmaciones ---------- */
@@ -8101,6 +8171,17 @@ function crearJugador(raiz, T, opc) {
   function accion(a, el) {
     const m = S.mision;
     switch (a) {
+      case "estudio-liga": abrirEstudioLiga({ T, S, yo: L.yo, raiz }); return;
+      case "final-energia": {
+        if (!S.final || S.final.fase !== "energia" || (S.final.energia || {})[L.yo]) return;
+        el.disabled = true;
+        const inicio = S.final.t;
+        T.transaccion("final", f => {
+          if (!f || f.t !== inicio || f.fase !== "energia") return undefined;
+          return { ...f, energia: { ...(f.energia || {}), [L.yo]: true } };
+        }).then(() => { vibrar([30, 50, 60]); Sonido.tocar("revelar"); }).catch(() => { el.disabled = false; aviso("No se pudo enviar la energía. Intenta otra vez."); });
+        return;
+      }
       case "entrar": entrarMision(); return;
       case "cuartel": irCuartel(); return;
       case "listo":
@@ -8425,14 +8506,14 @@ function crearComando(raiz, T, opc) {
     const m = S.mision;
     const lista = clasificacion(S);
     if (!lista.length) { aviso("Todavía no hay agentes."); return; }
-    const texto = (m && m.fase !== "resultados" ? `La misión «${m.nombre}» se cancelará sin dar puntos. ` : "") + "Todos los celulares pasan a la gran final y se cierran los duelos.";
-    const ok = await confirmar({ titulo: "¿Revelar el podio?", texto, si: "¡A la gran final!" }, raiz);
+    const texto = (m && m.fase !== "resultados" ? `La misión «${m.nombre}» se cancelará sin dar puntos. ` : "") + "Todos verán la última misión, los recuerdos y el podio en sus celulares. Tú decides cuándo avanzar; no necesitas una TV.";
+    const ok = await confirmar({ titulo: "¿Comenzar el gran final?", texto, si: "¡A la gran final!" }, raiz);
     if (!ok) return;
     const fresca = clasificacion(S);
     const podio = fresca.slice(0, 3).map((a) => ({ id: a.id, nombre: a.nombre, poder: a.poder, total: a.total, pos: a.pos }));
     const tabla = fresca.map((a) => ({ id: a.id, total: a.total, pos: a.pos }));
     if (S.mision) await T.borrar("mision");
-    await T.escribir("final", { paso: 0, t: T.ahora(), podio, tabla });
+    await T.escribir("final", { fase: "energia", paso: 0, t: T.ahora(), podio, tabla });
     L.pestana = "mision";
     desplazarArriba();
     refrescar();
@@ -8507,7 +8588,7 @@ function crearComando(raiz, T, opc) {
   async function reiniciarTodo() {
     const ok = await confirmar({ titulo: "¿Borrar todo?", texto: "Se borran agentes, puntos, misiones, fotos y duelos, y las preguntas de la trivia vuelven a estar todas sin usar. Los invitados tendrán que registrarse de nuevo.", si: "Sí, borrar todo" }, raiz);
     if (!ok) return;
-    for (const p of ["final", "mision", "mj", "puntos", "historial", "duelos", "enfriamiento", "fotos", "fotosMini", "trivia", "alerta", "ajustes", "codigos", "agentes"]) await T.borrar(p);
+    for (const p of ["final", "mision", "mj", "puntos", "historial", "duelos", "enfriamiento", "fotos", "fotosMini", "recuerdos", "trivia", "alerta", "ajustes", "codigos", "agentes"]) await T.borrar(p);
     L.album = null;
     aviso("Listo: la Liga quedó vacía.");
   }
@@ -8524,6 +8605,8 @@ function crearComando(raiz, T, opc) {
       pintarZona(zBarra, htmlBarra());
       pintarNav();
       pintarContenido();
+      const energia = $("[data-final-conteo]", zContenido);
+      if (energia) energia.textContent = Object.keys((S.final && S.final.energia) || {}).filter(id => S.agentes[id]).length;
     } catch (e) { console.error(e); }
     finally { L.pintando = false; }
     if (L.pendiente) { L.pendiente = false; setTimeout(refrescar, 0); }
@@ -8571,7 +8654,7 @@ function crearComando(raiz, T, opc) {
       case "marcador": return `marcador:${L.album ? "album" : ""}:${L.cargandoAlbum ? 1 : 0}:${S.ajustes && S.ajustes.ocultarRanking ? 1 : 0}`;
       default: {
         if (S.agentes === undefined || S.mision === undefined) return "cargando";
-        if (S.final) return `final:${S.final.paso || 0}:${L.revelando ? 1 : 0}`;
+        if (S.final) return `final:${S.final.fase || "podio"}:${S.final.paso || 0}:${L.revelando ? 1 : 0}`;
         const m = S.mision;
         if (!m) return "mision:vacia";
         const tipo = TIPOS[m.tipo];
@@ -8666,13 +8749,21 @@ function crearComando(raiz, T, opc) {
   function vecesJugada(id) { return Object.values(S.historial || {}).filter((h) => h && h.tipo === id).length; }
   function htmlLanzar() {
     if (L.elegido && TIPOS[L.elegido]) return htmlConfig(TIPOS[L.elegido]);
-    return `<section class="pagina"><span class="cap">Lanzar misión</span><p>Elige un juego. Al lanzarlo, suena en todos los celulares que tienen la página abierta.</p></section>` +
-      CATEGORIAS.map((cat) => `<section class="pagina"><span class="cap">${esc(cat.titulo)}</span><div class="catalogo">${cat.tipos.map((id) => {
+    const filtro = L.catalogoFiltro || "todos";
+    const filtros = [["todos", "Todos"], ["individual", "Minijuegos"], ["grupo", "En grupo"], ["fiesta", "En la fiesta"]];
+    return `<header class="catalogo-portada"><span class="eyebrow">ELIGE LA PRÓXIMA AVENTURA</span><h2>Que empiece la acción.</h2><p>Una misión, toda la Liga. Tú eliges el desafío; los héroes escriben la historia.</p></header>` +
+      `<div class="filtros-juegos" role="group" aria-label="Filtrar juegos">${filtros.map(([id, texto]) => `<button data-accion="filtrar-juegos" data-filtro="${id}" aria-pressed="${filtro === id}">${texto}</button>`).join("")}</div>` +
+      CATEGORIAS.map((cat) => {
+        const ids = cat.tipos.filter((id) => filtro === "todos" || (filtro === "individual" ? !!MINIJUEGOS[id] : filtro === "fiesta" ? TIPOS[id].cat === "fiesta" : TIPOS[id].cat !== "fiesta" && !MINIJUEGOS[id]));
+        if (!ids.length) return "";
+        return `<section class="catalogo-seccion"><h3>${esc(cat.titulo)} · ${ids.length} desafíos</h3><div class="catalogo">${ids.map((id) => {
         const t = TIPOS[id], veces = vecesJugada(id);
-        return `<button class="ficha${veces ? " jugada" : ""}" data-accion="elegir" data-tipo="${id}"><span class="icono">${icono(t.icono)}</span>` +
-          `<span class="ficha-texto"><span class="ficha-t">${esc(t.nombre)}</span><span class="ficha-r">${esc(t.resumen)}</span></span>` +
+        const arte = ARTE_JUEGOS[id] || ["cosmos", "Una nueva aventura", "Desafío"];
+        return `<button class="ficha${veces ? " jugada" : ""}" data-accion="elegir" data-tipo="${id}">${arteJuegoHTML(id, t.icono)}` +
+          `<span class="ficha-texto"><span class="ficha-genero">${esc(arte[2])}<b aria-hidden="true">↗</b></span><span class="ficha-t">${esc(t.nombre)}</span><span class="ficha-r">${esc(t.resumen)}</span><span class="ficha-genero">${esc(arte[1])}</span></span>` +
           (veces ? `<span class="hecha">jugada${veces > 1 ? ` ×${veces}` : ""}</span>` : "") + `</button>`;
-      }).join("")}</div></section>`).join("");
+      }).join("")}</div></section>`;
+      }).join("");
   }
   function htmlConfig(t) {
     const cfg = cfgDe(t.id);
@@ -8732,9 +8823,10 @@ function crearComando(raiz, T, opc) {
       `<section class="pagina"><span class="cap">En los celulares</span><p>¿Los invitados ven la clasificación? Ocúltala antes del final para dar suspenso.</p>` +
       `<div class="segmentado"><button data-accion="ranking" data-v="visible" aria-pressed="${!oculto}">Visible</button><button data-accion="ranking" data-v="oculto" aria-pressed="${oculto}">Oculta</button></div></section>` +
       `<section class="pagina"><span class="cap">Misiones jugadas</span><div data-vivo="historial"></div></section>` +
-      `<section class="pagina"><span class="cap">Álbum de fotos</span>${album}</section>` +
-      `<section class="pagina"><span class="cap roja">Gran final</span><p>Cuando termine la última misión, revela el podio: aparece en todos los celulares, del 3.er al 1.er lugar.</p>` +
-      `<div data-vivo="empate"></div><button class="boton rojo grande" data-accion="final-empezar">${icono("trofeo")} Revelar el podio</button></section>`;
+      `<section class="pagina"><span class="cap">Las portadas de la Liga</span><p>Aprueba las fotos que aparecerán en el álbum de los invitados y en el final de sus celulares.</p><button class="boton bloque" data-accion="album-liga">Revisar y aprobar fotos</button></section>` +
+      `<details class="pagina"><summary>Fotos de las misiones (solo anfitrión)</summary>${album}</details>` +
+      `<section class="pagina"><span class="cap roja">Gran final · En cada celular</span><p>Conecta la energía de los invitados, revive las fotos de la fiesta y revela el podio. Tú avanzas cada momento desde aquí.</p>` +
+      `<div data-vivo="empate"></div><button class="boton rojo grande" data-accion="final-empezar">${icono("trofeo")} Comenzar el gran final</button></section>`;
   }
   function actualizarMarcador() {
     const lista = clasificacion(S);
@@ -8756,6 +8848,11 @@ function crearComando(raiz, T, opc) {
   /* ---------- gran final en el centro de mando ---------- */
   function htmlFinal() {
     const f = S.final, podio = f.podio || [], paso = Number(f.paso) || 0;
+    if (f.fase === "energia" || f.fase === "historia") {
+      return `<section class="pagina"><span class="cap">FINAL EN LOS CELULARES</span><h2 class="titulo">${f.fase === "energia" ? "Enciende nuestra ciudad" : "El origen de la leyenda"}</h2><p>${f.fase === "energia" ? "Pide a los invitados que toquen su escudo. Puedes avanzar cuando quieras, aunque no estén todos." : "Cada celular recorre los recuerdos y revela a Salvador en 18 segundos. Después, inicia el podio."}</p>` +
+        `<div class="final-host-energia"><b data-final-conteo>0</b><span>héroes enviaron su energía</span></div><button class="boton bloque" data-accion="${f.fase === "energia" ? "final-historia" : "final-podio"}">${f.fase === "energia" ? "Encender la ciudad" : "Continuar al podio"}</button>` +
+        `<button class="enlace" data-accion="album-liga">Revisar las fotos del final</button></section><button class="enlace centro" data-accion="final-cancelar">Volver a la fiesta</button>`;
+    }
     const siguiente = siguientePodio(podio, paso);
     return `<section class="pagina"><span class="cap roja">Gran final</span><h2 class="titulo chico">El podio de la Liga</h2>${podioHTML(podio, paso)}` +
       (siguiente
@@ -8787,6 +8884,7 @@ function crearComando(raiz, T, opc) {
   }
   async function accion(a, el) {
     switch (a) {
+      case "filtrar-juegos": L.catalogoFiltro = el.dataset.filtro; L.forzar = true; refrescar(); return;
       case "pestana": L.pestana = el.dataset.p; if (L.pestana !== "lanzar") L.elegido = null; L.forzar = true; refrescar(); desplazarArriba(); return;
       case "tomar-control": tomarControl(); return;
       case "ir-lanzar": L.pestana = "lanzar"; L.elegido = null; refrescar(); desplazarArriba(); return;
@@ -8825,6 +8923,13 @@ function crearComando(raiz, T, opc) {
       case "reiniciar-todo": reiniciarTodo(); return;
       case "ranking": T.actualizar("ajustes", { ocultarRanking: el.dataset.v === "oculto" }); return;
       case "ver-album": cargarAlbum(); return;
+      case "album-liga": abrirEstudioLiga({ T, S, raiz, host: true }); return;
+      case "final-historia":
+        if (S.final?.fase === "energia") await T.actualizar("final", { fase: "historia", escenaT: T.ahora() });
+        return;
+      case "final-podio":
+        if (S.final?.fase === "historia") await T.actualizar("final", { fase: "podio" });
+        return;
       case "album-foto": verFoto(el.dataset.m, el.dataset.id); return;
       case "final-empezar": empezarFinal(); return;
       case "final-revelar": revelarPaso(); return;
