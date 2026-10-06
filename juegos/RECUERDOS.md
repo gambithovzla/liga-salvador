@@ -24,17 +24,39 @@ La fecha impresa se configura en `CONFIG.fechaRecuerdo`, y el año de la cápsul
 - `final/fase`: `hackeo`, `jefe`, `chispa`, `velas`, `historia`, `podio` o `creditos`. El anfitrión escribe los tiempos (`t`, `jefeT`, `chispaT`, `sopladoT`, `escenaT`, `creditosT`), `vida`, `orden` y `creditosDur`. Cada celular escribe solo `final/listos/{id}`, `final/golpes/{id}` (cada 0,5 s como máximo) y `final/reloj/{id}`.
 - `final/reloj/{id}`: al entrar al hackeo, a la chispa y a las velas, cada celular mide su diferencia con el reloj del servidor descontando la latencia (cinco escrituras de `serverTimestamp`). Si la medición falla, usa `.info/serverTimeOffset`, como antes.
 - Un `final` sin `t` (por ejemplo, un golpe que llegó tarde después de **Volver a la fiesta**) se ignora.
-- `capsula/{id}`: texto (hasta 400 caracteres), nombre, `publico`, fecha y `oculto` (lo pone el anfitrión). **Vaciar la Liga** también borra la cápsula: descarga el expediente antes.
+- `capsula/{id}/v/{versión}`: texto (hasta 400 caracteres), nombre, `publico` y fecha. `capsula/{id}/oculto` lo pone el anfitrión. **Vaciar la Liga** también borra la cápsula: descarga el expediente antes.
 - La fase `energia` se conserva para finales antiguos; los nuevos ya no la usan.
 - Las imágenes se convierten a JPEG, hasta 1600 px en su lado mayor, y se crean miniaturas. **Foto sin marco** descarga esa copia optimizada; no es el archivo original de la cámara. La conversión no conserva EXIF.
 - El álbum carga miniaturas. Solo abre la foto grande al crear una portada. Retirar un recuerdo de una misión no elimina la evidencia de esa misión ni altera sus puntos.
 - No se publican enlaces nuevos al álbum ni se cambia la autenticación existente. La aprobación es un flujo de la interfaz, no una nueva barrera de seguridad del servidor.
+
+## Protección de datos
+
+`database.rules.json` (en la raíz del repositorio) define quién puede escribir:
+
+- **Solo el anfitrión, con sesión de Google**, puede borrar o reemplazar datos: quitar agentes, **Vaciar la Liga**, aprobar o retirar fotos del álbum, borrar fotos y ocultar mensajes de la cápsula. La sesión se inicia en **Marcador → Protección de datos** o en **Agentes**.
+- **Los invitados**, y también el anfitrión sin sesión, pueden jugar y crear: registrarse, conectarse, jugar misiones, subir fotos, retar duelos, sumar puntos de duelo y escribir en la cápsula. No pueden borrar ni cambiar agentes, puntos, historial, duelos, códigos, fotos, álbum ni mensajes.
+- **El control del juego en curso** (`mision`, `mj`, `final`, `alerta`, `ajustes`, `comando`, `enfriamiento`) sigue abierto. Así la fiesta funciona aunque el inicio de sesión falle ese día. Esos nodos no guardan datos que haya que conservar.
+- **Las salas `ensayo…`** quedan abiertas, para que los ensayos se puedan vaciar.
+
+Cambios en la app que vienen con las reglas:
+
+- **Cápsula:** cada cambio es una versión nueva (`capsula/{id}/v/{versión}`). Vale la última, y un texto vacío equivale a "sin mensaje". Nadie puede borrar ni reemplazar una versión.
+- **Álbum:** si un invitado elimina su foto, queda marcada como retirada (`recuerdos/{id}/retirada`): desaparece del álbum y del final. El anfitrión la ve como "Retirada por su autor" y puede borrarla del todo.
+- **Vaciar la Liga y Quitar agente** son una sola escritura atómica: sin permiso no se borra nada a medias, y aparece un aviso.
+
+El correo del anfitrión **no** está en el repositorio, que es público. La plantilla usa `CORREO_DEL_ANFITRION`, y se reemplaza al pegar las reglas en Firebase → Realtime Database → Reglas. El inicio de sesión usa `CONFIG.firebaseAuth` (`apiKey` y `appId` de la app web; no son secretos). Solo el centro de mando carga Firebase Authentication.
 
 ## Verificación local
 
 Abrir `http://127.0.0.1:8765/juegos/?demo` después de iniciar `python -m http.server 8765 --bind 127.0.0.1` desde la raíz. La demo usa memoria y no escribe en Firebase.
 
 Prueba automatizada: `node juegos/tests/recuerdos.cjs`, con Playwright disponible en Node. Acepta `PLAYWRIGHT_WS_ENDPOINT` para usar un Chrome de pruebas ya iniciado; sin él, abre Chrome headless. `LIGA_TEST_URL` permite cambiar la URL local. La prueba bloquea solicitudes externas.
+
+Reglas en el emulador de Firebase (nunca producción): con `firebase emulators:start --only database,auth --project demo-liga` y `database.rules.json` con el correo real, para la instancia `liga-salvador-default-rtdb`:
+
+- `LIGA_ADMIN_EMAIL=… node juegos/tests/reglas.cjs`: 49 comprobaciones de lo que un invitado puede y no puede escribir, y de lo que puede el anfitrión.
+- `LIGA_ADMIN_EMAIL=… node juegos/tests/reglas-app.cjs`: la app completa contra el emulador. Prueba la cápsula con versiones, la foto retirada, el final y una misión jugados sin sesión (sin ningún permiso denegado), y que sin sesión no se puede vaciar la Liga. Después inicia sesión con Google en el emulador y verifica que sí se puede aprobar, ocultar y vaciar.
 
 Ensayo con Firebase real: `LIGA_FIREBASE_ENSAYO=1 node juegos/tests/firebase-ensayo.cjs`, con un servidor estático simple en el puerto 8790 (`python -m http.server 8790 --bind 127.0.0.1`). Abre un centro de mando y dos celulares en una sala desechable (`ensayo-…`), recorre todo el final con tiempos reales y borra la sala al terminar. Nunca usa la sala `fiesta`. Sin la variable no escribe nada.
 

@@ -182,10 +182,7 @@ function mensajeVillano(S, yo) {
 }
 
 function mensajesCreditos(S, semilla) {
-  const lista = Object.entries(S.capsula || {})
-    .filter(([id, c]) => c && c.publico && !c.oculto && String(c.texto || "").trim() && S.agentes && S.agentes[id])
-    .map(([id, c]) => ({ id, nombre: nombreDe(S, id), texto: String(c.texto).trim(), t: Number(c.t) || 0 }))
-    .sort((a, b) => a.t - b.t);
+  const lista = mensajesCapsula(S).filter((m) => m.publico && !m.oculto && S.agentes && S.agentes[m.id]);
   if (lista.length <= 8) return lista;
   const rnd = azarSemilla(hash(String(semilla || 1)));
   return lista.map((m) => [rnd(), m]).sort((a, b) => a[0] - b[0]).slice(0, 8).map((x) => x[1]).sort((a, b) => a.t - b.t);
@@ -200,7 +197,7 @@ function recordsOperacion(S) {
     [fmt(golpesTotales(f)), "golpes al Doctor Siesta"],
     [fmt(Object.keys(S.historial || {}).length), "misiones jugadas"],
     [fmt(Object.values(S.duelos || {}).filter((d) => d && d.estado === "resuelto").length), "duelos"],
-    [fmt(Object.values(S.recuerdos || {}).filter((r) => r && r.estado === "aprobada").length), "fotos en el álbum"],
+    [fmt(Object.values(S.recuerdos || {}).filter((r) => r && r.estado === "aprobada" && !r.retirada).length), "fotos en el álbum"],
   ].filter(([n]) => n !== "0");
 }
 
@@ -263,7 +260,7 @@ function crearOperacionJugador(opc) {
       case "jefe": return `jefe:${f.jefeT}:${l}`;
       case "chispa": return `chispa:${f.chispaT}`;
       case "velas": return `velas:${f.velasT}`;
-      case "creditos": return `creditos:${f.creditosT}:${S.capsula && S.capsula[yo()] ? 1 : 0}`;
+      case "creditos": return `creditos:${f.creditosT}:${(capsulaDe(S, yo()) || {}).t || 0}`;
       default: return f.fase;
     }
   }
@@ -329,7 +326,7 @@ function crearOperacionJugador(opc) {
     const mio = reparto.find((r) => r.id === yo()) || { nombre: nombreDe(S, yo()), alias: "Héroe de la Liga", dato: "" };
     const vencieron = listosOperacion(S, f).length || reparto.length;
     const fila = (f.tabla || []).find((x) => x.id === yo());
-    const tiene = !!(S.capsula && S.capsula[yo()] && String(S.capsula[yo()].texto || "").trim());
+    const tiene = !!(capsulaDe(S, yo()) || {}).texto;
     return `<section class="op-escena op-creditos" data-op="creditos" role="region" aria-label="Créditos finales">` +
       `<div class="op-rodillo" data-op-rodillo>` +
       `<p class="op-c-pre">LA LIGA DE SALVADOR PRESENTA</p><h1 class="op-c-titulo">OPERACIÓN<br><em>PRIMER VUELO</em></h1>` +
@@ -686,8 +683,19 @@ async function descargarFichaOperacion(S, yo) {
 }
 
 /* ---------- cápsula del tiempo ---------- */
+// Cada cambio es una versión nueva en capsula/{id}/v/{versión}: las reglas no dejan que nadie
+// (salvo el anfitrión) borre o reemplace un mensaje. Vale la última versión; un texto vacío es «sin mensaje».
+function capsulaDe(S, aid) {
+  const c = (S.capsula || {})[aid];
+  if (!c) return null;
+  const versiones = Object.values(c.v || {}).filter((x) => x && typeof x.texto === "string").sort((a, b) => (Number(a.t) || 0) - (Number(b.t) || 0));
+  const ultima = versiones[versiones.length - 1];
+  if (!ultima) return null;
+  return { texto: String(ultima.texto).trim(), nombre: ultima.nombre || "", publico: !!ultima.publico, t: Number(ultima.t) || 0, oculto: !!c.oculto };
+}
 function capsulaHTML(S, yo, borrador) {
-  const c = (S.capsula || {})[yo];
+  const guardada = capsulaDe(S, yo);
+  const c = guardada && guardada.texto ? guardada : null;
   const texto = borrador !== undefined ? borrador : (c && c.texto) || "";
   const anio = esc(CONFIG.capsulaAnio || "2043");
   return `<section class="capsula-acceso"><span class="eyebrow">CÁPSULA DEL TIEMPO · ABRIR EN ${anio}</span>` +
@@ -700,12 +708,10 @@ function capsulaHTML(S, yo, borrador) {
 }
 async function guardarCapsula(T, S, yo, form) {
   const texto = String(form.texto.value || "").trim().slice(0, 400);
-  if (!texto) {
-    if ((S.capsula || {})[yo]) await T.borrar(`capsula/${yo}`);
-    return "vacio";
-  }
-  await T.actualizar(`capsula/${yo}`, { texto, nombre: nombreDe(S, yo), publico: !!form.publico.checked, t: T.ahora() });
-  return "ok";
+  const actual = capsulaDe(S, yo);
+  if (!texto && !(actual && actual.texto)) return "nada";
+  await T.escribir(`capsula/${yo}/v/${nuevoId("v")}`, { texto, nombre: nombreDe(S, yo), publico: !!form.publico.checked, t: T.ahora() });
+  return texto ? "ok" : "vacio";
 }
 function abrirCapsulaOperacion(T, S, yo, raiz, aviso) {
   const capa = document.createElement("div");
@@ -719,14 +725,14 @@ function abrirCapsulaOperacion(T, S, yo, raiz, aviso) {
     e.preventDefault();
     e.stopPropagation();
     const b = form.querySelector("button"); b.disabled = true;
-    guardarCapsula(T, S, yo, form).then((r) => { capa.remove(); aviso(r === "ok" ? "Tu mensaje quedó guardado para 2043." : "Mensaje borrado."); })
+    guardarCapsula(T, S, yo, form).then((r) => { capa.remove(); aviso(r === "ok" ? "Tu mensaje quedó guardado para 2043." : r === "nada" ? "Escribe tu mensaje primero." : "Quitaste tu mensaje."); })
       .catch(() => { b.disabled = false; aviso("No se pudo guardar. Revisa tu conexión."); });
   });
 }
 
 function mensajesCapsula(S) {
-  return Object.entries(S.capsula || {}).filter(([, c]) => c && String(c.texto || "").trim())
-    .map(([id, c]) => ({ id, nombre: (S.agentes && S.agentes[id] && S.agentes[id].nombre) || c.nombre || "Agente", texto: String(c.texto).trim(), publico: !!c.publico, oculto: !!c.oculto, t: Number(c.t) || 0 }))
+  return Object.keys(S.capsula || {}).map((id) => [id, capsulaDe(S, id)]).filter(([, c]) => c && c.texto)
+    .map(([id, c]) => Object.assign(c, { id, nombre: (S.agentes && S.agentes[id] && S.agentes[id].nombre) || c.nombre || "Agente" }))
     .sort((a, b) => a.t - b.t);
 }
 function capsulaHostHTML(S) {

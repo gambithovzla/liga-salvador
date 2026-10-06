@@ -1,0 +1,80 @@
+{
+  "rules": {
+    "salas": {
+      "$sala": {
+        ".read": true,
+        ".write": "$sala.beginsWith('ensayo') || (auth != null && auth.token.email == 'CORREO_DEL_ANFITRION' && auth.token.email_verified == true)",
+
+        "mision": { ".write": true },
+        "mj": { ".write": true },
+        "final": { ".write": true },
+        "alerta": { ".write": true },
+        "ajustes": { ".write": true },
+        "comando": { ".write": true },
+        "enfriamiento": { ".write": true },
+
+        "agentes": {
+          "$id": {
+            ".write": "!data.exists() && newData.child('nombre').isString()",
+            ".validate": "newData.hasChild('nombre')",
+            "nombre": { ".validate": "newData.isString() && newData.val().length <= 40" },
+            "conectado": { ".write": "data.parent().exists()", ".validate": "newData.isBoolean()" },
+            "visto": { ".write": "data.parent().exists()", ".validate": "newData.isNumber()" },
+            "ocupado": { ".write": "data.parent().exists() || !newData.exists()", ".validate": "newData.val() === true" }
+          }
+        },
+        "codigos": {
+          "$c": { ".write": "!data.exists() && newData.isString()" }
+        },
+        "puntos": {
+          "$aid": {
+            "$k": { ".write": "!data.exists() && newData.child('p').isNumber()" }
+          }
+        },
+        "historial": {
+          "$mid": { ".write": "!data.exists() && newData.exists()" }
+        },
+        "trivia": {
+          "usadas": {
+            "$q": { ".write": "newData.val() === true" }
+          }
+        },
+        "duelos": {
+          "$did": { ".write": "newData.exists() || !data.exists()" }
+        },
+        "fotos": {
+          "$mid": {
+            "$aid": {
+              ".write": "newData.exists() && (!data.exists() || data.val() === newData.val() || root.child('salas').child($sala).child('mj').child($mid).child('llegadas').child($aid).child('estado').val() === 'rechazada')",
+              ".validate": "newData.isString() && newData.val().beginsWith('data:image/') && newData.val().length < 4000000"
+            }
+          }
+        },
+        "fotosMini": {
+          "$mid": {
+            "$aid": {
+              ".write": "newData.exists() && (!data.exists() || data.val() === newData.val() || root.child('salas').child($sala).child('mj').child($mid).child('llegadas').child($aid).child('estado').val() === 'rechazada')",
+              ".validate": "newData.isString() && newData.val().beginsWith('data:image/') && newData.val().length < 1000000"
+            }
+          }
+        },
+        "recuerdos": {
+          "$id": {
+            ".write": "newData.exists() && newData.child('estado').val() === 'pendiente' && (!data.exists() || (data.child('estado').val() !== 'aprobada' && data.child('autor').val() === newData.child('autor').val()))",
+            "retirada": { ".write": "data.parent().exists() && newData.val() === true" }
+          }
+        },
+        "capsula": {
+          "$aid": {
+            "v": {
+              "$vid": {
+                ".write": "!data.exists() && root.child('salas').child($sala).child('agentes').child($aid).exists()",
+                ".validate": "newData.child('texto').isString() && newData.child('texto').val().length <= 400 && newData.child('publico').isBoolean() && newData.child('t').isNumber()"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

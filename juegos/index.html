@@ -25,6 +25,11 @@ const CONFIG = {
   // 2) Clave de 4 números para abrir el centro de mando (enlace + #comando).
   pinComando: "1110",
 
+  // Inicio de sesión del anfitrión (Firebase Authentication con Google). Con las reglas de
+  // database.rules.json, solo la cuenta del anfitrión puede borrar datos, aprobar fotos y ocultar mensajes.
+  // Copia apiKey y appId de Firebase → Configuración del proyecto → Tus apps (no son secretos).
+  firebaseAuth: { apiKey: "", authDomain: "liga-salvador.firebaseapp.com", projectId: "liga-salvador", appId: "" },
+
   // 3) Nombre interno de la partida. Puedes dejarlo así.
   sala: "fiesta",
   fechaRecuerdo: "11 OCTUBRE 2026 · BARRANCO",
@@ -3628,6 +3633,10 @@ const almacenAgente = MODO === "local" ? {
   del(k) { try { sessionStorage.removeItem(k); } catch (e) { /* sin almacenamiento */ } },
 } : almacen;
 
+// Las reglas de Firebase solo dejan borrar, aprobar y ocultar a la cuenta del anfitrión.
+function sinPermiso(e) { return /permission[_ ]denied/i.test(String((e && (e.code || e.message)) || e)); }
+const TEXTO_SIN_PERMISO = "Solo el anfitrión con sesión iniciada puede hacer esto. Inicia sesión con Google en Marcador → Protección de datos.";
+
 function vibrar(p) { try { if (navigator.vibrate) navigator.vibrate(p); } catch (e) { /* no disponible */ } }
 
 let bloqueoPantalla = null;
@@ -4108,18 +4117,38 @@ function crearTransporteLocal(sala, opciones) {
 }
 
 async function crearTransporteFirebase(url, sala) {
-  const [{ initializeApp }, D] = await Promise.all([
+  // Solo el centro de mando carga el inicio de sesión: los invitados juegan sin cuenta.
+  const cfgAuth = window.__FB_AUTH_CONFIG__ || CONFIG.firebaseAuth || {};
+  const conSesion = ES_COMANDO && !!cfgAuth.apiKey;
+  const [{ initializeApp }, D, A] = await Promise.all([
     import(`${FIREBASE_SDK}/firebase-app.js`),
     import(`${FIREBASE_SDK}/firebase-database.js`),
+    conSesion ? import(`${FIREBASE_SDK}/firebase-auth.js`) : null,
   ]);
-  const app = initializeApp({ databaseURL: String(url).trim().replace(/\/+$/, "") });
+  const app = initializeApp(Object.assign(conSesion ? cfgAuth : {}, { databaseURL: String(url).trim().replace(/\/+$/, "") }));
+  const auth = A ? A.getAuth(app) : null;
+  if (auth && window.__FB_AUTH_EMULADOR__) A.connectAuthEmulator(auth, String(window.__FB_AUTH_EMULADOR__), { disableWarnings: true });
   const db = D.getDatabase(app);
   if (window.__FB_EMULADOR__) { const [h, pto] = String(window.__FB_EMULADOR__).split(":"); D.connectDatabaseEmulator(db, h, Number(pto)); }
   let desfase = 0, fino = null;
   D.onValue(D.ref(db, ".info/serverTimeOffset"), (s) => { desfase = Number(s.val()) || 0; });
   const r = (p) => D.ref(db, "salas/" + sala + "/" + p);
+  const sesion = auth && {
+    escuchar(cb) { return A.onAuthStateChanged(auth, (u) => cb(u ? { email: u.email || "", verificado: !!u.emailVerified } : null)); },
+    // Se llama directo desde el toque: Safari bloquea ventanas que se abren después de una espera.
+    entrar() {
+      const proveedor = new A.GoogleAuthProvider();
+      proveedor.setCustomParameters({ prompt: "select_account" });
+      return A.signInWithPopup(auth, proveedor).catch((e) => {
+        if (["auth/popup-blocked", "auth/operation-not-supported-in-this-environment"].includes(e.code)) return A.signInWithRedirect(auth, proveedor);
+        throw e;
+      });
+    },
+    salir() { return A.signOut(auth); },
+  };
   return {
     tipo: "firebase",
+    sesion,
     // .info/serverTimeOffset no descuenta la latencia; afinarReloj la mide para que los celulares coincidan.
     ahora: () => Date.now() + (fino === null ? desfase : fino),
     async afinarReloj(p) {
@@ -8209,8 +8238,9 @@ function crearJugador(raiz, T, opc) {
       b.disabled = true;
       guardarCapsula(T, S, L.yo, f).then((r) => {
         L.borradorCapsula = undefined;
-        aviso(r === "ok" ? "Tu mensaje quedó guardado para 2043." : "Mensaje borrado.");
-        pintarVivo("capsula-estado", r === "ok" ? "Tu mensaje está guardado. Puedes cambiarlo cuando quieras." : "No hay mensaje guardado.");
+        aviso(r === "ok" ? "Tu mensaje quedó guardado para 2043." : r === "nada" ? "Escribe tu mensaje primero." : "Quitaste tu mensaje.");
+        if (r !== "nada") b.textContent = r === "ok" ? "Actualizar mi mensaje" : "Guardar mi mensaje";
+        if (r !== "nada") pintarVivo("capsula-estado", r === "ok" ? "Tu mensaje está guardado. Puedes cambiarlo cuando quieras." : "No hay mensaje guardado.");
       }).catch(() => aviso("No se pudo guardar. Revisa tu conexión.")).finally(() => { b.disabled = false; });
       return;
     }
@@ -8373,6 +8403,7 @@ function crearComando(raiz, T, opc) {
   S.comando = undefined;
   S.triviaUsadas = {};
   T.escuchar("comando", (v) => { S.comando = v || null; programar(); });
+  if (T.sesion) T.sesion.escuchar((u) => { L.sesion = u; L.forzar = true; programar(); });
   T.escuchar("trivia/usadas", (v) => { S.triviaUsadas = v || {}; });
   const bots = crearBots(T, S, { retarA: opc.retarA });
 
@@ -8650,16 +8681,19 @@ function crearComando(raiz, T, opc) {
         const ag = S.agentes[id];
         const ok = await confirmar({ titulo: `¿Quitar a ${ag ? ag.nombre : "este agente"}?`, texto: "Se borran su tarjeta y sus puntos.", si: "Sí, quitar" }, raiz);
         if (!ok) return;
-        await T.borrar(`agentes/${id}`);
-        await T.borrar(`puntos/${id}`);
-        if (ag && ag.codigo) await T.borrar(`codigos/${ag.codigo}`);
+        // Todo o nada: sin permiso no queda un agente a medio borrar.
+        const cambios = { [`agentes/${id}`]: null, [`puntos/${id}`]: null };
+        if (ag && ag.codigo) cambios[`codigos/${ag.codigo}`] = null;
+        try { await T.actualizar("", cambios); } catch (e) { aviso(sinPermiso(e) ? TEXTO_SIN_PERMISO : "No se pudo quitar. Revisa tu conexión."); }
       }
     });
   }
   async function reiniciarTodo() {
     const ok = await confirmar({ titulo: "¿Borrar todo?", texto: "Se borran agentes, puntos, misiones, fotos y duelos, y las preguntas de la trivia vuelven a estar todas sin usar. Los invitados tendrán que registrarse de nuevo.", si: "Sí, borrar todo" }, raiz);
     if (!ok) return;
-    for (const p of ["final", "mision", "mj", "puntos", "historial", "duelos", "enfriamiento", "fotos", "fotosMini", "recuerdos", "capsula", "trivia", "alerta", "ajustes", "codigos", "agentes"]) await T.borrar(p);
+    const cambios = {};
+    for (const p of ["final", "mision", "mj", "puntos", "historial", "duelos", "enfriamiento", "fotos", "fotosMini", "recuerdos", "capsula", "trivia", "alerta", "ajustes", "codigos", "agentes"]) cambios[p] = null;
+    try { await T.actualizar("", cambios); } catch (e) { aviso(sinPermiso(e) ? TEXTO_SIN_PERMISO : "No se pudo vaciar. Revisa tu conexión."); return; }
     L.album = null;
     aviso("Listo: la Liga quedó vacía.");
   }
@@ -8727,8 +8761,8 @@ function crearComando(raiz, T, opc) {
   function claveContenido(ctx) {
     switch (L.pestana) {
       case "lanzar": return `lanzar:${L.elegido || ""}`;
-      case "agentes": return "agentes";
-      case "marcador": return `marcador:${L.album ? "album" : ""}:${L.cargandoAlbum ? 1 : 0}:${S.ajustes && S.ajustes.ocultarRanking ? 1 : 0}`;
+      case "agentes": return `agentes:${L.sesion ? L.sesion.email : ""}`;
+      case "marcador": return `marcador:${L.sesion ? L.sesion.email : ""}:${L.album ? "album" : ""}:${L.cargandoAlbum ? 1 : 0}:${S.ajustes && S.ajustes.ocultarRanking ? 1 : 0}`;
       default: {
         if (S.agentes === undefined || S.mision === undefined) return "cargando";
         if (S.final) return `final:${S.final.fase || "podio"}:${S.final.paso || 0}:${L.revelando ? 1 : 0}:${claveOperacionHost(S.final)}`;
@@ -8869,6 +8903,7 @@ function crearComando(raiz, T, opc) {
       `<section class="pagina"><span class="cap" data-vivo="n-agentes">Agentes</span><div class="columna lista-agentes" data-vivo="lista-agentes"></div></section>` +
       `<section class="pagina"><span class="cap">Ensayo</span><p>Agrega agentes de prueba: juegan solos todas las misiones, para que ensayes antes de la fiesta.</p>` +
       `<div class="fila"><button class="boton blanco" data-accion="bots-agregar">Agregar 6 de prueba</button><button class="boton blanco" data-accion="bots-quitar">Quitar los de prueba</button></div></section>` +
+      proteccionHTML() +
       `<section class="pagina"><span class="cap roja">Empezar de cero</span><p>Borra agentes, puntos, misiones y fotos. Úsalo después del ensayo, antes de que lleguen los invitados.</p>` +
       `<button class="boton rojo" data-accion="reiniciar-todo">Borrar todo</button></section>`;
   }
@@ -8884,6 +8919,17 @@ function crearComando(raiz, T, opc) {
       return `<button class="agente-fila${a.conectado === false ? " desconectado" : ""}" data-accion="agente" data-id="${a.id}">${poderHTML(a.poder)}` +
         `<span class="nom">${esc(a.nombre)}<small>${esc(notas.join(" · "))}</small></span><span class="val">${fmt(a.total)}</span></button>`;
     }).join("") : `<p class="suave">Todavía no hay agentes. Comparte el código QR o el enlace.</p>`);
+  }
+
+  /* ---------- protección de datos: la sesión de Google del anfitrión ---------- */
+  function proteccionHTML() {
+    if (MODO !== "firebase") return "";
+    const cab = `<section class="pagina"><span class="cap">Protección de datos</span>`;
+    if (!T.sesion) return cab + `<p>Falta configurar el inicio de sesión del anfitrión (<code>CONFIG.firebaseAuth</code>). Cuando estén publicadas las reglas de <code>database.rules.json</code>, sin sesión nadie podrá borrar datos, aprobar fotos ni ocultar mensajes.</p></section>`;
+    const u = L.sesion;
+    return cab + (u
+      ? `<p>Sesión iniciada: <b>${esc(u.email)}</b>. Con la cuenta del anfitrión puedes borrar datos, quitar agentes, aprobar fotos y ocultar mensajes.</p><button class="boton blanco" data-accion="sesion-salir">Cerrar sesión</button>`
+      : `<p>Puedes dirigir la fiesta sin iniciar sesión. Para borrar datos, quitar agentes, aprobar fotos u ocultar mensajes, inicia sesión con tu cuenta de Google.</p><button class="boton" data-accion="sesion-entrar">Iniciar sesión con Google</button>`) + `</section>`;
   }
 
   /* ---------- pestaña Marcador ---------- */
@@ -8902,6 +8948,7 @@ function crearComando(raiz, T, opc) {
       `<section class="pagina"><span class="cap">Misiones jugadas</span><div data-vivo="historial"></div></section>` +
       `<section class="pagina"><span class="cap">Las portadas de la Liga</span><p>Aprueba las fotos que aparecerán en el álbum de los invitados y en el final de sus celulares.</p><button class="boton bloque" data-accion="album-liga">Revisar y aprobar fotos</button></section>` +
       `<details class="pagina"><summary>Fotos de las misiones (solo anfitrión)</summary>${album}</details>` +
+      proteccionHTML() +
       capsulaHostHTML(S) +
       `<section class="pagina"><span class="cap roja">Gran final · Operación Primer Vuelo</span><p>El villano toma los celulares, la Liga pelea con sus poderes, la energía salta por la sala, las velas se apagan juntas, la película, el podio y los créditos. Tú avanzas cada momento desde aquí.</p>` +
       `<div data-vivo="empate"></div><button class="boton rojo grande" data-accion="final-empezar">${icono("trofeo")} Comenzar el gran final</button></section>`;
@@ -9002,7 +9049,9 @@ function crearComando(raiz, T, opc) {
       case "bots-quitar":
         if (L.trabajando) return;
         L.trabajando = true;
-        try { await bots.quitar(); aviso("Agentes de prueba fuera."); } finally { L.trabajando = false; }
+        try { await bots.quitar(); aviso("Agentes de prueba fuera."); }
+        catch (e) { aviso(sinPermiso(e) ? TEXTO_SIN_PERMISO : "No se pudieron quitar. Revisa tu conexión."); }
+        finally { L.trabajando = false; }
         return;
       case "reiniciar-todo": reiniciarTodo(); return;
       case "ranking": T.actualizar("ajustes", { ocultarRanking: el.dataset.v === "oculto" }); return;
@@ -9029,10 +9078,14 @@ function crearComando(raiz, T, opc) {
       case "capsula-expediente": abrirExpedienteCapsula(S); return;
       case "capsula-descargar": descargarExpedienteCapsula(S); return;
       case "capsula-ocultar": {
-        const c = (S.capsula || {})[el.dataset.id];
-        if (c) await T.escribir(`capsula/${el.dataset.id}/oculto`, c.oculto ? null : true);
+        const c = capsulaDe(S, el.dataset.id);
+        if (c) await T.escribir(`capsula/${el.dataset.id}/oculto`, c.oculto ? null : true).catch((e) => aviso(sinPermiso(e) ? TEXTO_SIN_PERMISO : "No se pudo cambiar. Revisa tu conexión."));
         return;
       }
+      case "sesion-entrar":
+        if (T.sesion) T.sesion.entrar().catch((e) => { if (e.code !== "auth/popup-closed-by-user" && e.code !== "auth/cancelled-popup-request") aviso("No se pudo iniciar sesión. Intenta otra vez."); });
+        return;
+      case "sesion-salir": if (T.sesion) T.sesion.salir(); return;
       case "final-revelar": revelarPaso(); return;
       case "final-cancelar": cancelarFinal(); return;
       case "sonido":

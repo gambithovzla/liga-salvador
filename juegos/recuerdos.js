@@ -109,11 +109,12 @@ function abrirEstudioLiga({ T, S, yo, raiz, host = false }) {
   function pintarAlbum() {
     const rev = ++revision;
     const todos = Object.entries(lista).sort((a, b) => b[1].t - a[1].t);
-    const fotos = todos.filter(([, r]) => host ? (filtro === "pendientes" ? r.estado === "pendiente" : true) : (filtro === "mias" ? r.autor === yo : r.estado === "aprobada"));
+    // Una foto retirada por su autor desaparece para los invitados; el anfitrión la ve y puede borrarla.
+    const fotos = todos.filter(([, r]) => host ? (filtro === "pendientes" ? r.estado === "pendiente" && !r.retirada : true) : !r.retirada && (filtro === "mias" ? r.autor === yo : r.estado === "aprobada"));
     panel.innerHTML = `<p class="estudio-intro">${host ? "Elige las fotos que verán los invitados en sus celulares y en el gran final. Aprobar una foto no cambia los puntos del juego." : "La gente que convirtió una fiesta en una historia. Solo las fotos aprobadas aparecen en este álbum."}</p>` +
       (!host ? `<button class="boton bloque" data-estudio="elegir">${icono("camara")} Crear mi portada con una foto</button><p class="estudio-local">Puedes descargarla sin subir tu foto.</p>` : "") +
       `<div class="filtros-juegos"><button data-filtro="${host ? "pendientes" : "todos"}" aria-pressed="${filtro === (host ? "pendientes" : "todos")}">${host ? "Por aprobar" : "La Liga"}</button><button data-filtro="${host ? "todos" : "mias"}" aria-pressed="${filtro === (host ? "todos" : "mias")}">${host ? "Todas" : "Mis fotos"}</button></div>` +
-      `<div class="archivo-fotos">${fotos.length ? fotos.map(([id, r], i) => `<article class="archivo-foto" data-foto="${esc(id)}"><div class="archivo-imagen"><img alt="${esc(r.reto)} · ${esc(r.nombre)}" loading="lazy"><span>ARCHIVO ${String(i + 1).padStart(2, "0")}</span></div><div class="archivo-pie"><h3>${esc(r.nombre)}</h3><p>${esc(r.reto)}</p>${host || r.autor === yo ? `<small>${r.estado === "aprobada" ? "En el álbum" : r.estado === "rechazada" ? "Fuera del álbum" : "Esperando aprobación"}</small>` : ""}<div class="archivo-acciones">${host ? `<button class="boton chico" data-estudio="aprobar" ${r.estado === "aprobada" ? "disabled" : ""}>Aprobar</button><button class="enlace" data-estudio="rechazar">Retirar del álbum</button>` : `<button class="boton chico blanco" data-estudio="portada">Crear portada</button>`}${host || r.autor === yo ? `<button class="enlace" data-estudio="eliminar">Eliminar foto</button>` : ""}</div></div></article>`).join("") : `<div class="archivo-vacio"><b>✦</b><h3>${filtro === "pendientes" ? "Todo al día" : "El primer recuerdo puede ser tuyo"}</h3><p>${host ? "Aquí llegarán las fotos que envíen los invitados." : filtro === "mias" ? "Las fotos que envíes aparecerán aquí con su estado." : "Crea tu portada o participa en una misión de fotos. El álbum se llena con las fotos aprobadas."}</p></div>`}</div>`;
+      `<div class="archivo-fotos">${fotos.length ? fotos.map(([id, r], i) => `<article class="archivo-foto" data-foto="${esc(id)}"><div class="archivo-imagen"><img alt="${esc(r.reto)} · ${esc(r.nombre)}" loading="lazy"><span>ARCHIVO ${String(i + 1).padStart(2, "0")}</span></div><div class="archivo-pie"><h3>${esc(r.nombre)}</h3><p>${esc(r.reto)}</p>${host || r.autor === yo ? `<small>${r.retirada ? "Retirada por su autor" : r.estado === "aprobada" ? "En el álbum" : r.estado === "rechazada" ? "Fuera del álbum" : "Esperando aprobación"}</small>` : ""}<div class="archivo-acciones">${host ? `<button class="boton chico" data-estudio="aprobar" ${r.estado === "aprobada" ? "disabled" : ""}>Aprobar</button><button class="enlace" data-estudio="rechazar">Retirar del álbum</button>` : `<button class="boton chico blanco" data-estudio="portada">Crear portada</button>`}${host || r.autor === yo ? `<button class="enlace" data-estudio="eliminar">Eliminar foto</button>` : ""}</div></div></article>`).join("") : `<div class="archivo-vacio"><b>✦</b><h3>${filtro === "pendientes" ? "Todo al día" : "El primer recuerdo puede ser tuyo"}</h3><p>${host ? "Aquí llegarán las fotos que envíen los invitados." : filtro === "mias" ? "Las fotos que envíes aparecerán aquí con su estado." : "Crea tu portada o participa en una misión de fotos. El álbum se llena con las fotos aprobadas."}</p></div>`}</div>`;
     for (const [id, r] of fotos) mini(r).then(src => {
       if (cerrado || modo !== "album" || rev !== revision) return;
       const card = [...panel.querySelectorAll("[data-foto]")].find(el => el.dataset.foto === id);
@@ -186,14 +187,19 @@ function abrirEstudioLiga({ T, S, yo, raiz, host = false }) {
         aviso(accion === "aprobar" ? "Foto incluida en el álbum y el final." : "Foto retirada del álbum y del final.");
       }
       if (accion === "eliminar" && r && (host || r.autor === yo)) {
-        // Keep mission evidence intact; studio-only photos can be removed entirely.
         if (!await confirmar({ titulo: "¿Eliminar este recuerdo?", texto: "Dejará de aparecer en el álbum y en el final. Las descargas ya guardadas no se pueden retirar.", si: "Eliminar foto" }, modal)) return;
+        if (!host) {
+          // Solo el anfitrión puede borrar datos: el invitado la retira y desaparece del álbum y del final.
+          await T.escribir(`recuerdos/${id}/retirada`, true); aviso("Foto retirada del álbum y del final.");
+          return;
+        }
+        // Keep mission evidence intact; studio-only photos can be removed entirely.
         const cambios = { [`recuerdos/${id}`]: null };
         if (r.mid === "recuerdos") { cambios[`fotos/${r.mid}/${r.aid}`] = null; cambios[`fotosMini/${r.mid}/${r.aid}`] = null; }
         await T.actualizar("", cambios); aviso("Recuerdo eliminado.");
       }
     } catch (err) {
-      if (err.name !== "AbortError") aviso("No se pudo completar. Revisa tu conexión e inténtalo otra vez.");
+      if (err.name !== "AbortError") aviso(sinPermiso(err) ? TEXTO_SIN_PERMISO : "No se pudo completar. Revisa tu conexión e inténtalo otra vez.");
       if (button.isConnected) button.disabled = false;
     } finally { ocupado = false; }
   });
@@ -241,7 +247,7 @@ function ciudadCineLigaHTML() {
 function finalCineLigaHTML(f, S, yo, ahora) {
   const energia = f.fase === "energia", momento = momentoFinalLiga(f, ahora), escena = momento.escena;
   const aporto = !!(f.energia || {})[yo];
-  const aprobadas = Object.entries(S.recuerdos || {}).filter(([, r]) => r.estado === "aprobada")
+  const aprobadas = Object.entries(S.recuerdos || {}).filter(([, r]) => r.estado === "aprobada" && !r.retirada)
     .sort((a, b) => a[1].t - b[1].t).slice(-8);
   const par = aprobadas.length ? [0, 1].map(i => aprobadas[(momento.lote * 2 + i) % aprobadas.length])
     .filter((r, i) => i === 0 || aprobadas.length > 1) : [];
@@ -273,7 +279,7 @@ function finalCineLigaHTML(f, S, yo, ahora) {
 function actualizarCineLiga(raiz, T, S, yo) {
   const f = S.final; if (!f) return;
   // Start fetching the next stills during the energy screen, before the film reaches them.
-  Object.values(S.recuerdos || {}).filter(r => r.estado === "aprobada")
+  Object.values(S.recuerdos || {}).filter(r => r.estado === "aprobada" && !r.retirada)
     .sort((a, b) => a.t - b.t).slice(-8).forEach(r => miniCineLiga(T, r));
   const contador = raiz.querySelector("[data-energia-conteo]");
   if (contador) {
@@ -305,9 +311,9 @@ function actualizarCineLiga(raiz, T, S, yo) {
   for (const figura of raiz.querySelectorAll("[data-cine-foto]:not([data-cargando])")) {
     figura.dataset.cargando = "1";
     const id = figura.dataset.cineFoto, r = (S.recuerdos || {})[id];
-    if (!r || r.estado !== "aprobada") continue;
+    if (!r || r.estado !== "aprobada" || r.retirada) continue;
     miniCineLiga(T, r).then(src => {
-      if (figura.isConnected && src && S.recuerdos[id]?.estado === "aprobada") figura.querySelector("img").src = src;
+      if (figura.isConnected && src && S.recuerdos[id]?.estado === "aprobada" && !S.recuerdos[id]?.retirada) figura.querySelector("img").src = src;
       else if (figura.isConnected) figura.hidden = true;
     });
   }
