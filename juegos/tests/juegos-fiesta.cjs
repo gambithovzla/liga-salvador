@@ -138,8 +138,7 @@ const { chromium } = require('playwright');
       ['villano', async () => {
         const fin = Date.now() + 26000;
         while (Date.now() < fin && await player.locator('[data-arena]').count()) {
-          const v = player.locator('.ventana.arriba:not([data-quien="salva"])').first();
-          if (await v.count()) await v.dispatchEvent('pointerdown').catch(() => {});
+          await page.evaluate(() => { const v = document.querySelector('#raiz-jugador .ventana.arriba:not([data-quien="salva"])'); if (v) v.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true })); });
           if (await player.locator('.villano-arena.apagado').count()) break;
           await page.waitForTimeout(60);
         }
