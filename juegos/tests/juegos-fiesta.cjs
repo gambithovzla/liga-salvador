@@ -124,6 +124,7 @@ const { chromium } = require('playwright');
     await page.mouse.up();
     assert.ok(Number((await mj(page, 'vistos'))[await page.evaluate(() => __demo.jugador.yo)]) >= 1);
     await host.locator('[data-vivo="zz-relato"] p').first().waitFor();
+    await page.evaluate(() => __demo.T.actualizar('mision', { 'sub/limite': __demo.T.ahora() - 1 }));
     await resultados(page);
     console.log('PASS: Un, dos, tres… ¡Zzz! walking, caught while looking, broadcast and results');
 
