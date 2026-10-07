@@ -3953,6 +3953,8 @@ const Sonido = (function () {
     },
     soplido: () => { golpe(0, 0.9, 0.2, 2600); golpe(0.05, 0.7, 0.12, 1200); },
     velaMagia: () => { [784, 988, 1175, 1568, 1976].forEach((f, i) => tono(f, i * 0.13, 1, "sine", 0.06)); tono(392, 0, 2, "triangle", 0.05); },
+    // Los globos: cada uno revienta un poco más agudo que el anterior.
+    pop: (n) => { const f = 330 * Math.pow(2, (Number(n) || 1) / 12); golpe(0, 0.07, 0.35, 2600); tono(f, 0, 0.12, "triangle", 0.09, f * 1.5); },
     apagon: () => { golpe(0, 0.35, 0.3, 160); tono(330, 0, 0.6, "sawtooth", 0.05, 70); },
     // Gran Premio de Barranco
     pasoGP: (sup) => golpe(0, 0.045, sup === "madera" ? 0.09 : 0.06, sup === "madera" ? 520 : 1500),
@@ -4696,11 +4698,18 @@ const MINIJUEGOS = {
     menorEsMejor: true,
     formato: (v) => `${(v / 1000).toFixed(1).replace(".", ",")} s`,
     jugar(arena, terminar) {
-      arena.className = "arena globos-fondo";
+      arena.className = "arena globos-fondo globos-cielo";
+      const cielo = document.createElement("div");
+      cielo.className = "globos-nubes";
+      cielo.setAttribute("aria-hidden", "true");
+      cielo.innerHTML = "<i></i><i></i><i></i>";
+      arena.appendChild(cielo);
       const m = marcadorArena(arena, "Busca el 1");
       const caja = document.createElement("div");
       caja.className = "numeros globos";
-      caja.innerHTML = barajar(Array.from({ length: 20 }, (_, i) => i + 1)).map((n) => `<button class="num globo-${n % 6}" data-n="${n}">${n}</button>`).join("");
+      // Cada globo flota a su ritmo: distinta demora, duración y vaivén.
+      caja.innerHTML = barajar(Array.from({ length: 20 }, (_, i) => i + 1)).map((n) =>
+        `<button class="num globo-${n % 6}" data-n="${n}" style="--d:${(-Math.random() * 3).toFixed(2)}s;--t:${(2.4 + Math.random() * 1.6).toFixed(2)}s;--g:${(Math.random() * 6 - 3).toFixed(1)}deg">${n}</button>`).join("");
       caja.style.visibility = "hidden";
       arena.appendChild(caja);
       let siguiente = 1, castigo = 0, t0 = 0, vivo = false;
@@ -4711,10 +4720,18 @@ const MINIJUEGOS = {
         const n = Number(b.dataset.n);
         if (n === siguiente) {
           b.classList.add("salvado");
+          reventar(b);
           siguiente++;
           vibrar(15);
-          Sonido.tocar("toque");
-          if (siguiente > 20) { vivo = false; m.textContent = "¡Feliz cumple, Salva!"; terminar(Math.round(performance.now() - t0 + castigo)); return; }
+          Sonido.tocar("pop", n);
+          if (siguiente > 20) {
+            vivo = false;
+            const marca = Math.round(performance.now() - t0 + castigo);
+            m.textContent = "¡Feliz cumple, Salva!";
+            fiestaFinal();
+            fin = setTimeout(() => terminar(marca), 1900);
+            return;
+          }
           m.textContent = `Busca el ${siguiente}`;
         } else if (!b.classList.contains("salvado")) {
           castigo += 1000;
@@ -4725,8 +4742,32 @@ const MINIJUEGOS = {
           setTimeout(() => b.classList.remove("error"), 250);
         }
       });
+      let fin = 0;
+      // El globo revienta en trocitos de su color.
+      function reventar(b) {
+        const r = arena.getBoundingClientRect(), rb = b.getBoundingClientRect();
+        const color = getComputedStyle(b).backgroundColor;
+        const x = rb.left - r.left + rb.width / 2, y = rb.top - r.top + rb.height / 2;
+        const pop = document.createElement("div");
+        pop.className = "globo-pop";
+        pop.style.left = x + "px"; pop.style.top = y + "px";
+        pop.innerHTML = `<b>¡POP!</b>` + Array.from({ length: 10 }, (_, k) => `<i style="--a:${k * 36 + Math.random() * 20}deg;--r:${30 + Math.random() * 30}px;background:${color}"></i>`).join("");
+        arena.appendChild(pop);
+        setTimeout(() => pop.remove(), 700);
+      }
+      // Al final, los 20 globos forman un «1» gigante: el primer año de Salvador.
+      function fiestaFinal() {
+        const puntos = [[50, 10], [44, 16], [38, 22], [32, 28], [50, 19], [50, 27], [50, 35], [50, 43], [50, 51], [50, 59], [50, 67], [50, 74], [38, 79], [44, 79], [56, 79], [62, 79], [32, 79], [68, 79], [56, 10], [26, 34]];
+        const capa = document.createElement("div");
+        capa.className = "globos-uno";
+        capa.innerHTML = puntos.map(([x, y], k) => `<i class="globo-${k % 6}" style="left:${x}%;top:${y}%;animation-delay:${k * 45}ms"></i>`).join("") +
+          `<b>¡Feliz primer año, Salva!</b>`;
+        arena.appendChild(capa);
+        Sonido.tocar("fanfarria");
+        confeti(arena);
+      }
       const quitar = cuentaAtras(arena, () => { caja.style.visibility = "visible"; vivo = true; t0 = performance.now(); });
-      return () => { vivo = false; quitar(); };
+      return () => { vivo = false; quitar(); clearTimeout(fin); };
     },
   },
 
