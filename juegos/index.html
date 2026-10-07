@@ -6114,6 +6114,20 @@ function opcionesBomba(b) {
   return { q, opciones: orden.map((i) => q.opciones[i]), correcta: orden.indexOf(q.correcta) };
 }
 const PUNTOS_BOMBA = 50;
+// El tic-tac se acelera con el tiempo que lleva encendida la bomba (no con lo que falta: eso nadie lo sabe).
+function ritmoBomba(s, ahora) { return Math.round(clamp(650 - (ahora - (s.inicio || ahora)) / 60000 * 420, 230, 650)); }
+// La bomba con la mecha encendida: la chispa chisporrotea y el cuerpo brilla.
+function bombaSVG(clase) {
+  return `<svg class="bm-bomba ${clase || ""}" viewBox="0 0 120 120" aria-hidden="true">` +
+    `<defs><radialGradient id="bmCuerpo" cx="38%" cy="34%" r="70%"><stop offset="0" stop-color="#5a6488"/><stop offset=".45" stop-color="#232a44"/><stop offset="1" stop-color="#07090f"/></radialGradient>` +
+    `<radialGradient id="bmChispa"><stop offset="0" stop-color="#fff"/><stop offset=".35" stop-color="#ffe066"/><stop offset="1" stop-color="#ff7a1a" stop-opacity="0"/></radialGradient></defs>` +
+    `<path class="bm-mecha" d="M74 30 C80 18 92 16 98 10" fill="none" stroke="#c9a26a" stroke-width="4" stroke-linecap="round" stroke-dasharray="3 3"/>` +
+    `<g class="bm-chispa"><circle cx="99" cy="9" r="12" fill="url(#bmChispa)"/><path d="M99 0v18M90 9h18M93 3l12 12M105 3 93 15" stroke="#fff6c4" stroke-width="2" stroke-linecap="round"/></g>` +
+    `<rect x="62" y="26" width="18" height="14" rx="3" transform="rotate(35 71 33)" fill="#3a4160" stroke="#07090f" stroke-width="3"/>` +
+    `<circle cx="56" cy="70" r="40" fill="url(#bmCuerpo)" stroke="#07090f" stroke-width="4"/>` +
+    `<ellipse cx="42" cy="54" rx="11" ry="7" fill="#ffffff55" transform="rotate(-30 42 54)"/>` +
+    `<text x="56" y="80" text-anchor="middle" font-family="Luckiest Guy, Bangers, Impact, sans-serif" font-size="26" fill="#ff5a3c">LIGA</text></svg>`;
+}
 TIPOS.bomba = {
   id: "bomba", nombre: "La bomba de la Liga", icono: "bomba", cat: "fiesta", usaSala: true,
   resumen: "Papa caliente con preguntas: respóndela bien para que la bomba salte a otro. A quien le explota, pierde puntos.",
@@ -6159,14 +6173,30 @@ TIPOS.bomba = {
     clave(ctx) { const s = ctx.m.sub; return `${s.k}:${s.estado}`; },
     html(ctx) {
       const s = ctx.m.sub;
-      if (s.estado === "pausa") return `<section class="pagina"><span class="cap">¡BOOM!</span><h2 class="titulo chico">Le explotó a ${esc(nombreDe(ctx.S, s.victimas["b" + s.k]))}</h2><p>Pierde ${PUNTOS_BOMBA} puntos. ${s.k < 3 ? "La siguiente bomba sale en unos segundos." : "Fue la última bomba."}</p></section>`;
-      return `<section class="pagina"><span class="cap">Bomba ${s.k} de 3</span><p data-vivo="quien"></p><p class="suave">Explota sola en un momento al azar. Puedes leer la pregunta en voz alta para darle suspenso.</p><div data-vivo="pregunta"></div>` +
+      if (s.estado === "pausa") {
+        return `<section class="bm-tv bm-explota"><div class="bm-fogonazo" aria-hidden="true"></div><div class="bm-hongo" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>` +
+          `<div class="bm-cartel"><span>¡BOOM!</span><b>${esc(nombreDe(ctx.S, s.victimas["b" + s.k]))}</b><small>pierde ${PUNTOS_BOMBA} puntos · ${s.k < 3 ? "la siguiente bomba sale en unos segundos" : "fue la última bomba"}</small></div></section>`;
+      }
+      return `<section class="bm-tv"><span class="bm-kicker">BOMBA ${s.k} DE 3 · EXPLOTA EN UN MOMENTO QUE NADIE CONOCE</span>${bombaSVG("grande")}` +
+        `<p class="bm-tiene">La tiene <b data-vivo="quien"></b></p><ol class="bm-cadena" data-vivo="cadena"></ol></section>` +
+        `<section class="pagina"><span class="cap">Pregunta (léela en voz alta para dar suspenso)</span><div data-vivo="pregunta"></div>` +
         `<button class="boton blanco" data-accion="cerrar-ya">Terminar y dar puntos</button></section>`;
     },
     actualizar(ctx, raiz) {
-      const b = (ctx.mj && ctx.mj.bomba) || {};
+      const b = (ctx.mj && ctx.mj.bomba) || {}, s = ctx.m.sub, L = ctx.local, ahora = ctx.ahora();
       const q = $('[data-vivo="quien"]', raiz);
-      if (q) { const h = `La tiene: <b>${esc(nombreDe(ctx.S, b.holder))}</b>`; if (q.dataset.h !== h) { q.dataset.h = h; q.innerHTML = h; } }
+      if (q) { const h = esc(nombreDe(ctx.S, b.holder)); if (q.dataset.h !== h) { q.dataset.h = h; q.innerHTML = h; q.classList.remove("bm-llega"); void q.offsetWidth; q.classList.add("bm-llega"); } }
+      // La cadena de pases de esta bomba, para que todos vean por dónde anduvo.
+      if (s.estado === "bomba" && b.holder && b.k === s.k) {
+        L.cadena = L.cadena && L.cadena.k === s.k ? L.cadena : { k: s.k, ids: [] };
+        if (L.cadena.ids[L.cadena.ids.length - 1] !== b.holder) L.cadena.ids.push(b.holder);
+        const c = $('[data-vivo="cadena"]', raiz);
+        if (c) { const h = L.cadena.ids.slice(-7).map((id) => `<li>${esc(nombreDe(ctx.S, id))}</li>`).join(""); if (c.dataset.h !== h) { c.dataset.h = h; c.innerHTML = h; } }
+        // El centro de mando también hace tic-tac, cada vez más rápido.
+        if (ahora >= s.inicio && ahora < s.explota && (!L.tic || performance.now() - L.tic > ritmoBomba(s, ahora))) { L.tic = performance.now(); Sonido.tocar("tictac"); }
+        const bomba = $(".bm-bomba", raiz);
+        if (bomba) bomba.style.setProperty("--bm-ritmo", `${ritmoBomba(s, ahora)}ms`);
+      }
       const p = $('[data-vivo="pregunta"]', raiz);
       if (p && b.q !== undefined) {
         const { q: preg, opciones, correcta } = opcionesBomba(b);
@@ -6202,35 +6232,42 @@ TIPOS.bomba = {
     html(ctx) {
       const s = ctx.m.sub, b = (ctx.mj && ctx.mj.bomba) || {};
       if (!s.jugadores.includes(ctx.yo)) return `<section class="pagina"><span class="cap">En curso</span><p>Esta misión empezó sin ti. ¡Ponte a salvo de la bomba!</p></section><button class="boton bloque" data-accion="cuartel">Volver al cuartel</button>`;
-      const dibujo = `<svg class="bomba tiembla" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11.3" fill="#ffd21f" stroke="#16130f" stroke-width="1"/><g transform="translate(3.6 3.4) scale(0.7)"><path d="${ICONOS.bomba}" fill="#16130f" fill-rule="evenodd"/></g></svg>`;
       if (s.estado === "pausa" || ctx.ahora() >= s.explota) {
         const victima = s.estado === "pausa" ? s.victimas["b" + s.k] : b.holder;
         const yo = victima === ctx.yo;
-        return `<div class="estallido rojo"><div><strong>¡BOOM!</strong><b>${yo ? "¡A ti!" : esc(nombreDe(ctx.S, victima))}</b></div></div>` +
-          `<p class="centro">${yo ? `Te explotó en las manos: pierdes ${PUNTOS_BOMBA} puntos.` : `Le explotó a ${esc(nombreDe(ctx.S, victima))}: pierde ${PUNTOS_BOMBA} puntos. ¡Tú te salvaste!`}</p>` +
+        return `<section class="bm-tv bm-explota${yo ? " bm-mia" : ""}"><div class="bm-fogonazo" aria-hidden="true"></div><div class="bm-hongo" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>` +
+          (yo ? `<div class="bm-tizne" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>` : "") +
+          `<div class="bm-cartel"><span>¡BOOM!</span><b>${yo ? "¡En tus manos!" : esc(nombreDe(ctx.S, victima))}</b>` +
+          `<small>${yo ? `Cof, cof… pierdes ${PUNTOS_BOMBA} puntos.` : `Le explotó a ${esc(nombreDe(ctx.S, victima))}: pierde ${PUNTOS_BOMBA} puntos. ¡Tú te salvaste!`}</small></div></section>` +
           `<p class="centro nota">${s.k < 3 ? "Atento: viene otra bomba." : "Esa fue la última bomba."}</p>`;
       }
       if (b.q === undefined) return `<p class="centro latido">Encendiendo la mecha…</p>`;
       const { q, opciones } = opcionesBomba(b);
       if (b.holder === ctx.yo) {
         const castigo = (ctx.local.castigo || 0) > Date.now();
-        return `<div class="alarma-bomba"><div class="estallido rojo latido"><div><strong>¡TIENES LA BOMBA!</strong></div></div>${dibujo}</div>` +
+        return `<div class="alarma-bomba bm-mia-ahora"><span class="bm-kicker">¡TIENES LA BOMBA!</span>${bombaSVG("tiembla")}<span class="bm-sub">Respóndela bien y se va a otro</span></div>` +
           `<section class="pagina"><span class="cap roja">¡Respóndela y se va!</span><p class="pregunta-texto">${esc(q.pregunta)}</p>` +
           `<div class="opciones">${opciones.map((t, i) => `<button class="opcion" data-o="${i}" data-accion="responder-bomba"${castigo ? " disabled" : ""}>${FORMAS_OPCION[i]}<span>${esc(t)}</span></button>`).join("")}</div>` +
           `<p class="error" data-vivo="error" role="alert">${castigo ? "¡Incorrecto! Ya te toca otra pregunta…" : ""}</p></section>`;
       }
-      return `<section class="pagina"><span class="cap">Bomba ${s.k} de 3</span><p>La tiene <b>${esc(nombreDe(ctx.S, b.holder))}</b>. Está respondiendo:</p>` +
+      const vuela = b.de && ctx.ahora() - (b.t || 0) < 1500;
+      return `<section class="bm-tv bm-mira"><span class="bm-kicker">BOMBA ${s.k} DE 3</span>${bombaSVG(vuela ? "vuela" : "")}<p class="bm-tiene">${vuela ? "La bomba voló a" : "La tiene"} <b>${esc(nombreDe(ctx.S, b.holder))}</b></p></section>` +
+        `<section class="pagina"><span class="cap">Está respondiendo</span>` +
         `<p class="pregunta-texto">${esc(q.pregunta)}</p><div class="opciones mirando">${opciones.map((t, i) => `<div class="opcion" data-o="${i}">${FORMAS_OPCION[i]}<span>${esc(t)}</span></div>`).join("")}</div></section>` +
-        `${dibujo}<p class="centro nota">Si la bomba te cae a ti, tu celular suena.</p>`;
+        `<p class="centro nota">Si la bomba te cae a ti, tu celular suena.</p>`;
     },
     actualizar(ctx) {
-      const s = ctx.m.sub, b = (ctx.mj && ctx.mj.bomba) || {};
-      // Mientras tengas la bomba, suena un tic-tac (no depende de la vibración, que los iPhone no tienen).
-      if (b.holder === ctx.yo && s.estado === "bomba" && ctx.ahora() < s.explota && ctx.ahora() >= s.inicio) {
-        const L = ctx.local;
-        if (!L.tic || performance.now() - L.tic > 650) { L.tic = performance.now(); Sonido.tocar("tictac"); }
+      const s = ctx.m.sub, b = (ctx.mj && ctx.mj.bomba) || {}, ahora = ctx.ahora();
+      // Mientras tengas la bomba, suena un tic-tac cada vez más rápido y la pantalla late en rojo.
+      const tengo = b.holder === ctx.yo && s.estado === "bomba" && ahora < s.explota && ahora >= s.inicio;
+      if (tengo) {
+        const L = ctx.local, ritmo = ritmoBomba(s, ahora);
+        if (!L.tic || performance.now() - L.tic > ritmo) { L.tic = performance.now(); Sonido.tocar("tictac"); if (ritmo < 400) vibrar(30); }
+        ctx.raiz.style.setProperty("--bm-ritmo", `${ritmo}ms`);
       }
+      ctx.raiz.classList.toggle("bm-caliente", tengo);
     },
+    salir(ctx) { ctx.raiz.classList.remove("bm-caliente", "bm-sacude"); },
     click(accion, el, ctx) {
       if (accion !== "responder-bomba") return;
       const s = ctx.m.sub, b = (ctx.mj && ctx.mj.bomba) || {}, L = ctx.local;
@@ -6270,8 +6307,14 @@ TIPOS.bomba = {
       if (clave.startsWith("boom") || clave.startsWith("pausa")) {
         const s = ctx.m.sub;
         const v = s.estado === "pausa" ? s.victimas["b" + s.k] : ((ctx.mj || {}).bomba || {}).holder;
-        if (v === ctx.yo) vibrar(700);
-        if (!ctx.local["boom" + s.k]) { ctx.local["boom" + s.k] = true; Sonido.tocar("boom"); }
+        if (v === ctx.yo) vibrar([400, 80, 300, 80, 200]);
+        if (!ctx.local["boom" + s.k]) {
+          ctx.local["boom" + s.k] = true;
+          Sonido.tocar("boom");
+          ctx.raiz.classList.remove("bm-caliente");
+          ctx.raiz.classList.add("bm-sacude");
+          setTimeout(() => ctx.raiz.classList.remove("bm-sacude"), 700);
+        }
       }
     },
   },
