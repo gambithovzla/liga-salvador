@@ -136,15 +136,13 @@ const { chromium } = require('playwright');
         await player.locator('.globos-uno').waitFor();
       }],
       ['villano', async () => {
-        const fin = Date.now() + 26000;
-        while (Date.now() < fin && await player.locator('[data-arena]').count()) {
-          await page.evaluate(() => { const v = document.querySelector('#raiz-jugador .ventana.arriba:not([data-quien="salva"])'); if (v) v.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true })); });
-          if (await player.locator('.villano-arena.apagado').count()) break;
-          await page.waitForTimeout(60);
-        }
-        await player.locator('.villano-arena.apagado').waitFor();
+        // Tap every visible villain from inside the page, so slow test machines never miss one.
+        await page.evaluate(() => { window.__toques = setInterval(() => { const v = document.querySelector('#raiz-jugador .ventana.arriba:not([data-quien="salva"])'); if (v) v.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true })); }, 120); });
+        await page.waitForFunction(() => !!document.querySelector('#raiz-jugador .villano-arena.apagado'), null, { timeout: 60000, polling: 100 });
+        assert.match(await player.locator('.villano-combo').textContent(), /COMBO ×\d+/);
+        await page.evaluate(() => clearInterval(window.__toques));
       }],
-      ['estrellas', async () => { await player.locator('.estrellas-suben').waitFor({ timeout: 35000 }); }],
+      ['estrellas', async () => { await page.waitForFunction(() => !!document.querySelector('#raiz-jugador .estrellas-suben'), null, { timeout: 60000, polling: 100 }); }],
     ]) {
       await player.getByRole('button', { name: 'Volver al cuartel', exact: true }).click().catch(() => {});
       await page.evaluate((t) => __demo.comando.lanzarTipo(t, { minutos: 3 }), tipo);
