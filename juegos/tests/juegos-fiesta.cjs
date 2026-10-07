@@ -145,6 +145,10 @@ const { chromium } = require('playwright');
       ['estrellas', async () => { await page.waitForFunction(() => !!document.querySelector('#raiz-jugador .estrellas-suben'), null, { timeout: 60000, polling: 100 }); }],
     ]) {
       await player.getByRole('button', { name: 'Volver al cuartel', exact: true }).click().catch(() => {});
+      // In the demo a test agent challenges the player to a duel after a while: turn it down.
+      await page.waitForTimeout(600);
+      const reto = player.locator('[data-accion="rechazar-duelo"]');
+      if (await reto.count()) await reto.first().click();
       await page.evaluate((t) => __demo.comando.lanzarTipo(t, { minutos: 3 }), tipo);
       await player.getByRole('button', { name: /vamos/i }).click();
       await player.getByRole('button', { name: /ya sé jugar|^¡jugar!$/i }).first().click();
