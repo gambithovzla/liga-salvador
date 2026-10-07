@@ -1288,12 +1288,14 @@ button.agente-fila:disabled { opacity: 0.5; cursor: default; }
 <link rel="stylesheet" href="recuerdos.css">
 <link rel="stylesheet" href="cine.css">
 <link rel="stylesheet" href="operacion.css">
+<link rel="stylesheet" href="carrera.css">
 </head>
 <body>
 <div id="app"></div>
 <script src="experience.js"></script>
 <script src="recuerdos.js"></script>
 <script src="operacion.js"></script>
+<script src="carrera.js"></script>
 <script>
 /* qrcode-generator — (c) Kazuhiko Arase, licencia MIT */
 //---------------------------------------------------------------------
@@ -3950,6 +3952,14 @@ const Sonido = (function () {
     },
     soplido: () => { golpe(0, 0.9, 0.2, 2600); golpe(0.05, 0.7, 0.12, 1200); },
     velaMagia: () => { [784, 988, 1175, 1568, 1976].forEach((f, i) => tono(f, i * 0.13, 1, "sine", 0.06)); tono(392, 0, 2, "triangle", 0.05); },
+    // Gran Premio de Barranco
+    pasoGP: (sup) => golpe(0, 0.045, sup === "madera" ? 0.09 : 0.06, sup === "madera" ? 520 : 1500),
+    alertaGP: () => { tono(988, 0, 0.09, "square", 0.05); tono(988, 0.12, 0.09, "square", 0.05); },
+    saltoGP: () => tono(392, 0, 0.22, "triangle", 0.09, 784),
+    perfectoGP: () => { tono(784, 0, 0.12, "triangle", 0.1); tono(1175, 0.08, 0.14, "triangle", 0.1); tono(1568, 0.16, 0.3, "sine", 0.09); },
+    tropiezoGP: () => { golpe(0, 0.2, 0.25, 300); tono(330, 0.02, 0.4, "sawtooth", 0.05, 160); },
+    poderGP: () => { tono(220, 0, 0.6, "sawtooth", 0.05, 880); [523, 659, 784, 1046].forEach((f, i) => tono(f, 0.15 + i * 0.06, 0.3, "triangle", 0.06)); golpe(0.1, 0.4, 0.15, 3000); },
+    metaGP: () => { [523, 659, 784, 1046].forEach((f, i) => tono(f, i * 0.09, 0.5, "triangle", 0.08)); golpe(0, 0.5, 0.2, 2500); },
     fanfarria: () => {
       [523, 659, 784].forEach((f) => tono(f, 0, 0.42, "sawtooth", 0.045));
       [784, 988, 1175].forEach((f) => tono(f, 0.36, 0.42, "sawtooth", 0.045));
@@ -3962,6 +3972,9 @@ const Sonido = (function () {
     set activo(v) { activo = !!v; },
     despertar() { if (activo) contexto(true); },
     tocar(nombre, x) { if (activo && efectos[nombre]) { try { efectos[nombre](x); } catch (e) { /* sin audio */ } } },
+    // Para la música: una nota o un golpe de ruido programados «en» segundos desde ahora.
+    nota(f, en, dur, tipo, vol, fFin) { if (activo) { try { tono(f, en, dur, tipo, vol, fFin); } catch (e) { /* sin audio */ } } },
+    ruido(en, dur, vol, frec) { if (activo) { try { golpe(en, dur, vol, frec); } catch (e) { /* sin audio */ } } },
   };
 })();
 // El primer toque en la página habilita el sonido (requisito de los navegadores).
@@ -5846,102 +5859,7 @@ TIPOS.ultimo = {
 
 /* ---------- Carrera de la Liga ---------- */
 const PASOS_META = 150;
-TIPOS.carrera = {
-  id: "carrera", nombre: "Carrera de la Liga", icono: "bandera", cat: "celular", usaSala: true,
-  resumen: "Todos corren a la vez tocando dos botones alternados.",
-  ayuda: "Toca los botones izquierdo y derecho alternados para correr. En la pantalla ves a todos los corredores en vivo. Gana quien llegue primero a la meta.",
-  campos: [],
-  empezar(ctx) {
-    const corredores = listosDe(ctx);
-    if (!corredores.length) { avisar("Primero tiene que haber agentes listos."); return false; }
-    const inicio = ctx.ahora() + 4200;
-    ctx.T.actualizar("mision", { fase: "juego", sub: { inicio, limite: inicio + 100000, corredores } });
-    return true;
-  },
-  progreso(ctx) {
-    const s = ctx.m.sub, pasos = (ctx.mj && ctx.mj.pasos) || {}, llegada = (ctx.mj && ctx.mj.llegada) || {};
-    return s.corredores.filter((id) => ctx.S.agentes[id]).map((id) => ({ id, pasos: llegada[id] ? PASOS_META : Number(pasos[id]) || 0, llegada: Number(llegada[id]) || 0 }))
-      .sort((a, b) => (a.llegada && b.llegada ? a.llegada - b.llegada : a.llegada ? -1 : b.llegada ? 1 : b.pasos - a.pasos));
-  },
-  pista(ctx, yo) {
-    const lista = this.progreso(ctx);
-    let mostrar = lista.slice(0, 6);
-    if (yo && !mostrar.find((c) => c.id === yo)) { const mio = lista.find((c) => c.id === yo); if (mio) mostrar = mostrar.slice(0, 5).concat([mio]); }
-    const resto = lista.length - mostrar.length;
-    return `<div class="pista"><div class="meta-salva"><span>¡Salvador te espera en la meta!</span>${caraSalvadorHTML("cara-meta")}</div>${mostrar.map((c) => `<div class="carril ${c.id === yo ? "yo" : ""}"><span class="meta"></span><div class="corredor" style="left:calc(${(c.pasos / PASOS_META) * 100}% - ${(c.pasos / PASOS_META) * 96}px)">${poderHTML(poderDeAgente(ctx.S, c.id))}<span>${esc(nombreDe(ctx.S, c.id))}</span></div></div>`).join("")}</div>` +
-      (resto > 0 ? `<p class="nota centro">y ${plural(resto, "corredor más", "corredores más")}</p>` : "");
-  },
-  cerrar(ctx) {
-    const entradas = this.progreso(ctx).map((c) => ({ id: c.id, v: c.llegada ? c.llegada : 1e9 - c.pasos, llegada: c.llegada, pasos: c.pasos }));
-    const l = rankear(entradas, true, 1);
-    const mejor = Math.min(...l.filter((e) => e.llegada).map((e) => e.llegada), Infinity);
-    l.forEach((e) => { e.pts = e.llegada ? Math.round(10 + 90 * mejor / e.llegada) : Math.round(10 + 40 * e.pasos / PASOS_META); });
-    ctx.premiar(l.map((e) => ({ id: e.id, pos: e.pos, pts: e.pts, txt: e.llegada ? `${(e.llegada / 1000).toFixed(1).replace(".", ",")} s` : `${e.pasos} de ${PASOS_META} pasos` })));
-  },
-  host: {
-    clave() { return "carrera"; },
-    html() { return `<section class="pagina"><span class="cap" data-vivo="estado">En sus marcas</span><div data-vivo="pista"></div><button class="boton blanco" data-accion="cerrar-ya">Terminar y dar puntos</button></section>`; },
-    actualizar(ctx, raiz) {
-      const s = ctx.m.sub, ahora = ctx.ahora();
-      const e = $('[data-vivo="estado"]', raiz);
-      if (e) e.textContent = ahora < s.inicio ? `Arranca en ${Math.ceil((s.inicio - ahora) / 1000)}` : `Carrera · ${reloj(ahora - s.inicio)}`;
-      const p = $('[data-vivo="pista"]', raiz);
-      if (p) { const h = TIPOS.carrera.pista(ctx, null); if (p.dataset.h !== h) { p.dataset.h = h; p.innerHTML = h; } }
-    },
-    click(accion, el, ctx) { if (accion === "cerrar-ya") ctx.cerrarMision(); },
-    tic(ctx) {
-      const s = ctx.m.sub, ahora = ctx.ahora();
-      const lista = TIPOS.carrera.progreso(ctx);
-      if (ahora > s.limite || (lista.length && lista.every((c) => c.llegada))) ctx.cerrarMision();
-    },
-  },
-  jugador: {
-    clave(ctx) { const s = ctx.m.sub; return s.corredores.includes(ctx.yo) ? "corre" : "mira"; },
-    html(ctx) {
-      const corre = ctx.m.sub.corredores.includes(ctx.yo);
-      return `<p class="centro"><span class="cap" data-vivo="estado">En sus marcas</span></p><div data-vivo="pista"></div>` +
-        (corre ? `<div class="pies"><button class="pie" data-pie="0" disabled>Izquierdo</button><button class="pie" data-pie="1" disabled>Derecho</button></div>` : `<p class="centro">Esta carrera empezó sin ti. ¡Mira cómo van!</p>`);
-    },
-    actualizar(ctx, raiz) {
-      const s = ctx.m.sub, ahora = ctx.ahora(), L = ctx.local;
-      const llegue = ((ctx.mj && ctx.mj.llegada) || {})[ctx.yo];
-      const e = $('[data-vivo="estado"]', raiz);
-      if (e) e.textContent = llegue ? `¡Llegaste! ${(llegue / 1000).toFixed(1).replace(".", ",")} s` : ahora < s.inicio ? `Arranca en ${Math.ceil((s.inicio - ahora) / 1000)}` : "¡CORRE!";
-      const p = $('[data-vivo="pista"]', raiz);
-      if (p) { const h = TIPOS.carrera.pista(ctx, ctx.yo); if (p.dataset.h !== h) { p.dataset.h = h; p.innerHTML = h; } }
-      const pies = $$(".pie", raiz);
-      if (!pies.length) return;
-      const activo = ahora >= s.inicio && ahora < s.limite && !llegue;
-      pies.forEach((b) => { if (b.disabled === activo) b.disabled = !activo; });
-      if (activo && !L.arranque) { L.arranque = performance.now() - (ahora - s.inicio); L.pasos = 0; L.ultimo = 1; }
-      if (!L.enlazado) {
-        L.enlazado = true;
-        raiz.addEventListener("pointerdown", (ev) => {
-          const b = ev.target.closest(".pie");
-          if (!b || b.disabled) return;
-          ev.preventDefault();
-          const lado = Number(b.dataset.pie);
-          if (lado === L.ultimo) return;
-          L.ultimo = lado;
-          L.pasos = (L.pasos || 0) + 1;
-          b.classList.add("toca");
-          setTimeout(() => b.classList.remove("toca"), 70);
-          if (L.pasos >= PASOS_META && !L.llego) {
-            L.llego = true;
-            const ms = Math.round(tiempoEvento(ev) - L.arranque);
-            ctx.T.escribir(`mj/${ctx.m.id}/llegada/${ctx.yo}`, ms);
-            ctx.T.escribir(`mj/${ctx.m.id}/pasos/${ctx.yo}`, PASOS_META);
-            vibrar([40, 60, 40]);
-            Sonido.tocar("exito");
-          } else if (!L.enviando) {
-            L.enviando = true;
-            setTimeout(() => { L.enviando = false; if (!L.llego) ctx.T.escribir(`mj/${ctx.m.id}/pasos/${ctx.yo}`, L.pasos); }, 220);
-          }
-        });
-      }
-    },
-  },
-};
+TIPOS.carrera = tipoCarrera(); // Gran Premio de Barranco (carrera.js)
 
 /* ---------- Charadas ---------- */
 TIPOS.charadas = {
@@ -6726,7 +6644,7 @@ const PASOS = {
   impostor: ["Todas las caras de Salvador son iguales menos una.", "Encuéntrala y tócala: una foto entre dibujos, un dibujo entre fotos, una cara al revés…", "Son 5 niveles. Cada error suma 2 segundos."],
   estrellas: ["Arrastra el dedo para mover a Salvador.", "Atrapa las estrellas: suman 1.", "Esquiva las bombas: restan 3. Dura 25 segundos."],
   ultimo: ["Espera con el dedo listo: la pantalla está oscura.", "Cuando se ponga AMARILLA y aparezca Salvador, toca.", "Los más lentos de cada ronda quedan fuera. Si tocas antes de tiempo, te avisamos una vez; la segunda, quedas fuera."],
-  carrera: ["Cuando arranque, toca IZQUIERDO y DERECHO, alternando.", "Cada toque alternado es un paso.", "Salvador te espera en la meta, a 150 pasos. ¡Gana quien llega primero!"],
+  carrera: ["Cuando arranque, toca IZQ y DER, alternando: cada toque es un paso por el malecón de Barranco.", "Hay 3 obstáculos. Toca ¡SALTA! justo cuando el anillo se cierre: si es perfecto, sales disparado.", "Tu poder te da un impulso una sola vez. Salvador te espera en la meta, a 150 pasos."],
   foto: ["Lee el reto de foto.", "Ve al lugar, toca Tomar foto y luego Enviar.", "El primero en llegar gana más puntos."],
   charadas: ["Mira la mímica del anfitrión.", "Escribe la palabra en tu celular y envíala, sin decirla en voz alta.", "El primero en escribirla bien gana la ronda."],
   agente: ["Mantén presionado para ver tu misión secreta: nadie más debe verla.", "Cúmplela sin que se note.", "Toca ¡Misión cumplida!: tu objetivo lo confirma en su celular."],
@@ -6982,34 +6900,6 @@ const PRACTICAS = {
     arena.addEventListener("pointerdown", toque);
     return () => { clearTimeout(espera); clearTimeout(vuelta); arena.removeEventListener("pointerdown", toque); };
   },
-  // Alternar izquierdo y derecho.
-  carrera(el) {
-    const META = 20;
-    el.innerHTML = `<div class="medidor"><i></i><b>0 de ${META} pasos</b></div><div class="pies mini"><button class="pie" data-p-pie="0">Izquierdo</button><button class="pie" data-p-pie="1">Derecho</button></div>`;
-    const barra = $(".medidor i", el), rotulo = $(".medidor b", el);
-    let pasos = 0, ultimo = 1, pausa = false, vuelta = 0;
-    function toque(e) {
-      const b = e.target.closest("[data-p-pie]");
-      if (!b || pausa) return;
-      e.preventDefault();
-      const lado = Number(b.dataset.pPie);
-      b.classList.add("toca");
-      setTimeout(() => b.classList.remove("toca"), 70);
-      if (lado === ultimo) { rotulo.textContent = "¡Alterna! Izquierdo, derecho…"; return; }
-      ultimo = lado;
-      pasos++;
-      barra.style.width = (pasos / META) * 100 + "%";
-      rotulo.textContent = `${pasos} de ${META} pasos`;
-      if (pasos >= META) {
-        pausa = true;
-        rotulo.textContent = "¡Así se corre! En la carrera son 150 pasos";
-        Sonido.tocar("exito");
-        vuelta = setTimeout(() => { pasos = 0; ultimo = 1; pausa = false; barra.style.width = "0"; rotulo.textContent = `0 de ${META} pasos`; }, 2200);
-      }
-    }
-    el.addEventListener("pointerdown", toque);
-    return () => { clearTimeout(vuelta); el.removeEventListener("pointerdown", toque); };
-  },
   // Escribir el código de otro agente (dúo).
   codigo(el, ctx) {
     const yo = ctx.S.agentes[ctx.yo] || {};
@@ -7079,6 +6969,7 @@ const PRACTICAS = {
     return () => form.removeEventListener("submit", enviar);
   },
 };
+PRACTICAS.carrera = practicaCarrera; // alternar y saltar (carrera.js)
 function montarPracticas(raiz, ctx, montadas) {
   $$("[data-practica]:not([data-montada])", raiz).forEach((el) => {
     const f = PRACTICAS[el.dataset.practica];
@@ -7294,7 +7185,17 @@ function crearBots(T, S, opc) {
               T.escribir(`mj/${m.id}/llegada/${b.id}`, Math.round((PASOS_META / ritmo) * 1000));
               T.escribir(`mj/${m.id}/pasos/${b.id}`, PASOS_META);
             }
-          } else if (toca(`ca:${m.id}:${b.id}:${Math.floor(t / 400)}`, ahora, () => ahora)) T.escribir(`mj/${m.id}/pasos/${b.id}`, pasos);
+          } else if (toca(`ca:${m.id}:${b.id}:${Math.floor(t / 400)}`, ahora, () => ahora)) {
+            T.escribir(`mj/${m.id}/pasos/${b.id}`, pasos);
+            // Efectos para la transmisión: saltos en los obstáculos y el poder una vez.
+            GP_OBSTACULOS.forEach((o, i) => {
+              if (pasos >= o.p && toca(`ca:${m.id}:${b.id}:o${i}`, ahora, () => ahora)) {
+                const k = Math.random() < 0.25 + 0.5 * b.bot ? "perfecto" : Math.random() < 0.6 ? "salto" : "tropiezo";
+                T.escribir(`mj/${m.id}/fx/${b.id}`, { k, t: ahora, o: i });
+              }
+            });
+            if (pasos >= cuando(`ca:${m.id}:${b.id}:poderEn`, () => azarEntero(20, 110)) && toca(`ca:${m.id}:${b.id}:poder`, ahora, () => ahora)) T.escribir(`mj/${m.id}/fx/${b.id}`, { k: "poder", t: ahora });
+          }
         }
         return;
       }
