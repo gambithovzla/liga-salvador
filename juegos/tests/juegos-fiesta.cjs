@@ -131,6 +131,7 @@ const { chromium } = require('playwright');
     // Minigames: they finish and record a mark (villain with combo and blackout, balloons, stars).
     for (const [tipo, jugar] of [
       ['rescate', async () => {
+        await page.waitForFunction(() => getComputedStyle(document.querySelector('#raiz-jugador .numeros.globos')).visibility === 'visible');
         for (let n = 1; n <= 20; n++) { await player.locator(`.num[data-n="${n}"]`).dispatchEvent('pointerdown'); await page.waitForTimeout(40); }
         await player.locator('.globos-uno').waitFor();
       }],
