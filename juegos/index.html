@@ -1288,12 +1288,16 @@ button.agente-fila:disabled { opacity: 0.5; cursor: default; }
 <link rel="stylesheet" href="recuerdos.css">
 <link rel="stylesheet" href="cine.css">
 <link rel="stylesheet" href="operacion.css">
+<link rel="stylesheet" href="carrera.css">
+<link rel="stylesheet" href="fiesta.css">
 </head>
 <body>
 <div id="app"></div>
 <script src="experience.js"></script>
 <script src="recuerdos.js"></script>
 <script src="operacion.js"></script>
+<script src="carrera.js"></script>
+<script src="zzz.js"></script>
 <script>
 /* qrcode-generator — (c) Kazuhiko Arase, licencia MIT */
 //---------------------------------------------------------------------
@@ -3950,6 +3954,22 @@ const Sonido = (function () {
     },
     soplido: () => { golpe(0, 0.9, 0.2, 2600); golpe(0.05, 0.7, 0.12, 1200); },
     velaMagia: () => { [784, 988, 1175, 1568, 1976].forEach((f, i) => tono(f, i * 0.13, 1, "sine", 0.06)); tono(392, 0, 2, "triangle", 0.05); },
+    // Los globos: cada uno revienta un poco más agudo que el anterior.
+    pop: (n) => { const f = 330 * Math.pow(2, (Number(n) || 1) / 12); golpe(0, 0.07, 0.35, 2600); tono(f, 0, 0.12, "triangle", 0.09, f * 1.5); },
+    // Un, dos, tres… ¡Zzz!
+    ronquido: () => { tono(90, 0, 1.1, "sawtooth", 0.05, 60); golpe(0.05, 1, 0.08, 400); tono(140, 1.3, 0.8, "sine", 0.05, 220); },
+    cuentaZzz: () => { [523, 587, 659].forEach((f, i) => tono(f, i * 0.5, 0.25, "triangle", 0.08)); },
+    quietos: () => { tono(880, 0, 0.12, "square", 0.08); tono(1320, 0.12, 0.35, "square", 0.08); },
+    teVi: () => { tono(392, 0, 0.18, "sawtooth", 0.08, 196); tono(196, 0.18, 0.4, "sawtooth", 0.07, 98); },
+    apagon: () => { golpe(0, 0.35, 0.3, 160); tono(330, 0, 0.6, "sawtooth", 0.05, 70); },
+    // Gran Premio de Barranco
+    pasoGP: (sup) => golpe(0, 0.045, sup === "madera" ? 0.09 : 0.06, sup === "madera" ? 520 : 1500),
+    alertaGP: () => { tono(988, 0, 0.09, "square", 0.05); tono(988, 0.12, 0.09, "square", 0.05); },
+    saltoGP: () => tono(392, 0, 0.22, "triangle", 0.09, 784),
+    perfectoGP: () => { tono(784, 0, 0.12, "triangle", 0.1); tono(1175, 0.08, 0.14, "triangle", 0.1); tono(1568, 0.16, 0.3, "sine", 0.09); },
+    tropiezoGP: () => { golpe(0, 0.2, 0.25, 300); tono(330, 0.02, 0.4, "sawtooth", 0.05, 160); },
+    poderGP: () => { tono(220, 0, 0.6, "sawtooth", 0.05, 880); [523, 659, 784, 1046].forEach((f, i) => tono(f, 0.15 + i * 0.06, 0.3, "triangle", 0.06)); golpe(0.1, 0.4, 0.15, 3000); },
+    metaGP: () => { [523, 659, 784, 1046].forEach((f, i) => tono(f, i * 0.09, 0.5, "triangle", 0.08)); golpe(0, 0.5, 0.2, 2500); },
     fanfarria: () => {
       [523, 659, 784].forEach((f) => tono(f, 0, 0.42, "sawtooth", 0.045));
       [784, 988, 1175].forEach((f) => tono(f, 0.36, 0.42, "sawtooth", 0.045));
@@ -3962,6 +3982,9 @@ const Sonido = (function () {
     set activo(v) { activo = !!v; },
     despertar() { if (activo) contexto(true); },
     tocar(nombre, x) { if (activo && efectos[nombre]) { try { efectos[nombre](x); } catch (e) { /* sin audio */ } } },
+    // Para la música: una nota o un golpe de ruido programados «en» segundos desde ahora.
+    nota(f, en, dur, tipo, vol, fFin) { if (activo) { try { tono(f, en, dur, tipo, vol, fFin); } catch (e) { /* sin audio */ } } },
+    ruido(en, dur, vol, frec) { if (activo) { try { golpe(en, dur, vol, frec); } catch (e) { /* sin audio */ } } },
   };
 })();
 // El primer toque en la página habilita el sonido (requisito de los navegadores).
@@ -4296,6 +4319,9 @@ function imgSalva(clave, clase) {
 const PRECARGA_SALVA = (() => { const src = imagenSalva("cara"); if (!src) return null; const i = new Image(); i.src = src; return i; })();
 function yaHTML() { const src = imagenSalva("cara"); return src ? `<img class="salva-ya" src="${esc(src)}" alt="">¡YA!` : "¡YA!"; }
 function svgPersona(tipo) {
+  if (tipo === "dorado") {
+    return `<svg viewBox="0 0 40 40" class="villano-dorado"><path d="M10 9l4 5 6-7 6 7 4-5v8H10z" fill="#ffe066" stroke="#16130f" stroke-width="2" stroke-linejoin="round"/><circle cx="20" cy="23" r="14" fill="#f5c21b" stroke="#16130f" stroke-width="2.5"/><path d="M8 21c0-2 2.6-3.4 6-3.4 2.8 0 3.8 1.4 6 1.4s3.2-1.4 6-1.4c3.4 0 6 1.4 6 3.4 0 4.6-2.9 8.2-6.4 8.2-2.4 0-3.4-1.9-5.6-1.9s-3.2 1.9-5.6 1.9C10.9 29.2 8 25.6 8 21z" fill="#16130f"/><circle cx="15" cy="22.4" r="2.2" fill="#fff6c4"/><circle cx="25" cy="22.4" r="2.2" fill="#fff6c4"/><path d="M15 32q5-2.4 10 0" stroke="#16130f" stroke-width="2.4" fill="none"/><circle cx="31" cy="12" r="1.6" fill="#fff"/></svg>`;
+  }
   if (tipo === "villano") {
     return `<svg viewBox="0 0 40 40"><circle cx="20" cy="21" r="16" fill="#7d1016" stroke="#16130f" stroke-width="2.5"/><path d="${"M6 18c0-2.4 3-3.9 7-3.9 3.2 0 4.3 1.6 7 1.6s3.8-1.6 7-1.6c4 0 7 1.5 7 3.9 0 5.2-3.3 9.4-7.3 9.4-2.7 0-3.9-2.2-6.7-2.2s-4 2.2-6.7 2.2C9.3 27.4 6 23.2 6 18z"}" fill="#16130f"/><circle cx="14" cy="20" r="2.4" fill="#ffd21f"/><circle cx="26" cy="20" r="2.4" fill="#ffd21f"/><path d="M14 31q6-3 12 0" stroke="#16130f" stroke-width="2.5" fill="none"/></svg>`;
   }
@@ -4430,13 +4456,33 @@ const MINIJUEGOS = {
   villano: {
     nombre: "Atrapa al villano", icono: "antifaz",
     resumen: "Toca a los villanos que se asoman. ¡A Salvador no!",
-    ayuda: "Durante 20 segundos se asoman villanos por las ventanas: tócalos rápido. A veces se asoma Salvador: si lo tocas, pierdes un punto.",
+    ayuda: "Durante 20 segundos se asoman villanos por las ventanas: tócalos rápido. El villano dorado vale 5 y, si encadenas villanos sin fallar, el combo suma más. A veces se asoma Salvador: si lo tocas, pierdes un punto. ¡Ojo con el apagón de los últimos 5 segundos!",
     menorEsMejor: false,
     formato: (v) => plural(v, "villano", "villanos"),
     jugar(arena, terminar) {
-      arena.className = "arena noche";
-      let puntos = 0, vivo = false, generador = 0, parar = () => {}, intervalo = 720;
+      arena.className = "arena noche villano-arena";
+      let puntos = 0, vivo = false, generador = 0, parar = () => {}, intervalo = 720, combo = 0, apagon = false;
       const m = marcadorArena(arena, "0");
+      const comboEl = document.createElement("div");
+      comboEl.className = "villano-combo";
+      arena.appendChild(comboEl);
+      // El apagón: en los últimos 5 segundos solo se ve lo que alumbra tu linterna.
+      const sombra = document.createElement("div");
+      sombra.className = "villano-apagon";
+      sombra.setAttribute("aria-hidden", "true");
+      arena.appendChild(sombra);
+      function linterna(e) {
+        const r = arena.getBoundingClientRect();
+        sombra.style.setProperty("--lx", `${e.clientX - r.left}px`);
+        sombra.style.setProperty("--ly", `${e.clientY - r.top}px`);
+      }
+      arena.addEventListener("pointerdown", linterna, true);
+      arena.addEventListener("pointermove", linterna);
+      function pintarCombo() {
+        comboEl.textContent = combo >= 3 ? `COMBO ×${combo}` : "";
+        comboEl.classList.toggle("caliente", combo >= 10);
+        comboEl.classList.remove("pulso"); void comboEl.offsetWidth; if (combo >= 3) comboEl.classList.add("pulso");
+      }
       const rejilla = document.createElement("div");
       rejilla.className = "ventanas";
       rejilla.innerHTML = Array.from({ length: 9 }, (_, i) => `<button class="ventana" data-i="${i}" aria-label="Ventana ${i + 1}"><div class="quien"></div></button>`).join("");
@@ -4450,19 +4496,21 @@ const MINIJUEGOS = {
         const libres = ocupada.map((o, i) => (o ? -1 : i)).filter((i) => i >= 0);
         if (libres.length) {
           const i = libres[Math.floor(Math.random() * libres.length)];
-          const tipo = Math.random() < 0.78 ? "villano" : "salva";
+          const azarQuien = Math.random();
+          const tipo = azarQuien < 0.07 ? "dorado" : azarQuien < 0.8 ? "villano" : "salva";
           const v = ventanas[i];
           v.querySelector(".quien").innerHTML = tipo === "salva" ? (caraSalva || svgPersona("ciudadano")) : svgPersona(tipo);
           v.dataset.quien = tipo;
           v.classList.add("arriba");
-          const vida = clamp(1000 - (720 - intervalo), 620, 1000);
-          ocupada[i] = { tipo, hasta: setTimeout(() => esconder(i), vida) };
+          const vida = clamp(1000 - (720 - intervalo), 620, 1000) * (tipo === "dorado" ? 0.7 : 1);
+          ocupada[i] = { tipo, hasta: setTimeout(() => esconder(i, true), vida) };
         }
         intervalo = Math.max(380, intervalo - 14);
         generador = setTimeout(asomar, intervalo);
       }
-      function esconder(i) {
+      function esconder(i, escapo) {
         if (!ocupada[i]) return;
+        if (escapo && ocupada[i].tipo !== "salva" && combo) { combo = 0; pintarCombo(); }
         clearTimeout(ocupada[i].hasta);
         ocupada[i] = null;
         ventanas[i].classList.remove("arriba");
@@ -4476,18 +4524,43 @@ const MINIJUEGOS = {
         const o = ocupada[i];
         if (!o) return;
         const r = arena.getBoundingClientRect(), rv = v.getBoundingClientRect();
-        if (o.tipo === "villano") { puntos++; v.classList.add("golpe"); vibrar(20); flotar(arena, rv.left - r.left + 10, rv.top - r.top, "+1"); }
-        else { puntos--; v.classList.add("error"); vibrar(140); Sonido.tocar("error"); flotar(arena, clamp(rv.left - r.left - 20, 4, r.width - 200), rv.top - r.top, "¡A Salvador no! -1", true); }
-        setTimeout(() => v.classList.remove("golpe", "error"), 160);
+        if (o.tipo === "villano" || o.tipo === "dorado") {
+          combo++;
+          // El combo suma: desde 5 seguidos cada villano vale 2; desde 10, vale 3.
+          const extra = combo >= 10 ? 2 : combo >= 5 ? 1 : 0;
+          const vale = (o.tipo === "dorado" ? 5 : 1) + extra;
+          puntos += vale;
+          v.classList.add(o.tipo === "dorado" ? "golpe-oro" : "golpe");
+          vibrar(o.tipo === "dorado" ? [20, 30, 40] : 20);
+          Sonido.tocar(o.tipo === "dorado" ? "revelar" : "toque");
+          flotar(arena, rv.left - r.left + 10, rv.top - r.top, o.tipo === "dorado" ? `¡ORO! +${vale}` : `+${vale}`);
+        } else {
+          puntos--; combo = 0;
+          v.classList.add("error"); vibrar(140); Sonido.tocar("error");
+          flotar(arena, clamp(rv.left - r.left - 20, 4, r.width - 200), rv.top - r.top, "¡A Salvador no! -1", true);
+        }
+        pintarCombo();
+        setTimeout(() => v.classList.remove("golpe", "golpe-oro", "error"), 160);
         m.textContent = Math.max(0, puntos);
         esconder(i);
       });
       const quitar = cuentaAtras(arena, () => {
         vivo = true;
         asomar();
-        parar = relojArena(arena, 20000, null, () => { vivo = false; clearTimeout(generador); ocupada.forEach((o, i) => esconder(i)); terminar(Math.max(0, puntos)); });
+        parar = relojArena(arena, 20000, (queda) => {
+          if (!apagon && queda <= 5000) {
+            apagon = true;
+            arena.classList.add("apagado");
+            const r = arena.getBoundingClientRect();
+            sombra.style.setProperty("--lx", `${r.width / 2}px`);
+            sombra.style.setProperty("--ly", `${r.height / 2}px`);
+            flotar(arena, r.width / 2 - 80, r.height * 0.4, "¡APAGÓN!", true);
+            Sonido.tocar("apagon");
+            vibrar([60, 40, 60]);
+          }
+        }, () => { vivo = false; clearTimeout(generador); ocupada.forEach((o, i) => esconder(i)); arena.classList.remove("apagado"); terminar(Math.max(0, puntos)); });
       });
-      return () => { vivo = false; quitar(); parar(); clearTimeout(generador); ocupada.forEach((o) => o && clearTimeout(o.hasta)); };
+      return () => { vivo = false; quitar(); parar(); clearTimeout(generador); ocupada.forEach((o) => o && clearTimeout(o.hasta)); arena.removeEventListener("pointerdown", linterna, true); arena.removeEventListener("pointermove", linterna); };
     },
   },
 
@@ -4631,11 +4704,18 @@ const MINIJUEGOS = {
     menorEsMejor: true,
     formato: (v) => `${(v / 1000).toFixed(1).replace(".", ",")} s`,
     jugar(arena, terminar) {
-      arena.className = "arena globos-fondo";
+      arena.className = "arena globos-fondo globos-cielo";
+      const cielo = document.createElement("div");
+      cielo.className = "globos-nubes";
+      cielo.setAttribute("aria-hidden", "true");
+      cielo.innerHTML = "<i></i><i></i><i></i>";
+      arena.appendChild(cielo);
       const m = marcadorArena(arena, "Busca el 1");
       const caja = document.createElement("div");
       caja.className = "numeros globos";
-      caja.innerHTML = barajar(Array.from({ length: 20 }, (_, i) => i + 1)).map((n) => `<button class="num globo-${n % 6}" data-n="${n}">${n}</button>`).join("");
+      // Cada globo flota a su ritmo: distinta demora, duración y vaivén.
+      caja.innerHTML = barajar(Array.from({ length: 20 }, (_, i) => i + 1)).map((n) =>
+        `<button class="num globo-${n % 6}" data-n="${n}" style="--d:${(-Math.random() * 3).toFixed(2)}s;--t:${(2.4 + Math.random() * 1.6).toFixed(2)}s;--g:${(Math.random() * 6 - 3).toFixed(1)}deg">${n}</button>`).join("");
       caja.style.visibility = "hidden";
       arena.appendChild(caja);
       let siguiente = 1, castigo = 0, t0 = 0, vivo = false;
@@ -4646,10 +4726,18 @@ const MINIJUEGOS = {
         const n = Number(b.dataset.n);
         if (n === siguiente) {
           b.classList.add("salvado");
+          reventar(b);
           siguiente++;
           vibrar(15);
-          Sonido.tocar("toque");
-          if (siguiente > 20) { vivo = false; m.textContent = "¡Feliz cumple, Salva!"; terminar(Math.round(performance.now() - t0 + castigo)); return; }
+          Sonido.tocar("pop", n);
+          if (siguiente > 20) {
+            vivo = false;
+            const marca = Math.round(performance.now() - t0 + castigo);
+            m.textContent = "¡Feliz cumple, Salva!";
+            fiestaFinal();
+            fin = setTimeout(() => terminar(marca), 1900);
+            return;
+          }
           m.textContent = `Busca el ${siguiente}`;
         } else if (!b.classList.contains("salvado")) {
           castigo += 1000;
@@ -4660,8 +4748,32 @@ const MINIJUEGOS = {
           setTimeout(() => b.classList.remove("error"), 250);
         }
       });
+      let fin = 0;
+      // El globo revienta en trocitos de su color.
+      function reventar(b) {
+        const r = arena.getBoundingClientRect(), rb = b.getBoundingClientRect();
+        const color = getComputedStyle(b).backgroundColor;
+        const x = rb.left - r.left + rb.width / 2, y = rb.top - r.top + rb.height / 2;
+        const pop = document.createElement("div");
+        pop.className = "globo-pop";
+        pop.style.left = x + "px"; pop.style.top = y + "px";
+        pop.innerHTML = `<b>¡POP!</b>` + Array.from({ length: 10 }, (_, k) => `<i style="--a:${k * 36 + Math.random() * 20}deg;--r:${30 + Math.random() * 30}px;background:${color}"></i>`).join("");
+        arena.appendChild(pop);
+        setTimeout(() => pop.remove(), 700);
+      }
+      // Al final, los 20 globos forman un «1» gigante: el primer año de Salvador.
+      function fiestaFinal() {
+        const puntos = [[50, 10], [44, 16], [38, 22], [32, 28], [50, 19], [50, 27], [50, 35], [50, 43], [50, 51], [50, 59], [50, 67], [50, 74], [38, 79], [44, 79], [56, 79], [62, 79], [32, 79], [68, 79], [56, 10], [26, 34]];
+        const capa = document.createElement("div");
+        capa.className = "globos-uno";
+        capa.innerHTML = puntos.map(([x, y], k) => `<i class="globo-${k % 6}" style="left:${x}%;top:${y}%;animation-delay:${k * 45}ms"></i>`).join("") +
+          `<b>¡Feliz primer año, Salva!</b>`;
+        arena.appendChild(capa);
+        Sonido.tocar("fanfarria");
+        confeti(arena);
+      }
       const quitar = cuentaAtras(arena, () => { caja.style.visibility = "visible"; vivo = true; t0 = performance.now(); });
-      return () => { vivo = false; quitar(); };
+      return () => { vivo = false; quitar(); clearTimeout(fin); };
     },
   },
 
@@ -4901,12 +5013,61 @@ const MINIJUEGOS = {
         t0 = performance.now();
         proximo = t0;
         raf = requestAnimationFrame(paso);
-        parar = relojArena(arena, 25000, null, () => { vivo = false; cancelAnimationFrame(raf); terminar(Math.max(0, puntos)); });
+        parar = relojArena(arena, 25000, null, () => {
+          vivo = false; cancelAnimationFrame(raf);
+          const total = Math.max(0, puntos);
+          // Tus estrellas suben al cielo de la Liga antes de mostrar la marca.
+          const subida = document.createElement("div");
+          subida.className = "estrellas-suben";
+          subida.innerHTML = Array.from({ length: Math.min(24, total) }, (_, k) => `<i style="left:${8 + Math.random() * 84}%;animation-delay:${k * 50}ms"></i>`).join("") +
+            `<b>${plural(total, "estrella sube", "estrellas suben")} al cielo de la Liga</b>`;
+          arena.appendChild(subida);
+          Sonido.tocar("velaMagia");
+          fin = setTimeout(() => terminar(total), 1800);
+        });
       });
-      return () => { vivo = false; quitar(); parar(); cancelAnimationFrame(raf); resize.disconnect(); arena.removeEventListener("pointerdown", mover); arena.removeEventListener("pointermove", mover); };
+      let fin = 0;
+      return () => { vivo = false; quitar(); parar(); clearTimeout(fin); cancelAnimationFrame(raf); resize.disconnect(); arena.removeEventListener("pointerdown", mover); arena.removeEventListener("pointermove", mover); };
+    },
+    // En el centro de mando: las estrellas de todos encienden la constelación de Salvador.
+    hostExtra() {
+      return `<section class="constelacion"><span class="es-kicker">EL CIELO DE LA LIGA</span><svg viewBox="0 0 100 100" aria-hidden="true" data-vivo="constelacion">${constelacionSVG(0)}</svg>` +
+        `<p class="es-total"><b data-vivo="es-total">0</b> estrellas atrapadas entre todos</p><p class="es-falta" data-vivo="es-falta"></p></section>`;
+    },
+    hostVivo(ctx, raiz) {
+      const res = (ctx.mj && ctx.mj.res) || {};
+      const total = Object.entries(res).filter(([id]) => ctx.S.agentes[id]).reduce((a, [, r]) => a + (Number(r.v) || 0), 0);
+      const porEstrella = Math.max(2, Math.round(agentesValidos(ctx.S.agentes).length * 16 / CONSTELACION.length));
+      const encendidas = Math.min(CONSTELACION.length, Math.floor(total / porEstrella));
+      const svg = $('[data-vivo="constelacion"]', raiz);
+      if (svg && svg.dataset.n !== String(encendidas)) {
+        const antes = Number(svg.dataset.n || 0);
+        svg.dataset.n = String(encendidas);
+        svg.innerHTML = constelacionSVG(encendidas, antes);
+        svg.closest(".constelacion").classList.toggle("completa", encendidas >= CONSTELACION.length);
+        if (encendidas > antes) Sonido.tocar(encendidas >= CONSTELACION.length ? "velaMagia" : "chispa", encendidas);
+      }
+      const t = $('[data-vivo="es-total"]', raiz); if (t && t.textContent !== String(total)) t.textContent = String(total);
+      const f = $('[data-vivo="es-falta"]', raiz);
+      if (f) { const txt = encendidas >= CONSTELACION.length ? "¡La constelación de Salvador brilla completa!" : `Faltan ${plural(CONSTELACION.length * porEstrella - total, "estrella", "estrellas")} para completar la constelación.`; if (f.textContent !== txt) f.textContent = txt; }
     },
   },
 };
+
+// La constelación de Salvador volando con el puño en alto (coordenadas en un cuadro de 100 × 100).
+const CONSTELACION = [
+  [38, 12], [42, 22], [50, 34], [58, 14], [64, 18], [64, 25], [58, 29], [52, 25], [52, 18], [66, 34], [74, 40], [80, 46],
+  [58, 43], [64, 52], [54, 54], [52, 70], [50, 84], [68, 68], [72, 82], [36, 46], [24, 62], [30, 64], [40, 60], [46, 50],
+];
+const LINEAS_CONSTELACION = [[0, 1], [1, 2], [3, 4], [4, 5], [5, 6], [6, 7], [7, 8], [8, 3], [2, 9], [9, 10], [10, 11], [2, 12], [9, 12], [12, 14], [12, 13], [13, 14],
+  [14, 15], [15, 16], [13, 17], [17, 18], [2, 19], [19, 20], [20, 21], [21, 22], [22, 23], [23, 2]];
+function constelacionSVG(n, antes) {
+  const lineas = LINEAS_CONSTELACION.filter(([a, b]) => a < n && b < n)
+    .map(([a, b]) => `<line x1="${CONSTELACION[a][0]}" y1="${CONSTELACION[a][1]}" x2="${CONSTELACION[b][0]}" y2="${CONSTELACION[b][1]}"${Math.max(a, b) >= (antes || 0) ? ' class="nueva"' : ""}/>`).join("");
+  const fondo = Array.from({ length: 40 }, (_, k) => `<circle class="polvo" cx="${(k * 37) % 100}" cy="${(k * 61) % 100}" r="${k % 5 ? 0.25 : 0.45}"/>`).join("");
+  const puntos = CONSTELACION.map(([x, y], k) => `<circle class="${k < n ? "luz" + (k >= (antes || 0) ? " nueva" : "") : "apagada"}" cx="${x}" cy="${y}" r="${k < n ? 1.4 : 0.8}"/>`).join("");
+  return fondo + `<g class="lineas">${lineas}</g>${puntos}`;
+}
 
 // La torta de cumpleaños con la vela del 1 (dibujo propio).
 function tortaSVG() {
@@ -5011,9 +5172,11 @@ function tipoSolo(id) {
           `<p>Cada agente juega una vez. Se cierra sola cuando termina el tiempo.</p>` +
           `<div class="mecha-fila"><div class="mecha"><i></i></div><span class="segundos" data-vivo="tiempo"></span></div>` +
           `<div class="fila"><button class="boton blanco" data-accion="mas-tiempo">+1 minuto</button><button class="boton rojo" data-accion="cerrar-ya">Cerrar y dar puntos</button></div></section>` +
+          (mj.hostExtra ? mj.hostExtra(ctx) : "") +
           `<section class="pagina"><span class="cap">Marcas</span><div data-vivo="tabla"></div></section>`;
       },
       actualizar(ctx, raiz) {
+        if (mj.hostVivo) mj.hostVivo(ctx, raiz);
         const queda = ctx.m.cierra - ctx.ahora(), total = ctx.m.cierra - ctx.m.abierta;
         const i = $(".mecha i", raiz); if (i) i.style.width = clamp((queda / total) * 100, 0, 100) + "%";
         const t = $('[data-vivo="tiempo"]', raiz); if (t) t.textContent = reloj(queda);
@@ -5846,102 +6009,8 @@ TIPOS.ultimo = {
 
 /* ---------- Carrera de la Liga ---------- */
 const PASOS_META = 150;
-TIPOS.carrera = {
-  id: "carrera", nombre: "Carrera de la Liga", icono: "bandera", cat: "celular", usaSala: true,
-  resumen: "Todos corren a la vez tocando dos botones alternados.",
-  ayuda: "Toca los botones izquierdo y derecho alternados para correr. En la pantalla ves a todos los corredores en vivo. Gana quien llegue primero a la meta.",
-  campos: [],
-  empezar(ctx) {
-    const corredores = listosDe(ctx);
-    if (!corredores.length) { avisar("Primero tiene que haber agentes listos."); return false; }
-    const inicio = ctx.ahora() + 4200;
-    ctx.T.actualizar("mision", { fase: "juego", sub: { inicio, limite: inicio + 100000, corredores } });
-    return true;
-  },
-  progreso(ctx) {
-    const s = ctx.m.sub, pasos = (ctx.mj && ctx.mj.pasos) || {}, llegada = (ctx.mj && ctx.mj.llegada) || {};
-    return s.corredores.filter((id) => ctx.S.agentes[id]).map((id) => ({ id, pasos: llegada[id] ? PASOS_META : Number(pasos[id]) || 0, llegada: Number(llegada[id]) || 0 }))
-      .sort((a, b) => (a.llegada && b.llegada ? a.llegada - b.llegada : a.llegada ? -1 : b.llegada ? 1 : b.pasos - a.pasos));
-  },
-  pista(ctx, yo) {
-    const lista = this.progreso(ctx);
-    let mostrar = lista.slice(0, 6);
-    if (yo && !mostrar.find((c) => c.id === yo)) { const mio = lista.find((c) => c.id === yo); if (mio) mostrar = mostrar.slice(0, 5).concat([mio]); }
-    const resto = lista.length - mostrar.length;
-    return `<div class="pista"><div class="meta-salva"><span>¡Salvador te espera en la meta!</span>${caraSalvadorHTML("cara-meta")}</div>${mostrar.map((c) => `<div class="carril ${c.id === yo ? "yo" : ""}"><span class="meta"></span><div class="corredor" style="left:calc(${(c.pasos / PASOS_META) * 100}% - ${(c.pasos / PASOS_META) * 96}px)">${poderHTML(poderDeAgente(ctx.S, c.id))}<span>${esc(nombreDe(ctx.S, c.id))}</span></div></div>`).join("")}</div>` +
-      (resto > 0 ? `<p class="nota centro">y ${plural(resto, "corredor más", "corredores más")}</p>` : "");
-  },
-  cerrar(ctx) {
-    const entradas = this.progreso(ctx).map((c) => ({ id: c.id, v: c.llegada ? c.llegada : 1e9 - c.pasos, llegada: c.llegada, pasos: c.pasos }));
-    const l = rankear(entradas, true, 1);
-    const mejor = Math.min(...l.filter((e) => e.llegada).map((e) => e.llegada), Infinity);
-    l.forEach((e) => { e.pts = e.llegada ? Math.round(10 + 90 * mejor / e.llegada) : Math.round(10 + 40 * e.pasos / PASOS_META); });
-    ctx.premiar(l.map((e) => ({ id: e.id, pos: e.pos, pts: e.pts, txt: e.llegada ? `${(e.llegada / 1000).toFixed(1).replace(".", ",")} s` : `${e.pasos} de ${PASOS_META} pasos` })));
-  },
-  host: {
-    clave() { return "carrera"; },
-    html() { return `<section class="pagina"><span class="cap" data-vivo="estado">En sus marcas</span><div data-vivo="pista"></div><button class="boton blanco" data-accion="cerrar-ya">Terminar y dar puntos</button></section>`; },
-    actualizar(ctx, raiz) {
-      const s = ctx.m.sub, ahora = ctx.ahora();
-      const e = $('[data-vivo="estado"]', raiz);
-      if (e) e.textContent = ahora < s.inicio ? `Arranca en ${Math.ceil((s.inicio - ahora) / 1000)}` : `Carrera · ${reloj(ahora - s.inicio)}`;
-      const p = $('[data-vivo="pista"]', raiz);
-      if (p) { const h = TIPOS.carrera.pista(ctx, null); if (p.dataset.h !== h) { p.dataset.h = h; p.innerHTML = h; } }
-    },
-    click(accion, el, ctx) { if (accion === "cerrar-ya") ctx.cerrarMision(); },
-    tic(ctx) {
-      const s = ctx.m.sub, ahora = ctx.ahora();
-      const lista = TIPOS.carrera.progreso(ctx);
-      if (ahora > s.limite || (lista.length && lista.every((c) => c.llegada))) ctx.cerrarMision();
-    },
-  },
-  jugador: {
-    clave(ctx) { const s = ctx.m.sub; return s.corredores.includes(ctx.yo) ? "corre" : "mira"; },
-    html(ctx) {
-      const corre = ctx.m.sub.corredores.includes(ctx.yo);
-      return `<p class="centro"><span class="cap" data-vivo="estado">En sus marcas</span></p><div data-vivo="pista"></div>` +
-        (corre ? `<div class="pies"><button class="pie" data-pie="0" disabled>Izquierdo</button><button class="pie" data-pie="1" disabled>Derecho</button></div>` : `<p class="centro">Esta carrera empezó sin ti. ¡Mira cómo van!</p>`);
-    },
-    actualizar(ctx, raiz) {
-      const s = ctx.m.sub, ahora = ctx.ahora(), L = ctx.local;
-      const llegue = ((ctx.mj && ctx.mj.llegada) || {})[ctx.yo];
-      const e = $('[data-vivo="estado"]', raiz);
-      if (e) e.textContent = llegue ? `¡Llegaste! ${(llegue / 1000).toFixed(1).replace(".", ",")} s` : ahora < s.inicio ? `Arranca en ${Math.ceil((s.inicio - ahora) / 1000)}` : "¡CORRE!";
-      const p = $('[data-vivo="pista"]', raiz);
-      if (p) { const h = TIPOS.carrera.pista(ctx, ctx.yo); if (p.dataset.h !== h) { p.dataset.h = h; p.innerHTML = h; } }
-      const pies = $$(".pie", raiz);
-      if (!pies.length) return;
-      const activo = ahora >= s.inicio && ahora < s.limite && !llegue;
-      pies.forEach((b) => { if (b.disabled === activo) b.disabled = !activo; });
-      if (activo && !L.arranque) { L.arranque = performance.now() - (ahora - s.inicio); L.pasos = 0; L.ultimo = 1; }
-      if (!L.enlazado) {
-        L.enlazado = true;
-        raiz.addEventListener("pointerdown", (ev) => {
-          const b = ev.target.closest(".pie");
-          if (!b || b.disabled) return;
-          ev.preventDefault();
-          const lado = Number(b.dataset.pie);
-          if (lado === L.ultimo) return;
-          L.ultimo = lado;
-          L.pasos = (L.pasos || 0) + 1;
-          b.classList.add("toca");
-          setTimeout(() => b.classList.remove("toca"), 70);
-          if (L.pasos >= PASOS_META && !L.llego) {
-            L.llego = true;
-            const ms = Math.round(tiempoEvento(ev) - L.arranque);
-            ctx.T.escribir(`mj/${ctx.m.id}/llegada/${ctx.yo}`, ms);
-            ctx.T.escribir(`mj/${ctx.m.id}/pasos/${ctx.yo}`, PASOS_META);
-            vibrar([40, 60, 40]);
-            Sonido.tocar("exito");
-          } else if (!L.enviando) {
-            L.enviando = true;
-            setTimeout(() => { L.enviando = false; if (!L.llego) ctx.T.escribir(`mj/${ctx.m.id}/pasos/${ctx.yo}`, L.pasos); }, 220);
-          }
-        });
-      }
-    },
-  },
-};
+TIPOS.carrera = tipoCarrera(); // Gran Premio de Barranco (carrera.js)
+TIPOS.zzz = tipoZzz(); // Un, dos, tres… ¡Zzz! (zzz.js)
 
 /* ---------- Charadas ---------- */
 TIPOS.charadas = {
@@ -6195,6 +6264,20 @@ function opcionesBomba(b) {
   return { q, opciones: orden.map((i) => q.opciones[i]), correcta: orden.indexOf(q.correcta) };
 }
 const PUNTOS_BOMBA = 50;
+// El tic-tac se acelera con el tiempo que lleva encendida la bomba (no con lo que falta: eso nadie lo sabe).
+function ritmoBomba(s, ahora) { return Math.round(clamp(650 - (ahora - (s.inicio || ahora)) / 60000 * 420, 230, 650)); }
+// La bomba con la mecha encendida: la chispa chisporrotea y el cuerpo brilla.
+function bombaSVG(clase) {
+  return `<svg class="bm-bomba ${clase || ""}" viewBox="0 0 120 120" aria-hidden="true">` +
+    `<defs><radialGradient id="bmCuerpo" cx="38%" cy="34%" r="70%"><stop offset="0" stop-color="#5a6488"/><stop offset=".45" stop-color="#232a44"/><stop offset="1" stop-color="#07090f"/></radialGradient>` +
+    `<radialGradient id="bmChispa"><stop offset="0" stop-color="#fff"/><stop offset=".35" stop-color="#ffe066"/><stop offset="1" stop-color="#ff7a1a" stop-opacity="0"/></radialGradient></defs>` +
+    `<path class="bm-mecha" d="M74 30 C80 18 92 16 98 10" fill="none" stroke="#c9a26a" stroke-width="4" stroke-linecap="round" stroke-dasharray="3 3"/>` +
+    `<g class="bm-chispa"><circle cx="99" cy="9" r="12" fill="url(#bmChispa)"/><path d="M99 0v18M90 9h18M93 3l12 12M105 3 93 15" stroke="#fff6c4" stroke-width="2" stroke-linecap="round"/></g>` +
+    `<rect x="62" y="26" width="18" height="14" rx="3" transform="rotate(35 71 33)" fill="#3a4160" stroke="#07090f" stroke-width="3"/>` +
+    `<circle cx="56" cy="70" r="40" fill="url(#bmCuerpo)" stroke="#07090f" stroke-width="4"/>` +
+    `<ellipse cx="42" cy="54" rx="11" ry="7" fill="#ffffff55" transform="rotate(-30 42 54)"/>` +
+    `<text x="56" y="80" text-anchor="middle" font-family="Luckiest Guy, Bangers, Impact, sans-serif" font-size="26" fill="#ff5a3c">LIGA</text></svg>`;
+}
 TIPOS.bomba = {
   id: "bomba", nombre: "La bomba de la Liga", icono: "bomba", cat: "fiesta", usaSala: true,
   resumen: "Papa caliente con preguntas: respóndela bien para que la bomba salte a otro. A quien le explota, pierde puntos.",
@@ -6240,14 +6323,30 @@ TIPOS.bomba = {
     clave(ctx) { const s = ctx.m.sub; return `${s.k}:${s.estado}`; },
     html(ctx) {
       const s = ctx.m.sub;
-      if (s.estado === "pausa") return `<section class="pagina"><span class="cap">¡BOOM!</span><h2 class="titulo chico">Le explotó a ${esc(nombreDe(ctx.S, s.victimas["b" + s.k]))}</h2><p>Pierde ${PUNTOS_BOMBA} puntos. ${s.k < 3 ? "La siguiente bomba sale en unos segundos." : "Fue la última bomba."}</p></section>`;
-      return `<section class="pagina"><span class="cap">Bomba ${s.k} de 3</span><p data-vivo="quien"></p><p class="suave">Explota sola en un momento al azar. Puedes leer la pregunta en voz alta para darle suspenso.</p><div data-vivo="pregunta"></div>` +
+      if (s.estado === "pausa") {
+        return `<section class="bm-tv bm-explota"><div class="bm-fogonazo" aria-hidden="true"></div><div class="bm-hongo" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>` +
+          `<div class="bm-cartel"><span>¡BOOM!</span><b>${esc(nombreDe(ctx.S, s.victimas["b" + s.k]))}</b><small>pierde ${PUNTOS_BOMBA} puntos · ${s.k < 3 ? "la siguiente bomba sale en unos segundos" : "fue la última bomba"}</small></div></section>`;
+      }
+      return `<section class="bm-tv"><span class="bm-kicker">BOMBA ${s.k} DE 3 · EXPLOTA EN UN MOMENTO QUE NADIE CONOCE</span>${bombaSVG("grande")}` +
+        `<p class="bm-tiene">La tiene <b data-vivo="quien"></b></p><ol class="bm-cadena" data-vivo="cadena"></ol></section>` +
+        `<section class="pagina"><span class="cap">Pregunta (léela en voz alta para dar suspenso)</span><div data-vivo="pregunta"></div>` +
         `<button class="boton blanco" data-accion="cerrar-ya">Terminar y dar puntos</button></section>`;
     },
     actualizar(ctx, raiz) {
-      const b = (ctx.mj && ctx.mj.bomba) || {};
+      const b = (ctx.mj && ctx.mj.bomba) || {}, s = ctx.m.sub, L = ctx.local, ahora = ctx.ahora();
       const q = $('[data-vivo="quien"]', raiz);
-      if (q) { const h = `La tiene: <b>${esc(nombreDe(ctx.S, b.holder))}</b>`; if (q.dataset.h !== h) { q.dataset.h = h; q.innerHTML = h; } }
+      if (q) { const h = esc(nombreDe(ctx.S, b.holder)); if (q.dataset.h !== h) { q.dataset.h = h; q.innerHTML = h; q.classList.remove("bm-llega"); void q.offsetWidth; q.classList.add("bm-llega"); } }
+      // La cadena de pases de esta bomba, para que todos vean por dónde anduvo.
+      if (s.estado === "bomba" && b.holder && b.k === s.k) {
+        L.cadena = L.cadena && L.cadena.k === s.k ? L.cadena : { k: s.k, ids: [] };
+        if (L.cadena.ids[L.cadena.ids.length - 1] !== b.holder) L.cadena.ids.push(b.holder);
+        const c = $('[data-vivo="cadena"]', raiz);
+        if (c) { const h = L.cadena.ids.slice(-7).map((id) => `<li>${esc(nombreDe(ctx.S, id))}</li>`).join(""); if (c.dataset.h !== h) { c.dataset.h = h; c.innerHTML = h; } }
+        // El centro de mando también hace tic-tac, cada vez más rápido.
+        if (ahora >= s.inicio && ahora < s.explota && (!L.tic || performance.now() - L.tic > ritmoBomba(s, ahora))) { L.tic = performance.now(); Sonido.tocar("tictac"); }
+        const bomba = $(".bm-bomba", raiz);
+        if (bomba) bomba.style.setProperty("--bm-ritmo", `${ritmoBomba(s, ahora)}ms`);
+      }
       const p = $('[data-vivo="pregunta"]', raiz);
       if (p && b.q !== undefined) {
         const { q: preg, opciones, correcta } = opcionesBomba(b);
@@ -6283,35 +6382,42 @@ TIPOS.bomba = {
     html(ctx) {
       const s = ctx.m.sub, b = (ctx.mj && ctx.mj.bomba) || {};
       if (!s.jugadores.includes(ctx.yo)) return `<section class="pagina"><span class="cap">En curso</span><p>Esta misión empezó sin ti. ¡Ponte a salvo de la bomba!</p></section><button class="boton bloque" data-accion="cuartel">Volver al cuartel</button>`;
-      const dibujo = `<svg class="bomba tiembla" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11.3" fill="#ffd21f" stroke="#16130f" stroke-width="1"/><g transform="translate(3.6 3.4) scale(0.7)"><path d="${ICONOS.bomba}" fill="#16130f" fill-rule="evenodd"/></g></svg>`;
       if (s.estado === "pausa" || ctx.ahora() >= s.explota) {
         const victima = s.estado === "pausa" ? s.victimas["b" + s.k] : b.holder;
         const yo = victima === ctx.yo;
-        return `<div class="estallido rojo"><div><strong>¡BOOM!</strong><b>${yo ? "¡A ti!" : esc(nombreDe(ctx.S, victima))}</b></div></div>` +
-          `<p class="centro">${yo ? `Te explotó en las manos: pierdes ${PUNTOS_BOMBA} puntos.` : `Le explotó a ${esc(nombreDe(ctx.S, victima))}: pierde ${PUNTOS_BOMBA} puntos. ¡Tú te salvaste!`}</p>` +
+        return `<section class="bm-tv bm-explota${yo ? " bm-mia" : ""}"><div class="bm-fogonazo" aria-hidden="true"></div><div class="bm-hongo" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>` +
+          (yo ? `<div class="bm-tizne" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>` : "") +
+          `<div class="bm-cartel"><span>¡BOOM!</span><b>${yo ? "¡En tus manos!" : esc(nombreDe(ctx.S, victima))}</b>` +
+          `<small>${yo ? `Cof, cof… pierdes ${PUNTOS_BOMBA} puntos.` : `Le explotó a ${esc(nombreDe(ctx.S, victima))}: pierde ${PUNTOS_BOMBA} puntos. ¡Tú te salvaste!`}</small></div></section>` +
           `<p class="centro nota">${s.k < 3 ? "Atento: viene otra bomba." : "Esa fue la última bomba."}</p>`;
       }
       if (b.q === undefined) return `<p class="centro latido">Encendiendo la mecha…</p>`;
       const { q, opciones } = opcionesBomba(b);
       if (b.holder === ctx.yo) {
         const castigo = (ctx.local.castigo || 0) > Date.now();
-        return `<div class="alarma-bomba"><div class="estallido rojo latido"><div><strong>¡TIENES LA BOMBA!</strong></div></div>${dibujo}</div>` +
+        return `<div class="alarma-bomba bm-mia-ahora"><span class="bm-kicker">¡TIENES LA BOMBA!</span>${bombaSVG("tiembla")}<span class="bm-sub">Respóndela bien y se va a otro</span></div>` +
           `<section class="pagina"><span class="cap roja">¡Respóndela y se va!</span><p class="pregunta-texto">${esc(q.pregunta)}</p>` +
           `<div class="opciones">${opciones.map((t, i) => `<button class="opcion" data-o="${i}" data-accion="responder-bomba"${castigo ? " disabled" : ""}>${FORMAS_OPCION[i]}<span>${esc(t)}</span></button>`).join("")}</div>` +
           `<p class="error" data-vivo="error" role="alert">${castigo ? "¡Incorrecto! Ya te toca otra pregunta…" : ""}</p></section>`;
       }
-      return `<section class="pagina"><span class="cap">Bomba ${s.k} de 3</span><p>La tiene <b>${esc(nombreDe(ctx.S, b.holder))}</b>. Está respondiendo:</p>` +
+      const vuela = b.de && ctx.ahora() - (b.t || 0) < 1500;
+      return `<section class="bm-tv bm-mira"><span class="bm-kicker">BOMBA ${s.k} DE 3</span>${bombaSVG(vuela ? "vuela" : "")}<p class="bm-tiene">${vuela ? "La bomba voló a" : "La tiene"} <b>${esc(nombreDe(ctx.S, b.holder))}</b></p></section>` +
+        `<section class="pagina"><span class="cap">Está respondiendo</span>` +
         `<p class="pregunta-texto">${esc(q.pregunta)}</p><div class="opciones mirando">${opciones.map((t, i) => `<div class="opcion" data-o="${i}">${FORMAS_OPCION[i]}<span>${esc(t)}</span></div>`).join("")}</div></section>` +
-        `${dibujo}<p class="centro nota">Si la bomba te cae a ti, tu celular suena.</p>`;
+        `<p class="centro nota">Si la bomba te cae a ti, tu celular suena.</p>`;
     },
     actualizar(ctx) {
-      const s = ctx.m.sub, b = (ctx.mj && ctx.mj.bomba) || {};
-      // Mientras tengas la bomba, suena un tic-tac (no depende de la vibración, que los iPhone no tienen).
-      if (b.holder === ctx.yo && s.estado === "bomba" && ctx.ahora() < s.explota && ctx.ahora() >= s.inicio) {
-        const L = ctx.local;
-        if (!L.tic || performance.now() - L.tic > 650) { L.tic = performance.now(); Sonido.tocar("tictac"); }
+      const s = ctx.m.sub, b = (ctx.mj && ctx.mj.bomba) || {}, ahora = ctx.ahora();
+      // Mientras tengas la bomba, suena un tic-tac cada vez más rápido y la pantalla late en rojo.
+      const tengo = b.holder === ctx.yo && s.estado === "bomba" && ahora < s.explota && ahora >= s.inicio;
+      if (tengo) {
+        const L = ctx.local, ritmo = ritmoBomba(s, ahora);
+        if (!L.tic || performance.now() - L.tic > ritmo) { L.tic = performance.now(); Sonido.tocar("tictac"); if (ritmo < 400) vibrar(30); }
+        ctx.raiz.style.setProperty("--bm-ritmo", `${ritmo}ms`);
       }
+      ctx.raiz.classList.toggle("bm-caliente", tengo);
     },
+    salir(ctx) { ctx.raiz.classList.remove("bm-caliente", "bm-sacude"); },
     click(accion, el, ctx) {
       if (accion !== "responder-bomba") return;
       const s = ctx.m.sub, b = (ctx.mj && ctx.mj.bomba) || {}, L = ctx.local;
@@ -6351,8 +6457,14 @@ TIPOS.bomba = {
       if (clave.startsWith("boom") || clave.startsWith("pausa")) {
         const s = ctx.m.sub;
         const v = s.estado === "pausa" ? s.victimas["b" + s.k] : ((ctx.mj || {}).bomba || {}).holder;
-        if (v === ctx.yo) vibrar(700);
-        if (!ctx.local["boom" + s.k]) { ctx.local["boom" + s.k] = true; Sonido.tocar("boom"); }
+        if (v === ctx.yo) vibrar([400, 80, 300, 80, 200]);
+        if (!ctx.local["boom" + s.k]) {
+          ctx.local["boom" + s.k] = true;
+          Sonido.tocar("boom");
+          ctx.raiz.classList.remove("bm-caliente");
+          ctx.raiz.classList.add("bm-sacude");
+          setTimeout(() => ctx.raiz.classList.remove("bm-sacude"), 700);
+        }
       }
     },
   },
@@ -6587,6 +6699,32 @@ async function pedirCartonBingo(T, mid, sub, id) {
   // Sin turnos libres (muchísimos jugadores): cartón al azar.
   return T.escribir(`mj/${mid}/carton/${id}`, barajar(sec.slice()).slice(0, 8));
 }
+// La carta holográfica del superhéroe cantado (cada héroe tiene su color).
+function cartaBingoHTML(i, n) {
+  const nombre = HEROES_BINGO[i] || "";
+  return `<div class="bg-carta" style="--bg-h:${hash(nombre) % 360}"><span class="bg-holo" aria-hidden="true"></span>` +
+    `<span class="bg-num">CANTO ${n}</span><span class="bg-inicial" aria-hidden="true">${esc(nombre.replace(/^(El |La |Ms\. |Mr\. )/, "").charAt(0))}</span>` +
+    `<b>${esc(nombre)}</b><small>¡Márcalo si está en tu cartón!</small></div>`;
+}
+// La animación del canto se juega una vez: después la carta queda quieta aunque se repinte la pantalla.
+function apagarRecienBingo(ctx, raiz) {
+  const el = raiz && $(".recien", raiz);
+  if (!el || el.dataset.apagando) return;
+  el.dataset.apagando = "1";
+  setTimeout(() => el.classList.remove("recien"), Math.max(0, (ctx.m.sub.tUltimo || 0) + 2500 - ctx.ahora()));
+}
+// Suspenso: quiénes están a una casilla del bingo.
+function pintarSuspensoBingo(ctx, el, yo) {
+  if (!el) return;
+  const marcas = (ctx.mj && ctx.mj.marcas) || {}, llenos = (ctx.mj && ctx.mj.lleno) || {}, cartones = (ctx.mj && ctx.mj.carton) || {};
+  const cerca = Object.keys(cartones).filter((id) => ctx.S.agentes[id] && !llenos[id] && Object.keys(marcas[id] || {}).length === 7);
+  const otros = cerca.filter((id) => id !== yo);
+  let h = "";
+  if (Object.keys(llenos).length) h = "";
+  else if (!yo && cerca.length) h = `<b>${cerca.length === 1 ? "¡UN HÉROE A UNA CASILLA!" : `¡${cerca.length} HÉROES A UNA CASILLA!`}</b><span>${cerca.slice(0, 6).map((id) => esc(nombreDe(ctx.S, id))).join(" · ")}</span>`;
+  else if (yo && otros.length) h = `<span>${otros.length === 1 ? `${esc(nombreDe(ctx.S, otros[0]))} está a una casilla` : `${otros.length} héroes están a una casilla`}</span>`;
+  if (el.dataset.h !== h) { el.dataset.h = h; el.innerHTML = h; el.classList.toggle("activo", !!h); }
+}
 TIPOS.bingo = {
   id: "bingo", nombre: "Bingo de la Liga", icono: "bingo", cat: "fiesta",
   resumen: "Tú cantas superhéroes y ellos los marcan en su cartón. El centro es Salvador.",
@@ -6626,14 +6764,29 @@ TIPOS.bingo = {
     clave(ctx) { return `bingo:${(ctx.m.sub.cantadas || []).length}`; },
     html(ctx) {
       const s = ctx.m.sub, ya = s.cantadas || [];
-      const ultimo = ya.length ? HEROES_BINGO[s.ultimo] : null;
-      return `<section class="pagina"><span class="cap">Cantados: ${ya.length} de ${HEROES_BINGO.length}</span>` +
-        (ultimo ? `<p class="suave">Léelo en voz alta:</p><p class="cantado">${esc(ultimo)}</p>` : `<p>Toca «¡Cantar!» y lee en voz alta el superhéroe que salga.</p>`) +
-        (s.modo === "auto" ? `<p class="suave">Modo automático: sale uno cada 10 segundos.</p>` : `<button class="boton rojo grande" data-accion="cantar">¡Cantar!</button>`) +
-        `<ul class="chips cantados">${ya.slice().reverse().map((i) => `<li><span>${esc(HEROES_BINGO[i])}</span></li>`).join("")}</ul></section>` +
+      // La tómbola gira y la carta se revela solo si el canto es de hace un momento.
+      const recien = ya.length && ctx.ahora() - (s.tUltimo || 0) < 2500;
+      return `<section class="bg-tv${recien ? " recien" : ""}">` +
+        `<div class="bg-escena"><div class="bg-tombola" aria-hidden="true"><div class="bg-bombo">${Array.from({ length: 9 }, (_, i) => `<i style="--i:${i}"></i>`).join("")}</div><span class="bg-eje"></span><span class="bg-bola"></span></div>` +
+        (ya.length ? cartaBingoHTML(s.ultimo, ya.length) : `<div class="bg-carta vacia"><b>¿Quién saldrá primero?</b><small>Toca «¡Cantar!» y lee en voz alta el superhéroe que salga.</small></div>`) +
+        `</div><div class="bg-suspenso" data-vivo="suspenso" aria-live="polite"></div>` +
+        `<div class="bg-celebra" data-vivo="celebra" hidden></div>` +
+        (s.modo === "auto" ? `<p class="bg-modo">Modo automático: sale uno cada 10 segundos.</p>` : `<button class="boton rojo grande bg-cantar" data-accion="cantar">¡Cantar!</button>`) +
+        `<div class="bg-tablero" aria-label="Superhéroes cantados: ${ya.length} de ${HEROES_BINGO.length}">${HEROES_BINGO.map((h, i) => `<span class="${ya.includes(i) ? "sale" : ""}${i === s.ultimo ? " ultimo" : ""}" style="--bg-h:${hash(h) % 360}">${esc(h)}</span>`).join("")}</div>` +
+        `<p class="bg-cuenta">${ya.length} de ${HEROES_BINGO.length} cantados</p></section>` +
         `<section class="pagina"><span class="cap">Cómo van</span><div data-vivo="lista"></div><button class="boton blanco" data-accion="cerrar-ya">Cerrar y dar puntos</button></section>`;
     },
     actualizar(ctx, raiz) {
+      apagarRecienBingo(ctx, raiz);
+      pintarSuspensoBingo(ctx, $('[data-vivo="suspenso"]', raiz), null);
+      const llenos = Object.entries((ctx.mj && ctx.mj.lleno) || {}).filter(([id]) => ctx.S.agentes[id]).sort((a, b) => a[1] - b[1]);
+      const cel = $('[data-vivo="celebra"]', raiz);
+      if (cel && llenos.length && cel.hidden) {
+        cel.hidden = false;
+        cel.innerHTML = `<div><span>¡BINGO!</span><b>${esc(nombreDe(ctx.S, llenos[0][0]))}</b><small>llenó su cartón</small></div>`;
+        Sonido.tocar("fanfarria");
+        confeti(raiz);
+      }
       const l = $('[data-vivo="lista"]', raiz);
       if (!l) return;
       const filas = rankear(TIPOS.bingo.tabla(ctx), true, 1).slice(0, 12).map((e) => ({ id: e.id, pos: e.pos, txt: e.lleno ? "¡BINGO!" : e.linea ? `línea · ${e.n}/8` : `${e.n}/8` }));
@@ -6673,14 +6826,20 @@ TIPOS.bingo = {
       for (let pos = 0, j = 0; pos < 9; pos++) {
         if (pos === 4) { celdas.push(`<div class="casilla centro marcada">${caraSalvadorHTML()}<span>Salvador</span></div>`); continue; }
         const h = carton[j++];
-        celdas.push(`<button class="casilla ${marcas["c" + pos] ? "marcada" : ""}" data-accion="marcar" data-pos="${pos}" data-h="${h}"><span>${esc(HEROES_BINGO[h])}</span></button>`);
+        const sello = marcas["c" + pos] && ctx.local.sello && ctx.local.sello.pos === pos && Date.now() - ctx.local.sello.t < 1500 ? " sello" : "";
+        celdas.push(`<button class="casilla ${marcas["c" + pos] ? "marcada" : ""}${sello}" data-accion="marcar" data-pos="${pos}" data-h="${h}"><span>${esc(HEROES_BINGO[h])}</span></button>`);
       }
-      const primero = Object.entries(llenos).sort((a, b) => a[1] - b[1])[0];
-      const cabeza = llenos[ctx.yo] ? `<div class="estallido"><div><strong>¡BINGO!</strong><b>¡Cartón lleno!</b></div></div>`
-        : primero ? `<div class="globo"><strong>¡BINGO de ${esc(nombreDe(ctx.S, primero[0]))}!</strong> El bingo está por cerrarse.</div>`
-          : lineas[ctx.yo] ? `<div class="globo"><strong>¡Línea!</strong> Sigue: gana quien llene el cartón.</div>` : "";
-      return cabeza + `<section class="pagina"><span class="cap">Cantaron</span><p class="cantado">${ya.length ? esc(HEROES_BINGO[s.ultimo]) : "Todavía nada"}</p><p class="suave">${ya.length} de ${HEROES_BINGO.length} cantados</p></section>` +
-        `<section class="pagina"><span class="cap">Tu cartón</span><div class="carton">${celdas.join("")}</div><p class="error" data-vivo="error" role="alert"></p></section>` +
+      const primero = Object.entries(llenos).filter(([id]) => ctx.S.agentes[id]).sort((a, b) => a[1] - b[1])[0];
+      const n = Object.keys(marcas).length;
+      const cabeza = llenos[ctx.yo] ? `<div class="bg-celebra yo"><div><span>¡BINGO!</span><b>¡Cartón lleno!</b><small>Eres el héroe del bingo</small></div></div>`
+        : primero ? `<div class="bg-celebra"><div><span>¡BINGO!</span><b>${esc(nombreDe(ctx.S, primero[0]))}</b><small>llenó su cartón. El bingo está por cerrarse.</small></div></div>`
+          : n === 7 ? `<div class="bg-falta-una"><b>¡TE FALTA UNA!</b><small>Atento al próximo canto</small></div>`
+            : lineas[ctx.yo] ? `<div class="globo"><strong>¡Línea!</strong> Sigue: gana quien llene el cartón.</div>` : "";
+      const recien = ya.length && ctx.ahora() - (s.tUltimo || 0) < 2000;
+      return cabeza + `<section class="bg-cantaron${recien ? " recien" : ""}"><span class="bg-kicker">Cantaron · ${ya.length} de ${HEROES_BINGO.length}</span>` +
+        (ya.length ? cartaBingoHTML(s.ultimo, ya.length) : `<div class="bg-carta vacia"><b>Todavía nada</b><small>Atento: el anfitrión está por cantar.</small></div>`) +
+        `<div class="bg-suspenso chico" data-vivo="suspenso"></div></section>` +
+        `<section class="pagina"><span class="cap">Tu cartón · ${n + 1} de 9</span><div class="carton">${celdas.join("")}</div><p class="error" data-vivo="error" role="alert"></p></section>` +
         `<button class="enlace" data-accion="cuartel">Volver al cuartel</button>`;
     },
     click(accion, el, ctx) {
@@ -6696,6 +6855,7 @@ TIPOS.bingo = {
         return;
       }
       const marcas = Object.assign({}, (((ctx.mj && ctx.mj.marcas) || {})[ctx.yo]) || {}, { ["c" + pos]: true });
+      ctx.local.sello = { pos, t: Date.now() };
       ctx.T.escribir(`mj/${ctx.m.id}/marcas/${ctx.yo}/c${pos}`, true);
       const e = estadoBingo(marcas);
       const lineas = (ctx.mj && ctx.mj.linea) || {}, llenos = (ctx.mj && ctx.mj.lleno) || {};
@@ -6703,10 +6863,22 @@ TIPOS.bingo = {
       else if (e.linea && !lineas[ctx.yo]) { ctx.T.escribir(`mj/${ctx.m.id}/linea/${ctx.yo}`, ctx.ahora()); vibrar([60, 40, 60]); Sonido.tocar("exito"); }
       else { vibrar(25); Sonido.tocar("toque"); }
     },
+    actualizar(ctx, raiz) { apagarRecienBingo(ctx, raiz); pintarSuspensoBingo(ctx, $('[data-vivo="suspenso"]', raiz), ctx.yo); },
     efectos(ctx, clave) {
       const n = (ctx.m.sub.cantadas || []).length;
-      if (ctx.local.cantadas !== undefined && n > ctx.local.cantadas) { Sonido.tocar("campana"); vibrar(40); }
+      const mias = Object.keys((((ctx.mj && ctx.mj.marcas) || {})[ctx.yo]) || {}).length;
+      if (ctx.local.cantadas !== undefined && n > ctx.local.cantadas) {
+        Sonido.tocar("campana");
+        // Si te falta una, el celular late como un corazón en cada canto.
+        vibrar(mias === 7 ? [60, 90, 60, 300, 60, 90, 60] : 40);
+      }
       ctx.local.cantadas = n;
+      const llenos = Object.keys((ctx.mj && ctx.mj.lleno) || {});
+      if (llenos.length && !ctx.local.celebrado) {
+        ctx.local.celebrado = true;
+        confeti(ctx.raiz);
+        if (!llenos.includes(ctx.yo)) Sonido.tocar("revelar");
+      }
       void clave;
     },
   },
@@ -6718,15 +6890,15 @@ const PASOS = {
   reflejos: ["Espera con el dedo listo: la pantalla está oscura.", "Cuando se ponga AMARILLA y aparezca Salvador, toca lo más rápido que puedas.", "Son 3 intentos. Si tocas antes de tiempo, ese intento vale 1 segundo."],
   supervelocidad: ["Espera la cuenta regresiva: 3, 2, 1.", "Toca ¡VUELA! sin parar durante 10 segundos: cada toque sube a Salvador 10 metros.", "Gana quien lo haga volar más alto."],
   cuanto: ["Lee la pregunta.", "Escribe tu número y envíalo. Puedes cambiarlo hasta que se cierre.", "Gana quien quede más cerca del número real."],
-  villano: ["Se asoman personajes por las ventanas durante 20 segundos.", "Toca a los villanos (antifaz negro): suman 1.", "¡A Salvador no! Si tocas su carita, resta 1."],
+  villano: ["Se asoman personajes por las ventanas durante 20 segundos. Toca a los villanos: suman 1; el dorado, con corona, vale 5.", "Encadena villanos sin fallar: con 5 seguidos cada uno vale 2 y con 10, vale 3. ¡A Salvador no! Si tocas su carita, resta 1.", "En los últimos 5 segundos hay un apagón: solo ves lo que alumbra tu dedo."],
   reloj: ["El reloj arranca y se esconde a los 3 segundos.", "Sigue contando en tu cabeza.", "Toca ¡SOPLA! cuando creas que van 10 segundos exactos: gana quien sopla más justo."],
   memoria: ["Mira el orden en que se encienden las caras de Salvador.", "Repítelo tocándolas en el mismo orden.", "Cada ronda suma una más. Un error y se acaba."],
   rescate: ["Revienta el globo 1, luego el 2, el 3…", "Llega hasta el 20 lo más rápido que puedas.", "Cada globo equivocado suma 1 segundo."],
   capa: ["Salvador aparece unos segundos y desaparece.", "Fíjate dónde está el escudo de su pecho.", "Toca donde estaba. Son 3 intentos."],
   impostor: ["Todas las caras de Salvador son iguales menos una.", "Encuéntrala y tócala: una foto entre dibujos, un dibujo entre fotos, una cara al revés…", "Son 5 niveles. Cada error suma 2 segundos."],
-  estrellas: ["Arrastra el dedo para mover a Salvador.", "Atrapa las estrellas: suman 1.", "Esquiva las bombas: restan 3. Dura 25 segundos."],
+  estrellas: ["Arrastra el dedo para mover a Salvador.", "Atrapa las estrellas: suman 1. Esquiva las bombas: restan 3. Dura 25 segundos.", "Las estrellas de todos se juntan en el centro de mando y encienden la constelación de Salvador."],
   ultimo: ["Espera con el dedo listo: la pantalla está oscura.", "Cuando se ponga AMARILLA y aparezca Salvador, toca.", "Los más lentos de cada ronda quedan fuera. Si tocas antes de tiempo, te avisamos una vez; la segunda, quedas fuera."],
-  carrera: ["Cuando arranque, toca IZQUIERDO y DERECHO, alternando.", "Cada toque alternado es un paso.", "Salvador te espera en la meta, a 150 pasos. ¡Gana quien llega primero!"],
+  carrera: ["Cuando arranque, toca IZQ y DER, alternando: cada toque es un paso por el malecón de Barranco.", "Hay 3 obstáculos. Toca ¡SALTA! justo cuando el anillo se cierre: si es perfecto, sales disparado.", "Tu poder te da un impulso una sola vez. Salvador te espera en la meta, a 150 pasos."],
   foto: ["Lee el reto de foto.", "Ve al lugar, toca Tomar foto y luego Enviar.", "El primero en llegar gana más puntos."],
   charadas: ["Mira la mímica del anfitrión.", "Escribe la palabra en tu celular y envíala, sin decirla en voz alta.", "El primero en escribirla bien gana la ronda."],
   agente: ["Mantén presionado para ver tu misión secreta: nadie más debe verla.", "Cúmplela sin que se note.", "Toca ¡Misión cumplida!: tu objetivo lo confirma en su celular."],
@@ -6742,7 +6914,7 @@ for (const [id, p] of Object.entries(PRACTICA_DE)) if (TIPOS[id]) TIPOS[id].prac
 
 const CATEGORIAS = [
   { id: "celular", titulo: "En el celular", tipos: ["trivia", "relampago", "reflejos", "supervelocidad", "cuanto", "villano", "reloj", "memoria", "rescate", "capa", "impostor", "estrellas", "ultimo", "carrera"] },
-  { id: "fiesta", titulo: "En la fiesta", tipos: ["foto", "charadas", "agente", "duo", "bingo", "infiltrado", "bomba"] },
+  { id: "fiesta", titulo: "En la fiesta", tipos: ["foto", "charadas", "agente", "duo", "bingo", "infiltrado", "bomba", "zzz"] },
 ];
 
 /* =====================================================================
@@ -6982,34 +7154,6 @@ const PRACTICAS = {
     arena.addEventListener("pointerdown", toque);
     return () => { clearTimeout(espera); clearTimeout(vuelta); arena.removeEventListener("pointerdown", toque); };
   },
-  // Alternar izquierdo y derecho.
-  carrera(el) {
-    const META = 20;
-    el.innerHTML = `<div class="medidor"><i></i><b>0 de ${META} pasos</b></div><div class="pies mini"><button class="pie" data-p-pie="0">Izquierdo</button><button class="pie" data-p-pie="1">Derecho</button></div>`;
-    const barra = $(".medidor i", el), rotulo = $(".medidor b", el);
-    let pasos = 0, ultimo = 1, pausa = false, vuelta = 0;
-    function toque(e) {
-      const b = e.target.closest("[data-p-pie]");
-      if (!b || pausa) return;
-      e.preventDefault();
-      const lado = Number(b.dataset.pPie);
-      b.classList.add("toca");
-      setTimeout(() => b.classList.remove("toca"), 70);
-      if (lado === ultimo) { rotulo.textContent = "¡Alterna! Izquierdo, derecho…"; return; }
-      ultimo = lado;
-      pasos++;
-      barra.style.width = (pasos / META) * 100 + "%";
-      rotulo.textContent = `${pasos} de ${META} pasos`;
-      if (pasos >= META) {
-        pausa = true;
-        rotulo.textContent = "¡Así se corre! En la carrera son 150 pasos";
-        Sonido.tocar("exito");
-        vuelta = setTimeout(() => { pasos = 0; ultimo = 1; pausa = false; barra.style.width = "0"; rotulo.textContent = `0 de ${META} pasos`; }, 2200);
-      }
-    }
-    el.addEventListener("pointerdown", toque);
-    return () => { clearTimeout(vuelta); el.removeEventListener("pointerdown", toque); };
-  },
   // Escribir el código de otro agente (dúo).
   codigo(el, ctx) {
     const yo = ctx.S.agentes[ctx.yo] || {};
@@ -7079,6 +7223,8 @@ const PRACTICAS = {
     return () => form.removeEventListener("submit", enviar);
   },
 };
+PRACTICAS.carrera = practicaCarrera; // alternar y saltar (carrera.js)
+PRACTICAS.zzz = practicaZzz; // avanzar y quedarse quieto (zzz.js)
 function montarPracticas(raiz, ctx, montadas) {
   $$("[data-practica]:not([data-montada])", raiz).forEach((el) => {
     const f = PRACTICAS[el.dataset.practica];
@@ -7148,7 +7294,7 @@ function crearBots(T, S, opc) {
     switch (tipo) {
       case "reflejos": v = Math.round(470 - 210 * s + azar(-35, 35)); break;
       case "supervelocidad": v = Math.round(38 + 42 * s + azar(-5, 5)); break;
-      case "villano": v = Math.max(0, Math.round(5 + 15 * s + azar(-3, 3))); break;
+      case "villano": v = Math.max(0, Math.round(8 + 40 * s + azar(-4, 4))); break; // con combos y dorados
       case "reloj": v = Math.round(Math.abs(azar(-1, 1)) * (950 - 880 * s)); break;
       case "memoria": v = Math.max(1, Math.round(3 + 7 * s + azar(-1, 1.4))); v2 = Math.round(v * azar(3200, 4800)); break;
       case "rescate": v = Math.round((36 - 18 * s + azar(-2.5, 2.5)) * 1000); break;
@@ -7281,6 +7427,31 @@ function crearBots(T, S, opc) {
         }
         return;
       }
+      case "zzz": {
+        if (ahora < sub.inicio) return;
+        const ll = mj.llegada || {}, f = faseZzz(sub, ahora);
+        for (const b of lista) {
+          if (!(sub.jugadores || []).includes(b.id) || ll[b.id]) continue;
+          const k = `zz:${m.id}:${b.id}`;
+          if (!toca(`${k}:${Math.floor((ahora - sub.inicio) / 500)}`, ahora, () => ahora)) continue;
+          const vel = cuando(`${k}:vel`, () => 0.55 + 0.45 * b.bot);
+          let p = Number((mj.p || {})[b.id]) || 0;
+          if (f.tipo === "duerme" || f.tipo === "cuenta") p += ZZZ_VELOCIDAD * 500 * vel;
+          // A veces un agente de prueba no frena a tiempo y el Doctor Siesta lo ve.
+          if (f.tipo === "mira" && f.t - f.desde > ZZZ_GRACIA && toca(`${k}:visto:${f.desde}`, ahora, () => (Math.random() < 0.35 * (1 - b.bot) ? ahora : null))) {
+            p = Math.max(0, p - ZZZ_CASTIGO);
+            T.escribir(`mj/${m.id}/vistos/${b.id}`, (Number((mj.vistos || {})[b.id]) || 0) + 1);
+            T.escribir(`mj/${m.id}/fx/${b.id}`, { k: "visto", t: ahora });
+          }
+          if (p >= 100) {
+            T.escribir(`mj/${m.id}/llegada/${b.id}`, Math.round(ahora - sub.inicio));
+            T.escribir(`mj/${m.id}/fx/${b.id}`, { k: "llego", t: ahora });
+            p = 100;
+          }
+          T.escribir(`mj/${m.id}/p/${b.id}`, Math.round(p * 10) / 10);
+        }
+        return;
+      }
       case "carrera": {
         if (ahora < sub.inicio) return;
         const llegada = mj.llegada || {};
@@ -7294,7 +7465,17 @@ function crearBots(T, S, opc) {
               T.escribir(`mj/${m.id}/llegada/${b.id}`, Math.round((PASOS_META / ritmo) * 1000));
               T.escribir(`mj/${m.id}/pasos/${b.id}`, PASOS_META);
             }
-          } else if (toca(`ca:${m.id}:${b.id}:${Math.floor(t / 400)}`, ahora, () => ahora)) T.escribir(`mj/${m.id}/pasos/${b.id}`, pasos);
+          } else if (toca(`ca:${m.id}:${b.id}:${Math.floor(t / 400)}`, ahora, () => ahora)) {
+            T.escribir(`mj/${m.id}/pasos/${b.id}`, pasos);
+            // Efectos para la transmisión: saltos en los obstáculos y el poder una vez.
+            GP_OBSTACULOS.forEach((o, i) => {
+              if (pasos >= o.p && toca(`ca:${m.id}:${b.id}:o${i}`, ahora, () => ahora)) {
+                const k = Math.random() < 0.25 + 0.5 * b.bot ? "perfecto" : Math.random() < 0.6 ? "salto" : "tropiezo";
+                T.escribir(`mj/${m.id}/fx/${b.id}`, { k, t: ahora, o: i });
+              }
+            });
+            if (pasos >= cuando(`ca:${m.id}:${b.id}:poderEn`, () => azarEntero(20, 110)) && toca(`ca:${m.id}:${b.id}:poder`, ahora, () => ahora)) T.escribir(`mj/${m.id}/fx/${b.id}`, { k: "poder", t: ahora });
+          }
         }
         return;
       }

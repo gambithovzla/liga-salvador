@@ -21,6 +21,7 @@ const ARTE_JUEGOS = {
   bingo: ["globos", "Completa tu cartón", "En la fiesta"],
   infiltrado: ["villano", "¿En quién confías?", "En la fiesta"],
   bomba: ["rayo", "Pásala a tiempo", "En la fiesta"],
+  zzz: ["villano", "Quieto cuando mira", "En la fiesta"],
 };
 
 function arteJuegoHTML(id, iconoNombre) {
