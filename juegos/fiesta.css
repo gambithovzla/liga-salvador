@@ -193,3 +193,24 @@
   .bm-fogonazo { display:none; }
   .bm-hongo i { opacity:.5; }
 }
+
+/* ===================== Atrapa al villano ===================== */
+.villano-combo {
+  position:absolute; z-index:6; left:50%; top:12px; transform:translateX(-50%); white-space:nowrap; pointer-events:none;
+  font:24px/1 "Luckiest Guy", "Bangers", Impact, sans-serif; color:#ffd968; -webkit-text-stroke:2px #16130f; paint-order:stroke fill; text-shadow:0 3px 0 #16130f;
+}
+.villano-combo.caliente { color:#ff7a3c; text-shadow:0 3px 0 #16130f, 0 0 18px #ff7a3c; }
+.villano-combo.pulso { animation:vl-pulso .3s cubic-bezier(.2, 1.8, .4, 1); }
+.ventana[data-quien="dorado"] { box-shadow:inset 0 0 24px #ffd968, 0 0 18px #ffd96899; }
+.ventana[data-quien="dorado"] .quien svg { filter:drop-shadow(0 0 6px #fff3a0); }
+.ventana.golpe-oro { background:#fff3a0; box-shadow:0 0 30px #ffd968; }
+.villano-apagon {
+  --lx:50%; --ly:50%;
+  position:absolute; inset:0; z-index:2; pointer-events:none; opacity:0; transition:opacity .35s;
+  background:radial-gradient(circle at var(--lx) var(--ly), transparent 0 58px, #02040cdd 92px, #02040cf5 170px);
+}
+.villano-arena.apagado .villano-apagon { opacity:1; }
+.villano-arena .arena-reloj, .villano-arena .arena-marcador, .villano-arena .flota { z-index:6; }
+.villano-arena.apagado .ventana.arriba .quien { filter:drop-shadow(0 0 10px #ffd96888); }
+@keyframes vl-pulso { from { transform:translateX(-50%) scale(1.5); } }
+@media (prefers-reduced-motion:reduce) { .villano-combo.pulso { animation:none; } }

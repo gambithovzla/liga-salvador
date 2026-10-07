@@ -3953,6 +3953,7 @@ const Sonido = (function () {
     },
     soplido: () => { golpe(0, 0.9, 0.2, 2600); golpe(0.05, 0.7, 0.12, 1200); },
     velaMagia: () => { [784, 988, 1175, 1568, 1976].forEach((f, i) => tono(f, i * 0.13, 1, "sine", 0.06)); tono(392, 0, 2, "triangle", 0.05); },
+    apagon: () => { golpe(0, 0.35, 0.3, 160); tono(330, 0, 0.6, "sawtooth", 0.05, 70); },
     // Gran Premio de Barranco
     pasoGP: (sup) => golpe(0, 0.045, sup === "madera" ? 0.09 : 0.06, sup === "madera" ? 520 : 1500),
     alertaGP: () => { tono(988, 0, 0.09, "square", 0.05); tono(988, 0.12, 0.09, "square", 0.05); },
@@ -4310,6 +4311,9 @@ function imgSalva(clave, clase) {
 const PRECARGA_SALVA = (() => { const src = imagenSalva("cara"); if (!src) return null; const i = new Image(); i.src = src; return i; })();
 function yaHTML() { const src = imagenSalva("cara"); return src ? `<img class="salva-ya" src="${esc(src)}" alt="">¡YA!` : "¡YA!"; }
 function svgPersona(tipo) {
+  if (tipo === "dorado") {
+    return `<svg viewBox="0 0 40 40" class="villano-dorado"><path d="M10 9l4 5 6-7 6 7 4-5v8H10z" fill="#ffe066" stroke="#16130f" stroke-width="2" stroke-linejoin="round"/><circle cx="20" cy="23" r="14" fill="#f5c21b" stroke="#16130f" stroke-width="2.5"/><path d="M8 21c0-2 2.6-3.4 6-3.4 2.8 0 3.8 1.4 6 1.4s3.2-1.4 6-1.4c3.4 0 6 1.4 6 3.4 0 4.6-2.9 8.2-6.4 8.2-2.4 0-3.4-1.9-5.6-1.9s-3.2 1.9-5.6 1.9C10.9 29.2 8 25.6 8 21z" fill="#16130f"/><circle cx="15" cy="22.4" r="2.2" fill="#fff6c4"/><circle cx="25" cy="22.4" r="2.2" fill="#fff6c4"/><path d="M15 32q5-2.4 10 0" stroke="#16130f" stroke-width="2.4" fill="none"/><circle cx="31" cy="12" r="1.6" fill="#fff"/></svg>`;
+  }
   if (tipo === "villano") {
     return `<svg viewBox="0 0 40 40"><circle cx="20" cy="21" r="16" fill="#7d1016" stroke="#16130f" stroke-width="2.5"/><path d="${"M6 18c0-2.4 3-3.9 7-3.9 3.2 0 4.3 1.6 7 1.6s3.8-1.6 7-1.6c4 0 7 1.5 7 3.9 0 5.2-3.3 9.4-7.3 9.4-2.7 0-3.9-2.2-6.7-2.2s-4 2.2-6.7 2.2C9.3 27.4 6 23.2 6 18z"}" fill="#16130f"/><circle cx="14" cy="20" r="2.4" fill="#ffd21f"/><circle cx="26" cy="20" r="2.4" fill="#ffd21f"/><path d="M14 31q6-3 12 0" stroke="#16130f" stroke-width="2.5" fill="none"/></svg>`;
   }
@@ -4444,13 +4448,33 @@ const MINIJUEGOS = {
   villano: {
     nombre: "Atrapa al villano", icono: "antifaz",
     resumen: "Toca a los villanos que se asoman. ¡A Salvador no!",
-    ayuda: "Durante 20 segundos se asoman villanos por las ventanas: tócalos rápido. A veces se asoma Salvador: si lo tocas, pierdes un punto.",
+    ayuda: "Durante 20 segundos se asoman villanos por las ventanas: tócalos rápido. El villano dorado vale 5 y, si encadenas villanos sin fallar, el combo suma más. A veces se asoma Salvador: si lo tocas, pierdes un punto. ¡Ojo con el apagón de los últimos 5 segundos!",
     menorEsMejor: false,
     formato: (v) => plural(v, "villano", "villanos"),
     jugar(arena, terminar) {
-      arena.className = "arena noche";
-      let puntos = 0, vivo = false, generador = 0, parar = () => {}, intervalo = 720;
+      arena.className = "arena noche villano-arena";
+      let puntos = 0, vivo = false, generador = 0, parar = () => {}, intervalo = 720, combo = 0, apagon = false;
       const m = marcadorArena(arena, "0");
+      const comboEl = document.createElement("div");
+      comboEl.className = "villano-combo";
+      arena.appendChild(comboEl);
+      // El apagón: en los últimos 5 segundos solo se ve lo que alumbra tu linterna.
+      const sombra = document.createElement("div");
+      sombra.className = "villano-apagon";
+      sombra.setAttribute("aria-hidden", "true");
+      arena.appendChild(sombra);
+      function linterna(e) {
+        const r = arena.getBoundingClientRect();
+        sombra.style.setProperty("--lx", `${e.clientX - r.left}px`);
+        sombra.style.setProperty("--ly", `${e.clientY - r.top}px`);
+      }
+      arena.addEventListener("pointerdown", linterna, true);
+      arena.addEventListener("pointermove", linterna);
+      function pintarCombo() {
+        comboEl.textContent = combo >= 3 ? `COMBO ×${combo}` : "";
+        comboEl.classList.toggle("caliente", combo >= 10);
+        comboEl.classList.remove("pulso"); void comboEl.offsetWidth; if (combo >= 3) comboEl.classList.add("pulso");
+      }
       const rejilla = document.createElement("div");
       rejilla.className = "ventanas";
       rejilla.innerHTML = Array.from({ length: 9 }, (_, i) => `<button class="ventana" data-i="${i}" aria-label="Ventana ${i + 1}"><div class="quien"></div></button>`).join("");
@@ -4464,19 +4488,21 @@ const MINIJUEGOS = {
         const libres = ocupada.map((o, i) => (o ? -1 : i)).filter((i) => i >= 0);
         if (libres.length) {
           const i = libres[Math.floor(Math.random() * libres.length)];
-          const tipo = Math.random() < 0.78 ? "villano" : "salva";
+          const azarQuien = Math.random();
+          const tipo = azarQuien < 0.07 ? "dorado" : azarQuien < 0.8 ? "villano" : "salva";
           const v = ventanas[i];
           v.querySelector(".quien").innerHTML = tipo === "salva" ? (caraSalva || svgPersona("ciudadano")) : svgPersona(tipo);
           v.dataset.quien = tipo;
           v.classList.add("arriba");
-          const vida = clamp(1000 - (720 - intervalo), 620, 1000);
-          ocupada[i] = { tipo, hasta: setTimeout(() => esconder(i), vida) };
+          const vida = clamp(1000 - (720 - intervalo), 620, 1000) * (tipo === "dorado" ? 0.7 : 1);
+          ocupada[i] = { tipo, hasta: setTimeout(() => esconder(i, true), vida) };
         }
         intervalo = Math.max(380, intervalo - 14);
         generador = setTimeout(asomar, intervalo);
       }
-      function esconder(i) {
+      function esconder(i, escapo) {
         if (!ocupada[i]) return;
+        if (escapo && ocupada[i].tipo !== "salva" && combo) { combo = 0; pintarCombo(); }
         clearTimeout(ocupada[i].hasta);
         ocupada[i] = null;
         ventanas[i].classList.remove("arriba");
@@ -4490,18 +4516,43 @@ const MINIJUEGOS = {
         const o = ocupada[i];
         if (!o) return;
         const r = arena.getBoundingClientRect(), rv = v.getBoundingClientRect();
-        if (o.tipo === "villano") { puntos++; v.classList.add("golpe"); vibrar(20); flotar(arena, rv.left - r.left + 10, rv.top - r.top, "+1"); }
-        else { puntos--; v.classList.add("error"); vibrar(140); Sonido.tocar("error"); flotar(arena, clamp(rv.left - r.left - 20, 4, r.width - 200), rv.top - r.top, "¡A Salvador no! -1", true); }
-        setTimeout(() => v.classList.remove("golpe", "error"), 160);
+        if (o.tipo === "villano" || o.tipo === "dorado") {
+          combo++;
+          // El combo suma: desde 5 seguidos cada villano vale 2; desde 10, vale 3.
+          const extra = combo >= 10 ? 2 : combo >= 5 ? 1 : 0;
+          const vale = (o.tipo === "dorado" ? 5 : 1) + extra;
+          puntos += vale;
+          v.classList.add(o.tipo === "dorado" ? "golpe-oro" : "golpe");
+          vibrar(o.tipo === "dorado" ? [20, 30, 40] : 20);
+          Sonido.tocar(o.tipo === "dorado" ? "revelar" : "toque");
+          flotar(arena, rv.left - r.left + 10, rv.top - r.top, o.tipo === "dorado" ? `¡ORO! +${vale}` : `+${vale}`);
+        } else {
+          puntos--; combo = 0;
+          v.classList.add("error"); vibrar(140); Sonido.tocar("error");
+          flotar(arena, clamp(rv.left - r.left - 20, 4, r.width - 200), rv.top - r.top, "¡A Salvador no! -1", true);
+        }
+        pintarCombo();
+        setTimeout(() => v.classList.remove("golpe", "golpe-oro", "error"), 160);
         m.textContent = Math.max(0, puntos);
         esconder(i);
       });
       const quitar = cuentaAtras(arena, () => {
         vivo = true;
         asomar();
-        parar = relojArena(arena, 20000, null, () => { vivo = false; clearTimeout(generador); ocupada.forEach((o, i) => esconder(i)); terminar(Math.max(0, puntos)); });
+        parar = relojArena(arena, 20000, (queda) => {
+          if (!apagon && queda <= 5000) {
+            apagon = true;
+            arena.classList.add("apagado");
+            const r = arena.getBoundingClientRect();
+            sombra.style.setProperty("--lx", `${r.width / 2}px`);
+            sombra.style.setProperty("--ly", `${r.height / 2}px`);
+            flotar(arena, r.width / 2 - 80, r.height * 0.4, "¡APAGÓN!", true);
+            Sonido.tocar("apagon");
+            vibrar([60, 40, 60]);
+          }
+        }, () => { vivo = false; clearTimeout(generador); ocupada.forEach((o, i) => esconder(i)); arena.classList.remove("apagado"); terminar(Math.max(0, puntos)); });
       });
-      return () => { vivo = false; quitar(); parar(); clearTimeout(generador); ocupada.forEach((o) => o && clearTimeout(o.hasta)); };
+      return () => { vivo = false; quitar(); parar(); clearTimeout(generador); ocupada.forEach((o) => o && clearTimeout(o.hasta)); arena.removeEventListener("pointerdown", linterna, true); arena.removeEventListener("pointermove", linterna); };
     },
   },
 
@@ -6740,7 +6791,7 @@ const PASOS = {
   reflejos: ["Espera con el dedo listo: la pantalla está oscura.", "Cuando se ponga AMARILLA y aparezca Salvador, toca lo más rápido que puedas.", "Son 3 intentos. Si tocas antes de tiempo, ese intento vale 1 segundo."],
   supervelocidad: ["Espera la cuenta regresiva: 3, 2, 1.", "Toca ¡VUELA! sin parar durante 10 segundos: cada toque sube a Salvador 10 metros.", "Gana quien lo haga volar más alto."],
   cuanto: ["Lee la pregunta.", "Escribe tu número y envíalo. Puedes cambiarlo hasta que se cierre.", "Gana quien quede más cerca del número real."],
-  villano: ["Se asoman personajes por las ventanas durante 20 segundos.", "Toca a los villanos (antifaz negro): suman 1.", "¡A Salvador no! Si tocas su carita, resta 1."],
+  villano: ["Se asoman personajes por las ventanas durante 20 segundos. Toca a los villanos: suman 1; el dorado, con corona, vale 5.", "Encadena villanos sin fallar: con 5 seguidos cada uno vale 2 y con 10, vale 3. ¡A Salvador no! Si tocas su carita, resta 1.", "En los últimos 5 segundos hay un apagón: solo ves lo que alumbra tu dedo."],
   reloj: ["El reloj arranca y se esconde a los 3 segundos.", "Sigue contando en tu cabeza.", "Toca ¡SOPLA! cuando creas que van 10 segundos exactos: gana quien sopla más justo."],
   memoria: ["Mira el orden en que se encienden las caras de Salvador.", "Repítelo tocándolas en el mismo orden.", "Cada ronda suma una más. Un error y se acaba."],
   rescate: ["Revienta el globo 1, luego el 2, el 3…", "Llega hasta el 20 lo más rápido que puedas.", "Cada globo equivocado suma 1 segundo."],
@@ -7143,7 +7194,7 @@ function crearBots(T, S, opc) {
     switch (tipo) {
       case "reflejos": v = Math.round(470 - 210 * s + azar(-35, 35)); break;
       case "supervelocidad": v = Math.round(38 + 42 * s + azar(-5, 5)); break;
-      case "villano": v = Math.max(0, Math.round(5 + 15 * s + azar(-3, 3))); break;
+      case "villano": v = Math.max(0, Math.round(8 + 40 * s + azar(-4, 4))); break; // con combos y dorados
       case "reloj": v = Math.round(Math.abs(azar(-1, 1)) * (950 - 880 * s)); break;
       case "memoria": v = Math.max(1, Math.round(3 + 7 * s + azar(-1, 1.4))); v2 = Math.round(v * azar(3200, 4800)); break;
       case "rescate": v = Math.round((36 - 18 * s + azar(-2.5, 2.5)) * 1000); break;
