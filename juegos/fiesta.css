@@ -261,3 +261,38 @@
 @keyframes gl-uno-fondo { from { opacity:0; } }
 @keyframes gl-aparece { from { transform:scale(0); opacity:0; } }
 @media (prefers-reduced-motion:reduce) { .numeros.globos .num, .globos-nubes i, .globo-pop i, .globos-uno i, .globos-uno b { animation:none; } }
+
+/* ===================== Salvador atrapa estrellas ===================== */
+.estrellas-suben { position:absolute; inset:0; z-index:8; pointer-events:none; background:radial-gradient(ellipse at 50% 100%, #2a3f8666, transparent 70%); }
+.estrellas-suben i {
+  position:absolute; bottom:12%; width:16px; height:16px; margin-left:-8px;
+  background:#ffd21f; clip-path:polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  filter:drop-shadow(0 0 6px #ffe9a0); animation:es-sube 1.4s cubic-bezier(.4, 0, .6, 1) both;
+}
+.estrellas-suben b {
+  position:absolute; left:6%; right:6%; top:38%; text-align:center;
+  font:clamp(20px, 6vw, 28px)/1.1 "Luckiest Guy", "Bangers", Impact, sans-serif; color:#fff6d8; -webkit-text-stroke:1.5px #0a0f24; paint-order:stroke fill;
+  animation:gl-aparece .5s .2s both;
+}
+.constelacion {
+  position:relative; overflow:hidden; margin:0 0 14px; padding:16px 14px; border-radius:22px; text-align:center; color:#e8f0ff;
+  background:radial-gradient(ellipse at 60% 30%, #23306a 0, #0a1030 55%, #04060f);
+  box-shadow:0 22px 50px #01040fcc, inset 0 0 0 1px #ffffff1c;
+}
+.es-kicker { font:12px/1 "Bangers", Impact, sans-serif; letter-spacing:2px; color:#9fc4ff; }
+.constelacion svg { display:block; width:min(100%, 420px); aspect-ratio:1; margin:6px auto; overflow:visible; }
+.constelacion .polvo { fill:#cfe0ff; opacity:.5; }
+.constelacion .apagada { fill:#ffffff33; }
+.constelacion .luz { fill:#fff6c8; filter:drop-shadow(0 0 1.6px #ffe08a) drop-shadow(0 0 3px #ffd21f); }
+.constelacion .luz.nueva { animation:es-nace .9s cubic-bezier(.2, 1.6, .4, 1) both; transform-box:fill-box; transform-origin:center; }
+.constelacion .lineas line { stroke:#ffe9a0aa; stroke-width:.45; stroke-linecap:round; }
+.constelacion .lineas line.nueva { stroke-dasharray:40; animation:es-linea 1.2s ease-out both; }
+.constelacion.completa svg { animation:es-brilla 2.4s ease-in-out infinite alternate; }
+.es-total { margin:0; font-size:16px; }
+.es-total b { font:28px/1 "Luckiest Guy", "Bangers", Impact, sans-serif; color:#ffd968; }
+.es-falta { margin:4px 0 0; font-size:14px; color:#9fb4d8; }
+@keyframes es-sube { 0% { transform:translateY(0) scale(.6); opacity:0; } 15% { opacity:1; } 100% { transform:translateY(-420px) scale(1.2) rotate(180deg); opacity:0; } }
+@keyframes es-nace { from { transform:scale(4); opacity:0; } }
+@keyframes es-linea { from { stroke-dashoffset:40; } to { stroke-dashoffset:0; } }
+@keyframes es-brilla { to { filter:drop-shadow(0 0 10px #ffe08a88); } }
+@media (prefers-reduced-motion:reduce) { .estrellas-suben i, .constelacion .luz.nueva, .constelacion .lineas line.nueva, .constelacion.completa svg { animation:none; } }
