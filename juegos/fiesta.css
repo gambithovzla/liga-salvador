@@ -296,3 +296,68 @@
 @keyframes es-linea { from { stroke-dashoffset:40; } to { stroke-dashoffset:0; } }
 @keyframes es-brilla { to { filter:drop-shadow(0 0 10px #ffe08a88); } }
 @media (prefers-reduced-motion:reduce) { .estrellas-suben i, .constelacion .luz.nueva, .constelacion .lineas line.nueva, .constelacion.completa svg { animation:none; } }
+
+/* ===================== Un, dos, tres… ¡Zzz! ===================== */
+.zz-tv {
+  --zz-luz:#5be3a0;
+  position:relative; overflow:hidden; isolation:isolate; container-type:inline-size;
+  display:grid; justify-items:center; gap:8px; margin:0 0 14px; padding:16px 14px 18px; border-radius:22px; text-align:center; color:#f3eaff;
+  background:radial-gradient(ellipse at 50% 30%, color-mix(in srgb, var(--zz-luz) 30%, #1b0f3a), #0c0720 60%, #05030d);
+  box-shadow:0 22px 50px #01040fcc, inset 0 0 0 2px color-mix(in srgb, var(--zz-luz) 50%, transparent), 0 0 40px color-mix(in srgb, var(--zz-luz) 35%, transparent);
+  transition:box-shadow .3s, background .3s;
+}
+.zz-tv.zz-previa { --zz-luz:#8a7cff; }
+.zz-tv.zz-cuenta { --zz-luz:#ffc23a; }
+.zz-tv.zz-mira { --zz-luz:#ff3a2a; animation:zz-alerta .5s ease-in-out 2; }
+.zz-jefe { width:min(52%, 240px); }
+.zz-jefe .op-villano { display:block; width:100%; height:auto; }
+.zz-mira .zz-jefe .op-villano { filter:drop-shadow(0 0 26px #ff3a2a); animation:zz-despierta .35s cubic-bezier(.2, 1.8, .4, 1); }
+.zz-fase b { display:block; font:clamp(34px, 15cqi, 90px)/.95 "Luckiest Guy", "Bangers", Impact, sans-serif; color:#fff; -webkit-text-stroke:3px #12082a; paint-order:stroke fill; text-shadow:0 5px 0 #12082a, 0 0 30px var(--zz-luz); }
+.zz-mira .zz-fase b { color:#ffd0c8; }
+.zz-fase small { display:block; margin-top:6px; font-size:16px; color:#d8ccf6; }
+.zz-pista { width:100%; margin:6px 0 0; padding:0; list-style:none; display:grid; gap:6px; }
+.zz-pista li { position:relative; display:grid; grid-template-columns:minmax(80px, 28%) 1fr; align-items:center; gap:10px; text-align:left; font-size:15px; }
+.zz-pista li span { overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+.zz-pista li i {
+  --p:0%;
+  position:relative; height:12px; border-radius:8px; background:linear-gradient(90deg, var(--zz-luz) var(--p), #ffffff1a var(--p));
+  box-shadow:inset 0 0 0 1px #ffffff22;
+}
+.zz-pista li i::after { content:"🛏"; position:absolute; right:-4px; top:50%; transform:translateY(-50%); font-size:16px; font-style:normal; }
+.zz-pista li i .poder { position:absolute; left:var(--p); top:50%; transform:translate(-50%, -50%); transition:left .3s linear; }
+.zz-pista li.llego span { color:#ffd968; }
+.zz-relato { display:grid; gap:4px; min-height:24px; }
+.zz-relato p { margin:0; padding:4px 12px; border-radius:10px; background:#ff3a2acc; font:15px/1.1 "Bangers", Impact, sans-serif; letter-spacing:.8px; animation:gp-entra .3s ease-out both; }
+.zz-relato p.bien { background:#2aa86acc; }
+
+/* celular */
+.zz-barra { position:relative; width:100%; height:16px; margin-top:10px; border-radius:10px; background:#ffffff1a; box-shadow:inset 0 0 0 1px #ffffff26; }
+.zz-barra > i { position:absolute; left:0; top:0; bottom:0; width:0; border-radius:10px; background:linear-gradient(90deg, #8a7cff, var(--zz-luz, #5be3a0)); }
+.zz-yo { position:absolute; left:0; top:50%; transform:translate(-50%, -50%); z-index:2; filter:drop-shadow(0 0 6px #fff8); }
+.zz-meta { position:absolute; right:-6px; top:50%; width:30px; height:20px; transform:translateY(-50%); border-radius:8px; background:#f3eaff; box-shadow:inset 0 -4px 0 #c9b8f0, 0 0 14px #f3eaff88; }
+.zz-pct { margin:4px 0 0; font:22px/1 "Luckiest Guy", "Bangers", Impact, sans-serif; color:#fff; }
+.zz-celular.caminando .zz-yo { animation:zz-pasito .3s ease-in-out infinite alternate; }
+.zz-visto { position:absolute; inset:0; z-index:5; display:grid; place-content:center; background:#c2190fd9; animation:zz-visto .35s cubic-bezier(.2, 1.6, .4, 1) both; }
+.zz-visto b { font:clamp(50px, 24cqi, 120px)/1 "Luckiest Guy", "Bangers", Impact, sans-serif; color:#fff; -webkit-text-stroke:3px #3a0603; paint-order:stroke fill; }
+.zz-visto small { font-size:18px; color:#ffe0da; }
+.zz-caminar {
+  display:grid; gap:4px; place-items:center; width:100%; min-height:130px; margin:0 0 10px; border:0; border-radius:26px; cursor:pointer;
+  touch-action:none; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none;
+  background:radial-gradient(circle at 50% 30%, #9a8bff, #5a3fd0 60%, #3a2296); color:#fff;
+  box-shadow:0 10px 0 #23125e, 0 18px 30px #0008, inset 0 2px 0 #ffffff44;
+}
+.zz-caminar span { font:clamp(22px, 7vw, 32px)/1 "Luckiest Guy", "Bangers", Impact, sans-serif; -webkit-text-stroke:1.5px #1a0c46; paint-order:stroke fill; }
+.zz-caminar small { font-size:14px; color:#e6defc; }
+.zz-caminar.apretado { transform:translateY(6px); box-shadow:0 4px 0 #23125e, 0 8px 16px #0008, inset 0 0 30px #ffffff55; }
+.zz-llego { --zz-luz:#ffd968; }
+.zz-almohada { width:120px; height:70px; border-radius:30px; background:radial-gradient(circle at 40% 35%, #fff, #e6dcff 60%, #b8a6ee); box-shadow:0 0 40px #ffd96888; animation:gl-aparece .6s cubic-bezier(.2, 1.6, .4, 1) both; }
+.zz-practica { display:grid; gap:10px; }
+.zz-p-estado { padding:10px; border-radius:14px; text-align:center; font:22px/1 "Luckiest Guy", "Bangers", Impact, sans-serif; color:#fff; background:#2aa86a; transition:background .2s; }
+.zz-p-estado.mira { background:#d62b1f; }
+.zz-practica .zz-barra { margin:0; background:#16130f22; }
+.zz-practica .zz-barra > i { background:#5a3fd0; }
+@keyframes zz-alerta { 50% { transform:scale(1.015); } }
+@keyframes zz-despierta { from { transform:scale(.8) rotate(-4deg); } }
+@keyframes zz-pasito { from { transform:translate(-50%, -50%); } to { transform:translate(-50%, -80%); } }
+@keyframes zz-visto { from { opacity:0; transform:scale(1.3); } }
+@media (prefers-reduced-motion:reduce) { .zz-tv.zz-mira, .zz-mira .zz-jefe .op-villano, .zz-celular.caminando .zz-yo, .zz-visto { animation:none; } }

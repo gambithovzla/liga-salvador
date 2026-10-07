@@ -1297,6 +1297,7 @@ button.agente-fila:disabled { opacity: 0.5; cursor: default; }
 <script src="recuerdos.js"></script>
 <script src="operacion.js"></script>
 <script src="carrera.js"></script>
+<script src="zzz.js"></script>
 <script>
 /* qrcode-generator — (c) Kazuhiko Arase, licencia MIT */
 //---------------------------------------------------------------------
@@ -3955,6 +3956,11 @@ const Sonido = (function () {
     velaMagia: () => { [784, 988, 1175, 1568, 1976].forEach((f, i) => tono(f, i * 0.13, 1, "sine", 0.06)); tono(392, 0, 2, "triangle", 0.05); },
     // Los globos: cada uno revienta un poco más agudo que el anterior.
     pop: (n) => { const f = 330 * Math.pow(2, (Number(n) || 1) / 12); golpe(0, 0.07, 0.35, 2600); tono(f, 0, 0.12, "triangle", 0.09, f * 1.5); },
+    // Un, dos, tres… ¡Zzz!
+    ronquido: () => { tono(90, 0, 1.1, "sawtooth", 0.05, 60); golpe(0.05, 1, 0.08, 400); tono(140, 1.3, 0.8, "sine", 0.05, 220); },
+    cuentaZzz: () => { [523, 587, 659].forEach((f, i) => tono(f, i * 0.5, 0.25, "triangle", 0.08)); },
+    quietos: () => { tono(880, 0, 0.12, "square", 0.08); tono(1320, 0.12, 0.35, "square", 0.08); },
+    teVi: () => { tono(392, 0, 0.18, "sawtooth", 0.08, 196); tono(196, 0.18, 0.4, "sawtooth", 0.07, 98); },
     apagon: () => { golpe(0, 0.35, 0.3, 160); tono(330, 0, 0.6, "sawtooth", 0.05, 70); },
     // Gran Premio de Barranco
     pasoGP: (sup) => golpe(0, 0.045, sup === "madera" ? 0.09 : 0.06, sup === "madera" ? 520 : 1500),
@@ -6004,6 +6010,7 @@ TIPOS.ultimo = {
 /* ---------- Carrera de la Liga ---------- */
 const PASOS_META = 150;
 TIPOS.carrera = tipoCarrera(); // Gran Premio de Barranco (carrera.js)
+TIPOS.zzz = tipoZzz(); // Un, dos, tres… ¡Zzz! (zzz.js)
 
 /* ---------- Charadas ---------- */
 TIPOS.charadas = {
@@ -6907,7 +6914,7 @@ for (const [id, p] of Object.entries(PRACTICA_DE)) if (TIPOS[id]) TIPOS[id].prac
 
 const CATEGORIAS = [
   { id: "celular", titulo: "En el celular", tipos: ["trivia", "relampago", "reflejos", "supervelocidad", "cuanto", "villano", "reloj", "memoria", "rescate", "capa", "impostor", "estrellas", "ultimo", "carrera"] },
-  { id: "fiesta", titulo: "En la fiesta", tipos: ["foto", "charadas", "agente", "duo", "bingo", "infiltrado", "bomba"] },
+  { id: "fiesta", titulo: "En la fiesta", tipos: ["foto", "charadas", "agente", "duo", "bingo", "infiltrado", "bomba", "zzz"] },
 ];
 
 /* =====================================================================
@@ -7217,6 +7224,7 @@ const PRACTICAS = {
   },
 };
 PRACTICAS.carrera = practicaCarrera; // alternar y saltar (carrera.js)
+PRACTICAS.zzz = practicaZzz; // avanzar y quedarse quieto (zzz.js)
 function montarPracticas(raiz, ctx, montadas) {
   $$("[data-practica]:not([data-montada])", raiz).forEach((el) => {
     const f = PRACTICAS[el.dataset.practica];
@@ -7416,6 +7424,31 @@ function crearBots(T, S, opc) {
           const k = `ul:${m.id}:${sub.ronda}:${b.id}`;
           const v = cuando(k + ":v", () => (Math.random() < 0.05 ? -1 : Math.round(520 - 250 * b.bot + azar(-60, 60))));
           if (toca(k, ahora, () => (v < 0 ? sub.go - azar(150, 700) : sub.go + v))) T.escribir(`mj/${m.id}/t/r${sub.ronda}/${b.id}`, v);
+        }
+        return;
+      }
+      case "zzz": {
+        if (ahora < sub.inicio) return;
+        const ll = mj.llegada || {}, f = faseZzz(sub, ahora);
+        for (const b of lista) {
+          if (!(sub.jugadores || []).includes(b.id) || ll[b.id]) continue;
+          const k = `zz:${m.id}:${b.id}`;
+          if (!toca(`${k}:${Math.floor((ahora - sub.inicio) / 500)}`, ahora, () => ahora)) continue;
+          const vel = cuando(`${k}:vel`, () => 0.55 + 0.45 * b.bot);
+          let p = Number((mj.p || {})[b.id]) || 0;
+          if (f.tipo === "duerme" || f.tipo === "cuenta") p += ZZZ_VELOCIDAD * 500 * vel;
+          // A veces un agente de prueba no frena a tiempo y el Doctor Siesta lo ve.
+          if (f.tipo === "mira" && f.t - f.desde > ZZZ_GRACIA && toca(`${k}:visto:${f.desde}`, ahora, () => (Math.random() < 0.35 * (1 - b.bot) ? ahora : null))) {
+            p = Math.max(0, p - ZZZ_CASTIGO);
+            T.escribir(`mj/${m.id}/vistos/${b.id}`, (Number((mj.vistos || {})[b.id]) || 0) + 1);
+            T.escribir(`mj/${m.id}/fx/${b.id}`, { k: "visto", t: ahora });
+          }
+          if (p >= 100) {
+            T.escribir(`mj/${m.id}/llegada/${b.id}`, Math.round(ahora - sub.inicio));
+            T.escribir(`mj/${m.id}/fx/${b.id}`, { k: "llego", t: ahora });
+            p = 100;
+          }
+          T.escribir(`mj/${m.id}/p/${b.id}`, Math.round(p * 10) / 10);
         }
         return;
       }
